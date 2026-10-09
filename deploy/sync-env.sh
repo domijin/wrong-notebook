@@ -26,10 +26,15 @@ if grep -qE '^NEXTAUTH_SECRET=(supersecret-dev-secret|your_secret_key|changeme|p
   exit 2
 fi
 
-echo "[sync-env] uploading $SRC -> $REMOTE:$REMOTE_DIR/.env"
-scp "$SRC" "$REMOTE:$REMOTE_DIR/.env.new"
+# Resolve $REMOTE_DIR on the remote side to avoid tilde expansion issues
+# with scp; scp only expands ~ if it's the first char after the colon.
+REMOTE_HOME="$(ssh -o ConnectTimeout=10 "$REMOTE" 'printf %s "$HOME"')"
+REMOTE_DIR_ABS="${REMOTE_DIR/#\~/$REMOTE_HOME}"
+
+echo "[sync-env] uploading $SRC -> $REMOTE:$REMOTE_DIR_ABS/.env"
+scp "$SRC" "$REMOTE:$REMOTE_DIR_ABS/.env.new"
 ssh "$REMOTE" bash -lc "set -e
-cd '$REMOTE_DIR'
+cd '$REMOTE_DIR_ABS'
 chmod 600 .env.new
 mv .env.new .env
 echo '[sync-env] recreate $CONTAINER (down + up so compose re-reads .env)'
