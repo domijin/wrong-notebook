@@ -35,6 +35,93 @@
 - **iPhone / iPad (Safari)**: 点击底部 **分享** 按钮 -> 选择 **"添加到主屏幕"**。
 - **Android (Chrome)**: 点击右上角 **菜单** -> 选择 **"添加到主屏幕"** 或 **"安装应用"**。
 
+## 🔒 Private deploy (recommended: Tailscale)
+
+This app is built for a small, trusted group (family, your own kids, a small
+class). **Do not expose it directly to the public internet.** Run it on a
+limited-access server and reach it through a [Tailscale](https://tailscale.com/)
+tailnet. Compose binds the container to `127.0.0.1:3000`; expose HTTPS via
+Tailscale Serve.
+
+### 1. Required environment
+
+```bash
+export NEXTAUTH_SECRET="$(openssl rand -base64 32)"   # required, >= 32 chars; placeholders are rejected at startup
+export NEXTAUTH_URL="https://notebook.example-tailnet.ts.net"  # exact HTTPS URL the client uses
+export ADMIN_EMAIL="you@example.com"                 # creates the first admin on first run with an empty DB
+export ADMIN_PASSWORD="$(openssl rand -base64 18)"     # 12–72 bytes; remove after the first successful login
+```
+
+> Production startup validates `NEXTAUTH_SECRET`. Missing, too short, or
+> placeholder values (e.g. `supersecret-dev-secret`) cause the process to exit.
+
+### 2. Start with Docker
+
+```bash
+docker compose up -d
+```
+
+Compose binds the published port to `127.0.0.1:3000` so it is not reachable
+from outside the host. SQLite lives in `./data`, and `app-config.json` lives
+in `./config`; keep both directories private.
+
+### 3. Expose HTTPS via Tailscale Serve (recommended)
+
+On the machine running the container:
+
+```bash
+sudo tailscale serve --bg --https=443 \
+  --set-path=/ http://127.0.0.1:3000
+```
+
+Share `<machine-name>.ts.net` with the people on your allowlist. **Do not**
+use `tailscale funnel` — it would expose the service on the public internet.
+
+### 4. Optional: Tailscale Funnel for a small allowlist
+
+Only if you can lock access down with device approval and ACL tags:
+
+```bash
+sudo tailscale funnel --bg 443 http://127.0.0.1:3000
+```
+
+Tighten the Tailscale ACL:
+
+```json
+{
+  "acls": [
+    { "action": "accept", "src": ["tag:trusted"], "dst": ["tag:server:443"] }
+  ],
+  "tagOwners": { "tag:trusted": ["autogroup:admin"] }
+}
+```
+
+### 5. Users and keys
+
+- The first admin is created on first run from `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+- `allowRegistration` defaults to **off**. Add new users from “Settings → User Management”.
+- After login, configure AI providers (Gemini / OpenAI / Azure) in the
+  settings page. The API only returns `keyConfigured`; raw keys never leave
+  the server.
+- Rotate any legacy default passwords and sign out all sessions.
+- The Openclaw integration is disabled by default. To enable it, set
+  `OPENCLAW_API_URL`; in apikey mode also set `OPENCLAW_USER_EMAIL` to bind
+  the shared key to a single trusted account.
+
+### 6. Verify
+
+```bash
+# App should only listen on loopback
+ss -lnt | grep ':3000' | grep 127.0.0.1
+
+# Startup must see a real NEXTAUTH_SECRET; missing causes exit
+docker logs wrong-notebook | grep -i "NEXTAUTH_SECRET" || true
+```
+
+Full threat model, residual risks, and operator notes: [SECURITY.md](SECURITY.md).
+
+---
+
 ## 🔒 私有部署（推荐：Tailscale）
 
 本应用面向小范围可信用户（家人、自家小孩、同学小群），**不要直接暴露在公网**。推荐使用 [Tailscale](https://tailscale.com/) 把服务接入你的私有 tailnet，Compose 默认绑定 `127.0.0.1:3000`，再通过 Tailscale Serve 暴露 HTTPS。
@@ -110,6 +197,93 @@ docker logs wrong-notebook | grep -i "NEXTAUTH_SECRET" || true
 
 ---
 
+## 🔒 Private deploy (recommended: Tailscale)
+
+This app is built for a small, trusted group (family, your own kids, a small
+class). **Do not expose it directly to the public internet.** Run it on a
+limited-access server and reach it through a [Tailscale](https://tailscale.com/)
+tailnet. Compose binds the container to `127.0.0.1:3000`; expose HTTPS via
+Tailscale Serve.
+
+### 1. Required environment
+
+```bash
+export NEXTAUTH_SECRET="$(openssl rand -base64 32)"   # required, >= 32 chars; placeholders are rejected at startup
+export NEXTAUTH_URL="https://notebook.example-tailnet.ts.net"  # exact HTTPS URL the client uses
+export ADMIN_EMAIL="you@example.com"                 # creates the first admin on first run with an empty DB
+export ADMIN_PASSWORD="$(openssl rand -base64 18)"     # 12–72 bytes; remove after the first successful login
+```
+
+> Production startup validates `NEXTAUTH_SECRET`. Missing, too short, or
+> placeholder values (e.g. `supersecret-dev-secret`) cause the process to exit.
+
+### 2. Start with Docker
+
+```bash
+docker compose up -d
+```
+
+Compose binds the published port to `127.0.0.1:3000` so it is not reachable
+from outside the host. SQLite lives in `./data`, and `app-config.json` lives
+in `./config`; keep both directories private.
+
+### 3. Expose HTTPS via Tailscale Serve (recommended)
+
+On the machine running the container:
+
+```bash
+sudo tailscale serve --bg --https=443 \
+  --set-path=/ http://127.0.0.1:3000
+```
+
+Share `<machine-name>.ts.net` with the people on your allowlist. **Do not**
+use `tailscale funnel` — it would expose the service on the public internet.
+
+### 4. Optional: Tailscale Funnel for a small allowlist
+
+Only if you can lock access down with device approval and ACL tags:
+
+```bash
+sudo tailscale funnel --bg 443 http://127.0.0.1:3000
+```
+
+Tighten the Tailscale ACL:
+
+```json
+{
+  "acls": [
+    { "action": "accept", "src": ["tag:trusted"], "dst": ["tag:server:443"] }
+  ],
+  "tagOwners": { "tag:trusted": ["autogroup:admin"] }
+}
+```
+
+### 5. Users and keys
+
+- The first admin is created on first run from `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+- `allowRegistration` defaults to **off**. Add new users from “Settings → User Management”.
+- After login, configure AI providers (Gemini / OpenAI / Azure) in the
+  settings page. The API only returns `keyConfigured`; raw keys never leave
+  the server.
+- Rotate any legacy default passwords and sign out all sessions.
+- The Openclaw integration is disabled by default. To enable it, set
+  `OPENCLAW_API_URL`; in apikey mode also set `OPENCLAW_USER_EMAIL` to bind
+  the shared key to a single trusted account.
+
+### 6. Verify
+
+```bash
+# App should only listen on loopback
+ss -lnt | grep ':3000' | grep 127.0.0.1
+
+# Startup must see a real NEXTAUTH_SECRET; missing causes exit
+docker logs wrong-notebook | grep -i "NEXTAUTH_SECRET" || true
+```
+
+Full threat model, residual risks, and operator notes: [SECURITY.md](SECURITY.md).
+
+---
+
 ## 🛠️ 技术栈
 
 - **框架**: [Next.js 16](https://nextjs.org/) (App Router)
@@ -121,7 +295,7 @@ docker logs wrong-notebook | grep -i "NEXTAUTH_SECRET" || true
 
 ## 🚀 快速开始
 
-> 计划在公网或共享网络上部署？请先看 [🔒 私有部署（Tailscale）](#-私有部署推荐tailscale)。
+> Planning a public or shared-network deploy? Read [🔒 Private deploy (Tailscale)](#-private-deploy-recommendedtailscale) first.
 
 ### 方式一：使用 Docker 部署
 
