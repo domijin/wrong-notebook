@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent: keep `docker compose up` running for wrong-notebook.
+
+  Install:
+    mkdir -p ~/Library/LaunchAgents ~/wrong-notebook/logs
+    cp deploy/com.wrong-notebook.plist ~/Library/LaunchAgents/
+    # edit the strings below (UserName, WorkingDirectory, ProgramArguments
+    # binary path) for your engine (OrbStack / Docker Desktop / colima)
+    launchctl unload ~/Library/LaunchAgents/com.wrong-notebook.plist 2>/dev/null || true
+    launchctl load   ~/Library/LaunchAgents/com.wrong-notebook.plist
+
+  Notes:
+    - The agent runs at user login; KeepAlive keeps the wrapper alive
+      even after a clean exit so a daemon crash does not orphan the
+      container.
+    - The actual container restart is governed by the `restart: always`
+      policy in docker-compose.yml.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.you.wrong-notebook</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- Edit the path to match your engine. Examples:
+           OrbStack: /Applications/OrbStack.app/Contents/Resources/bin/orb
+           Docker Desktop: /usr/local/bin/docker
+           colima:  /opt/homebrew/bin/docker
+    -->
+    <string>/usr/local/bin/docker</string>
+    <string>compose</string>
+    <string>-f</string>
+    <string>/Users/you/wrong-notebook/docker-compose.yml</string>
+    <string>up</string>
+    <string>--remove-orphans</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/you/wrong-notebook</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+    <key>Crashed</key>
+    <true/>
+  </dict>
+
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/you/wrong-notebook/logs/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/you/wrong-notebook/logs/launchd.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>
