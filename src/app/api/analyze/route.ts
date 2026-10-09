@@ -1,7 +1,7 @@
+import { acquireAIWork } from "@/lib/rate-limit";
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { getAIService } from "@/lib/ai";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { calculateGradeNumber, inferSubjectFromName } from "@/lib/knowledge-tags";
 import { calculateGrade } from "@/lib/grade-calculator";
 import { prisma } from "@/lib/prisma";
@@ -13,13 +13,16 @@ const logger = createLogger('api:analyze');
 export async function POST(req: Request) {
     logger.info('Analyze API called');
 
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     // 认证检查
     if (!session) {
         logger.warn('Unauthorized access attempt');
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
+    const work = acquireAIWork(session.user.id);
+    if (work instanceof Response) return work;
 
     try {
         const body = await req.json();
@@ -152,5 +155,7 @@ export async function POST(req: Request) {
         }
 
         return createErrorResponse(errorMessage, 500, ErrorCode.AI_ERROR, error.message);
+    } finally {
+        work.release();
     }
 }

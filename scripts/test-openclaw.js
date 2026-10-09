@@ -80,17 +80,17 @@ function httpRequest(options, postData) {
 
 function getAuthRequestBody() {
     if (AUTH_MODE === 'apikey') {
-        return { userEmail: 'admin@localhost', images: [] };
+        return { userEmail: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, images: [] };
     } else {
-        return { username: 'admin@localhost', password: '123456', images: [] };
+        return { username: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD, images: [] };
     }
 }
 
 function getAuthRequestBodyWithImages(images) {
     if (AUTH_MODE === 'apikey') {
-        return { userEmail: 'admin@localhost', images };
+        return { userEmail: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, images };
     } else {
-        return { username: 'admin@localhost', password: '123456', images };
+        return { username: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD, images };
     }
 }
 
@@ -135,13 +135,13 @@ async function runTests() {
         await test(
             '测试1: 无API密钥',
             401,
-            { userEmail: 'admin@localhost', images: [] }
+            { userEmail: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, images: [] }
         );
 
         await test(
             '测试2: 无效API密钥',
             401,
-            { userEmail: 'admin@localhost', images: [] },
+            { userEmail: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, images: [] },
             { 'X-Api-Key': 'wrong-key' }
         );
     } else {
@@ -154,21 +154,21 @@ async function runTests() {
         await test(
             '测试2: 错误密码',
             401,
-            { username: 'admin@localhost', password: 'wrongpassword', images: [] }
+            { username: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, password: 'wrongpassword', images: [] }
         );
 
         await test(
             '测试3: 不存在的用户',
             404,
-            { username: 'notexist', password: '123456', images: [] }
+            { username: 'notexist', password: process.env.ADMIN_PASSWORD, images: [] }
         );
     }
 
     console.log('\n--- 参数验证测试 ---\n');
 
-    const baseAuth = AUTH_MODE === 'apikey' 
-        ? { userEmail: 'admin@localhost' } 
-        : { username: 'admin@localhost', password: '123456' };
+    const baseAuth = AUTH_MODE === 'apikey'
+        ? { userEmail: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL }
+        : { username: process.env.OPENCLAW_USER_EMAIL || process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD };
 
     await test(
         '测试4: 空图片数组',
@@ -179,8 +179,8 @@ async function runTests() {
     await test(
         '测试5: 图片数量超限 (21张)',
         400,
-        { 
-            ...baseAuth, 
+        {
+            ...baseAuth,
             images: Array(21).fill({ base64: 'abc', mimeType: 'image/jpeg', filename: 'test.jpg' })
         }
     );
@@ -198,21 +198,21 @@ async function runTests() {
     await test(
         '测试7: 成功上传单张图片',
         201,
-        { 
-            ...baseAuth, 
-            images: [{ base64: testImageBase64, mimeType: 'image/png', filename: 'test.png' }] 
+        {
+            ...baseAuth,
+            images: [{ base64: testImageBase64, mimeType: 'image/png', filename: 'test.png' }]
         }
     );
 
     await test(
         '测试8: 批量上传多张图片',
         201,
-        { 
-            ...baseAuth, 
+        {
+            ...baseAuth,
             images: [
                 { base64: testImageBase64, mimeType: 'image/png', filename: 'test1.png' },
                 { base64: testImageBase64, mimeType: 'image/jpeg', filename: 'test2.jpg' }
-            ] 
+            ]
         }
     );
 

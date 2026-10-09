@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getAppConfig } from "@/lib/config";
 
 export async function GET() {
-    const config = getAppConfig();
-    return NextResponse.json({
-        allowRegistration: config.allowRegistration !== false
-    });
+    try {
+        return NextResponse.json({ allowRegistration: getAppConfig().allowRegistration === true });
+    } catch {
+        return NextResponse.json({ allowRegistration: false });
+    }
 }

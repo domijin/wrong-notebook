@@ -122,7 +122,7 @@ describe('middleware', () => {
     });
 
     describe('错误处理', () => {
-        it('Token 验证失败时应该继续请求而不是崩溃', async () => {
+        it('Token verification errors deny access', async () => {
             vi.mocked(getToken).mockRejectedValue(new Error('Token validation failed'));
 
             const req = new NextRequest('http://localhost:3000/notebooks');
@@ -130,8 +130,8 @@ describe('middleware', () => {
             // 不应该抛出错误
             const response = await middleware(req);
 
-            // 应该调用 NextResponse.next()，允许请求继续
-            expect(response).toBeDefined();
+            expect(response?.status).toBe(307);
+            expect(response?.headers.get('location')).toBe('http://localhost:3000/login');
         });
 
         it('Token 验证失败时应该记录错误日志', async () => {

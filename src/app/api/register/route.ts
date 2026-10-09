@@ -7,7 +7,7 @@ import { getAppConfig } from "@/lib/config"
 const userSchema = z.object({
     // 支持标准邮箱和本地邮箱（如 user@localhost）
     email: z.string().regex(/^[^\s@]+@[^\s@]+$/, "Invalid email format"),
-    password: z.string().min(6),
+    password: z.string().min(6).refine(value => Buffer.byteLength(value) <= 72),
     name: z.string().min(1),
     educationStage: z.string().optional(),
     enrollmentYear: z.number().optional(),
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     try {
         // 检查是否允许注册
         const config = getAppConfig();
-        if (config.allowRegistration === false) {
+        if (config.allowRegistration !== true) {
             return NextResponse.json(
                 { user: null, message: "Registration is currently disabled" },
                 { status: 403 }

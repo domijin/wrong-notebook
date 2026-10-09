@@ -80,7 +80,8 @@ describe('AI Provider 初始化', () => {
             expect(typeof provider.analyzeImage).toBe('function');
         });
 
-        it('应该支持自定义 baseUrl', async () => {
+        it('应该支持 allowlisted 自定义 baseUrl', async () => {
+            vi.stubEnv('AI_ALLOWED_ORIGINS', 'https://custom-api.example.com');
             const { OpenAIProvider } = await import('@/lib/ai/openai-provider');
 
             const provider = new OpenAIProvider({
@@ -89,6 +90,7 @@ describe('AI Provider 初始化', () => {
             });
 
             expect(provider).toBeDefined();
+            vi.unstubAllEnvs();
         });
     });
 

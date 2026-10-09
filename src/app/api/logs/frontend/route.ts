@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createLogger } from '@/lib/logger';
+import { getCurrentSession } from '@/lib/current-session';
+import { unauthorized } from '@/lib/api-errors';
 
 const logger = createLogger('frontend-logs');
 
@@ -26,6 +28,7 @@ interface BatchLogRequest {
  * Supports both single log and batch log formats.
  */
 export async function POST(request: NextRequest) {
+  if (!await getCurrentSession()) return unauthorized();
   try {
     const body = await request.json();
 

@@ -48,3 +48,17 @@ test_output*.txt
 README.md
 docs
 doc
+
+# Live state and credentials
+config
+data
+certs
+.aws
+.codex
+.agents
+*.db-wal
+*.db-shm
+*.sqlite-wal
+*.sqlite-shm
+*.pem
+*.key

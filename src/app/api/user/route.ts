@@ -1,9 +1,9 @@
+import { consumeRateLimit } from "@/lib/rate-limit";
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { hash } from "bcryptjs";
+import { hash, compare } from "bcryptjs";
 import { unauthorized, notFound, badRequest, validationError, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
@@ -12,13 +12,14 @@ const logger = createLogger('api:user');
 const userUpdateSchema = z.object({
     name: z.string().optional(),
     email: z.string().optional(),
-    password: z.string().optional(),
+    password: z.string().refine(value => Buffer.byteLength(value) <= 72).optional(),
+    currentPassword: z.string().refine(value => Buffer.byteLength(value) <= 72).optional(),
     educationStage: z.string().optional(),
     enrollmentYear: z.number().optional().nullable(),
-});
+}).strict();
 
 export async function GET() {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     if (!session?.user?.email) {
         return unauthorized();
@@ -26,7 +27,7 @@ export async function GET() {
 
     try {
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             select: {
                 name: true,
                 email: true,
@@ -50,7 +51,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     if (!session?.user?.email) {
         return unauthorized();
@@ -58,7 +59,7 @@ export async function PATCH(req: Request) {
 
     try {
         const body = await req.json();
-        const { name, email, password, educationStage, enrollmentYear } = userUpdateSchema.parse(body);
+        const { name, email, password, currentPassword, educationStage, enrollmentYear } = userUpdateSchema.parse(body);
 
         const updateData: any = {};
 
@@ -87,8 +88,15 @@ export async function PATCH(req: Request) {
             updateData.password = await hash(password, 10);
         }
 
+        if (updateData.password || (updateData.email && updateData.email !== session.user.email)) {
+            const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+            if (!currentPassword || !user || !consumeRateLimit(`profile-password:${session.user.id}`, 6, 60000)
+                || !await compare(currentPassword, user.password)) return unauthorized("Current password is incorrect");
+            updateData.sessionVersion = { increment: 1 };
+        }
+
         const updatedUser = await prisma.user.update({
-            where: { email: session.user.email },
+            where: { id: session.user.id },
             data: updateData,
             select: {
                 name: true,

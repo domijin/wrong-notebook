@@ -1,6 +1,8 @@
+import { resolveAIRequest } from "@/lib/ai-request";
+import { acquireAIWork } from "@/lib/rate-limit";
+import { forbidden, badRequest } from "@/lib/api-errors";
+import { getCurrentSession } from "@/lib/current-session";
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { OpenAIProvider } from '@/lib/ai/openai-provider';
 import { GeminiProvider } from '@/lib/ai/gemini-provider';
 import { AzureOpenAIProvider } from '@/lib/ai/azure-provider';
@@ -94,115 +96,55 @@ export interface AITestResponse {
 export async function POST(request: NextRequest) {
     try {
         // 验证登录
-        const session = await getServerSession(authOptions);
+        const session = await getCurrentSession();
         if (!session?.user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const body: AITestRequest = await request.json();
+        if (session.user.role !== 'admin') return forbidden("Current active admin required");
+        let body;
+        try { body = resolveAIRequest(await request.json()); }
+        catch { return badRequest("Invalid provider configuration or AI destination"); }
         const { provider, apiKey, baseUrl, model, endpoint, deploymentName, apiVersion, language = 'zh' } = body;
-
-        if (!provider || !apiKey) {
-            return NextResponse.json({ error: 'Missing provider or apiKey' }, { status: 400 });
-        }
-
-        logger.info({ provider, model, baseUrl: baseUrl || endpoint }, 'AI 连接测试开始');
-
-        let textSupport = false;
-        let visionSupport = false;
-        let textError: string | undefined;
-        let visionError: string | undefined;
-        let modelInfo: string | undefined;
-
-        // 辅助函数：判断错误是否为配置/连接问题（不应继续文本测试）
-        const isConfigError = (errorCode: string) => {
-            return ['AI_AUTH_ERROR', 'AI_CONNECTION_FAILED', 'AI_TIMEOUT_ERROR',
-                'AI_QUOTA_EXCEEDED', 'AI_PERMISSION_DENIED', 'AI_SERVICE_UNAVAILABLE'].includes(errorCode);
-        };
-
-        // 优化策略：先视觉测试，成功则一步完成；失败则根据错误类型决定是否进行文本测试
-        // 测试 1: 视觉（多模态）能力
+        const work = acquireAIWork(session.user.id);
+        if (work instanceof Response) return work;
         try {
-            if (provider === 'openai') {
-                const openai = new OpenAIProvider({ apiKey, baseUrl, model });
-                const result = await openai.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
-                if (result.questionText || result.analysis) {
-                    // 视觉成功 → 文本和视觉都支持，一步完成
-                    textSupport = true;
-                    visionSupport = true;
-                    modelInfo = model || 'gpt-4o';
-                }
-            } else if (provider === 'gemini') {
-                const gemini = new GeminiProvider({ apiKey, baseUrl, model });
-                const result = await gemini.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
-                if (result.questionText || result.analysis) {
-                    textSupport = true;
-                    visionSupport = true;
-                    modelInfo = model || 'gemini-2.0-flash';
-                }
-            } else if (provider === 'azure') {
-                if (!endpoint || !deploymentName) {
-                    return NextResponse.json({ error: 'Azure 需要 endpoint 和 deploymentName' }, { status: 400 });
-                }
-                const azure = new AzureOpenAIProvider({
-                    apiKey,
-                    endpoint,
-                    deploymentName,
-                    apiVersion,
-                    model
-                });
-                const result = await azure.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
-                if (result.questionText || result.analysis) {
-                    textSupport = true;
-                    visionSupport = true;
-                    modelInfo = model || deploymentName;
-                }
-            }
-        } catch (error) {
-            const errCode = parseErrorCode(error);
-            const errMsg = error instanceof Error ? error.message : String(error);
+            let textSupport = false;
+            let visionSupport = false;
+            let textError: string | undefined;
+            let visionError: string | undefined;
+            let modelInfo: string | undefined;
 
-            logger.info({ error: errMsg, errorCode: errCode, provider }, '视觉测试失败');
+            // 辅助函数：判断错误是否为配置/连接问题（不应继续文本测试）
+            const isConfigError = (errorCode: string) => {
+                return ['AI_AUTH_ERROR', 'AI_CONNECTION_FAILED', 'AI_TIMEOUT_ERROR',
+                    'AI_QUOTA_EXCEEDED', 'AI_PERMISSION_DENIED', 'AI_SERVICE_UNAVAILABLE'].includes(errorCode);
+            };
 
-            // 如果是配置/连接问题，直接返回错误，不再测试文本
-            if (isConfigError(errCode)) {
-                textError = errCode;
-                visionError = errCode;
-                logger.warn({ errorCode: errCode, provider }, '配置错误，跳过文本测试');
-            } else {
-                // 非配置错误（如模型不支持多模态），标记为视觉不支持
-                visionError = 'VISION_NOT_SUPPORTED';
-            }
-        }
-
-        // 测试 2: 文本生成能力（仅在视觉失败且非配置错误时进行）
-        if (!textSupport && !textError) {
+            // 优化策略：先视觉测试，成功则一步完成；失败则根据错误类型决定是否进行文本测试
+            // 测试 1: 视觉（多模态）能力
             try {
                 if (provider === 'openai') {
                     const openai = new OpenAIProvider({ apiKey, baseUrl, model });
-                    const result = await openai.generateSimilarQuestion(
-                        '1+1=?',
-                        ['基础算术'],
-                        language,
-                        'easy'
-                    );
-                    if (result.questionText) {
+                    const result = await openai.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
+                    if (result.questionText || result.analysis) {
+                        // 视觉成功 → 文本和视觉都支持，一步完成
                         textSupport = true;
+                        visionSupport = true;
                         modelInfo = model || 'gpt-4o';
                     }
                 } else if (provider === 'gemini') {
                     const gemini = new GeminiProvider({ apiKey, baseUrl, model });
-                    const result = await gemini.generateSimilarQuestion(
-                        '1+1=?',
-                        ['基础算术'],
-                        language,
-                        'easy'
-                    );
-                    if (result.questionText) {
+                    const result = await gemini.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
+                    if (result.questionText || result.analysis) {
                         textSupport = true;
+                        visionSupport = true;
                         modelInfo = model || 'gemini-2.0-flash';
                     }
                 } else if (provider === 'azure') {
+                    if (!endpoint || !deploymentName) {
+                        return NextResponse.json({ error: 'Azure 需要 endpoint 和 deploymentName' }, { status: 400 });
+                    }
                     const azure = new AzureOpenAIProvider({
                         apiKey,
                         endpoint,
@@ -210,36 +152,96 @@ export async function POST(request: NextRequest) {
                         apiVersion,
                         model
                     });
-                    const result = await azure.generateSimilarQuestion(
-                        '1+1=?',
-                        ['基础算术'],
-                        language,
-                        'easy'
-                    );
-                    if (result.questionText) {
+                    const result = await azure.analyzeImage(TEST_IMAGE_BASE64, TEST_IMAGE_MIME, language);
+                    if (result.questionText || result.analysis) {
                         textSupport = true;
+                        visionSupport = true;
                         modelInfo = model || deploymentName;
                     }
                 }
             } catch (error) {
-                textError = parseErrorCode(error);
-                logger.warn({ error, provider }, '文本生成测试失败');
+                const errCode = parseErrorCode(error);
+                const errMsg = error instanceof Error ? error.message : String(error);
+
+                logger.info({ error: errMsg, errorCode: errCode, provider }, '视觉测试失败');
+
+                // 如果是配置/连接问题，直接返回错误，不再测试文本
+                if (isConfigError(errCode)) {
+                    textError = errCode;
+                    visionError = errCode;
+                    logger.warn({ errorCode: errCode, provider }, '配置错误，跳过文本测试');
+                } else {
+                    // 非配置错误（如模型不支持多模态），标记为视觉不支持
+                    visionError = 'VISION_NOT_SUPPORTED';
+                }
             }
-        }
 
-        const response: AITestResponse = {
-            success: textSupport,
-            textSupport,
-            visionSupport,
-            textError,
-            visionError,
-            modelInfo
-        };
+            // 测试 2: 文本生成能力（仅在视觉失败且非配置错误时进行）
+            if (!textSupport && !textError) {
+                try {
+                    if (provider === 'openai') {
+                        const openai = new OpenAIProvider({ apiKey, baseUrl, model });
+                        const result = await openai.generateSimilarQuestion(
+                            '1+1=?',
+                            ['基础算术'],
+                            language,
+                            'easy'
+                        );
+                        if (result.questionText) {
+                            textSupport = true;
+                            modelInfo = model || 'gpt-4o';
+                        }
+                    } else if (provider === 'gemini') {
+                        const gemini = new GeminiProvider({ apiKey, baseUrl, model });
+                        const result = await gemini.generateSimilarQuestion(
+                            '1+1=?',
+                            ['基础算术'],
+                            language,
+                            'easy'
+                        );
+                        if (result.questionText) {
+                            textSupport = true;
+                            modelInfo = model || 'gemini-2.0-flash';
+                        }
+                    } else if (provider === 'azure') {
+                        const azure = new AzureOpenAIProvider({
+                            apiKey,
+                            endpoint,
+                            deploymentName,
+                            apiVersion,
+                            model
+                        });
+                        const result = await azure.generateSimilarQuestion(
+                            '1+1=?',
+                            ['基础算术'],
+                            language,
+                            'easy'
+                        );
+                        if (result.questionText) {
+                            textSupport = true;
+                            modelInfo = model || deploymentName;
+                        }
+                    }
+                } catch (error) {
+                    textError = parseErrorCode(error);
+                    logger.warn({ error, provider }, '文本生成测试失败');
+                }
+            }
 
-        logger.info({ response }, 'AI 连接测试完成');
+            const response: AITestResponse = {
+                success: textSupport,
+                textSupport,
+                visionSupport,
+                textError,
+                visionError,
+                modelInfo
+            };
 
-        return NextResponse.json(response);
+            logger.info({ response }, 'AI 连接测试完成');
 
+            return NextResponse.json(response);
+
+        } finally { work.release(); }
     } catch (error) {
         logger.error({ error }, 'AI 测试 API 异常');
         return NextResponse.json(

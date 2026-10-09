@@ -55,8 +55,11 @@
 
 ```bash
 docker run -d --name wrong-notebook \
-  -e NEXTAUTH_SECRET="your_secret_key" \
-  -p 3000:3000 \
+  -e NEXTAUTH_SECRET="$NEXTAUTH_SECRET" \
+  -e NEXTAUTH_URL="$NEXTAUTH_URL" \
+  -e ADMIN_EMAIL="$ADMIN_EMAIL" \
+  -e ADMIN_PASSWORD="$ADMIN_PASSWORD" \
+  -p 127.0.0.1:3000:3000 \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/config:/app/config \
   ghcr.io/wttwins/wrong-notebook
@@ -115,7 +118,7 @@ cp .env.example .env
 | 环境变量 | 描述 | 默认值 | 说明 |
 | :--- | :--- | :--- | :--- |
 | `DATABASE_URL` | 数据库连接地址 | `file:./dev.db` | SQLite 数据库路径 |
-| `NEXTAUTH_SECRET` | Auth 密钥 | 无 | 用于加密 Session，生产环境建议设置,可以使用 openssl rand -base64 32 生成一个随机字符串作为密钥 |
+| `NEXTAUTH_SECRET` | Auth 密钥 | 无 | 生产环境必须设置随机密钥（至少 32 字符），使用 openssl rand -base64 32 生成 |
 | `NEXTAUTH_URL` | 访问地址 | `http://your-domain-name:3000` | 部署后的访问地址 |
 | `AUTH_TRUST_HOST` | 信任主机头 | `true` | 设置为 `true` 时自动推断 URL，适合 Docker/PaaS |
 | `LOG_LEVEL` | 日志级别 | `debug` (开发) / `info` (生产) | 可选值：`trace`, `debug`, `info`, `warn`, `error`, `fatal` |
@@ -163,9 +166,9 @@ npx prisma db seed
 
 #### 6. 管理员账户
 
-默认管理员账户：
-- **邮箱**: `admin@localhost`
-- **密码**: `123456`
+没有默认管理员账户。首次初始化空数据库前，设置 `ADMIN_EMAIL` 和 `ADMIN_PASSWORD`（至少 12 字符、最多 72 字节）。已有账户不会在重启时恢复权限或启用状态。首次成功创建后移除 `ADMIN_PASSWORD`。
+
+注册默认关闭。生产部署必须使用随机 `NEXTAUTH_SECRET`（至少 32 字符），并将 `NEXTAUTH_URL` 设置为 Tailscale Serve 的 HTTPS 地址。详见 [私有部署安全配置](SECURITY.md)。
 
 > 管理员登录后，可在“设置” -> “用户管理”中管理系统用户。
 
@@ -230,9 +233,9 @@ npm run dev
   ```bash
   node scripts/reset-password.js <邮箱> <新密码>
   ```
-  示例:  
+  示例:
   ```bash
-  node scripts/reset-password.js user@example.com 123456 
+  node scripts/reset-password.js user@example.com "<strong-new-password>"
   ```
 
 ## 📄 许可证

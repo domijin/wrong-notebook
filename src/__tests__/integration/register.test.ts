@@ -238,7 +238,7 @@ describe('/api/register', () => {
             expect(data.allowRegistration).toBe(false);
         });
 
-        it('应该默认允许注册（当配置中未指定时）', async () => {
+        it('defaults registration to disabled when omitted', async () => {
             mocks.mockGetAppConfig.mockReturnValue({
                 aiProvider: 'gemini',
                 // 没有 allowRegistration 字段
@@ -248,7 +248,7 @@ describe('/api/register', () => {
             const data = await response.json();
 
             expect(response.status).toBe(200);
-            expect(data.allowRegistration).toBe(true);
+            expect(data.allowRegistration).toBe(false);
         });
     });
 });

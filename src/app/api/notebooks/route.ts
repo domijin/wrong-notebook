@@ -1,7 +1,6 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { unauthorized, badRequest, conflict, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
@@ -12,7 +11,7 @@ const logger = createLogger('api:notebooks');
  * 获取用户所有错题本（Subjects）
  */
 export async function GET() {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         let user;
@@ -85,7 +84,7 @@ export async function GET() {
  * 创建新错题本
  */
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         let user;

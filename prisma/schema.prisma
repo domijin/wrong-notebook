@@ -24,11 +24,24 @@ model User {
 
   role      String   @default("user") // "admin" or "user"
   isActive  Boolean  @default(true)   // 用户是否启用
+  sessionVersion Int @default(0)
 
   errorItems ErrorItem[]
   subjects   Subject[]
   practiceRecords PracticeRecord[]
   customTags KnowledgeTag[] // User's custom tags
+}
+
+// No user foreign key: audit history survives account deletion and system reset.
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  target    String
+  result    String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 // 统一知识点标签表 (支持无限层级)

@@ -1,8 +1,7 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { unauthorized, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/lib/constants/pagination";
@@ -10,7 +9,7 @@ import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/lib/constants
 const logger = createLogger('api:error-items:list');
 
 export async function GET(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     const { searchParams } = new URL(req.url);
     const subjectId = searchParams.get("subjectId");

@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+node /app/dist-scripts/scripts/validate-production-env.js
+
 # Define paths
 SOURCE_DB="/app/prisma/dev.db"
 TARGET_DB="/app/data/dev.db"
@@ -44,16 +46,11 @@ fi
 
 # Run migrations to ensure DB schema is available and up to date.
 echo "[Entrypoint] Running database migrations to sync schema..."
-cd /app && $PRISMA_BIN migrate deploy --schema=./prisma/schema.prisma && {
-    echo "[Entrypoint] Migrations completed successfully."
-} || echo "[Entrypoint] Migration failed or no pending migrations."
+cd /app
+$PRISMA_BIN migrate deploy --schema=./prisma/schema.prisma
 
-# Always run seed after migrations to ensure admin user has correct role/isActive
-# (migration may have reset role to default 'user' for existing installs)
-echo "[Entrypoint] Ensuring admin user exists with correct role..."
-cd /app && node "$SEED_ADMIN_SCRIPT" && {
-    echo "[Entrypoint] Admin seed completed successfully."
-} || echo "[Entrypoint] Admin seed failed (non-fatal, continuing...)."
+# First-time env provisioning only; existing accounts are never changed.
+node "$SEED_ADMIN_SCRIPT"
 touch "$SEED_MARKER" 2>/dev/null
 
 # Check if version changed - rebuild system tags automatically

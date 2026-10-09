@@ -1,4 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentSession } from "@/lib/current-session";
+import { resolveAIRequest } from "@/lib/ai-request";
+import { badRequest, forbidden } from "@/lib/api-errors";
+import { consumeRateLimit } from "@/lib/rate-limit";
+import { NextResponse } from 'next/server';
 import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('api:ai:models');
@@ -16,15 +20,15 @@ function extractModelName(modelId: string): string {
 }
 
 async function fetchGeminiModels(apiKey: string, baseUrl: string): Promise<ModelInfo[]> {
-    const url = `${baseUrl}/v1beta/models?key=${apiKey}`;
+    const url = `${baseUrl}/v1beta/models`;
 
     const response = await fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        redirect: 'error', signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) {
-        const errorText = await response.text();
-        logger.error({ status: response.status, errorText }, 'Gemini models API error');
+        logger.error({ status: response.status }, 'Gemini models API error');
         throw new Error(`Gemini API error: ${response.status}`);
     }
 
@@ -48,6 +52,7 @@ async function fetchOpenAIModels(apiKey: string, baseUrl: string): Promise<Model
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
         },
+        redirect: 'error', signal: AbortSignal.timeout(10000),
     });
 
     if (!response.ok) {
@@ -65,38 +70,22 @@ async function fetchOpenAIModels(apiKey: string, baseUrl: string): Promise<Model
         }));
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: Request) {
+    const session = await getCurrentSession();
+    if (session?.user.role !== 'admin') return forbidden("Current active admin required");
+    if (!consumeRateLimit(`models:${session.user.id}`, 20, 60000)) {
+        return NextResponse.json({ message: "Too many model discovery requests" }, { status: 429 });
+    }
+    let body;
+    try { body = resolveAIRequest(await req.json()); }
+    catch { return badRequest("Invalid provider configuration or AI destination"); }
+    if (body.provider === 'azure') return badRequest("Use the Azure deployment name");
     try {
-        const { searchParams } = new URL(req.url);
-        const provider = searchParams.get('provider');
-        const apiKey = searchParams.get('apiKey');
-        const baseUrl = searchParams.get('baseUrl');
-
-        if (!apiKey) {
-            return NextResponse.json(
-                { error: 'API key is required' },
-                { status: 400 }
-            );
-        }
-
-        let models: ModelInfo[] = [];
-
-        if (provider === 'gemini') {
-            const effectiveBaseUrl = baseUrl || 'https://generativelanguage.googleapis.com';
-            models = await fetchGeminiModels(apiKey, effectiveBaseUrl);
-        } else {
-            // OpenAI-compatible
-            const effectiveBaseUrl = baseUrl || 'https://api.openai.com/v1';
-            models = await fetchOpenAIModels(apiKey, effectiveBaseUrl);
-        }
-
+        const models = body.provider === 'gemini'
+            ? await fetchGeminiModels(body.apiKey, body.baseUrl)
+            : await fetchOpenAIModels(body.apiKey, body.baseUrl);
         return NextResponse.json({ models });
-
-    } catch (error: any) {
-        logger.error({ error }, 'Error fetching models');
-        return NextResponse.json(
-            { error: error.message || 'Internal server error', models: [] },
-            { status: 200 } // Return 200 with empty models to allow manual input
-        );
+    } catch {
+        return NextResponse.json({ error: 'Model discovery failed', models: [] }, { status: 502 });
     }
 }

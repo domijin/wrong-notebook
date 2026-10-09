@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id' } } : null;
+    },
+}));
 /**
  * /api/tags API 集成测试
  * 测试标签统计和标签建议接口
@@ -49,6 +57,14 @@ describe('/api/tags', () => {
     });
 
     describe('GET /api/tags/stats (标签统计)', () => {
+        beforeEach(() => {
+            mocks.mockGetServerSession.mockResolvedValue({ user: { id: 'reader-id', email: 'reader@example.com' } });
+        });
+        it('requires authentication', async () => {
+            mocks.mockGetServerSession.mockResolvedValueOnce(null);
+            expect((await GET_STATS(new Request('http://localhost/api/tags/stats'))).status).toBe(401);
+            expect(mocks.mockPrismaErrorItem.findMany).not.toHaveBeenCalled();
+        });
         it('应该返回标签使用频率统计', async () => {
             const errorItems = [
                 { knowledgePoints: '["一元一次方程", "移项"]' },

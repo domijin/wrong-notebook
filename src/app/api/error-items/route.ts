@@ -1,7 +1,6 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { calculateGrade } from "@/lib/grade-calculator";
 import { unauthorized, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
@@ -14,7 +13,7 @@ const logger = createLogger('api:error-items');
 export async function POST(req: Request) {
     logger.info('POST /api/error-items called');
 
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         const body = await req.json();

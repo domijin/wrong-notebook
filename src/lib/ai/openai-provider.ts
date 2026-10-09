@@ -1,3 +1,4 @@
+import { validateAIDestination, aiFetch } from "../ai-destination";
 import OpenAI from "openai";
 import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
@@ -23,7 +24,7 @@ export class OpenAIProvider implements AIService {
 
     constructor(config?: AIConfig) {
         const apiKey = config?.apiKey;
-        const baseURL = config?.baseUrl;
+        const baseURL = validateAIDestination(config?.baseUrl || 'https://api.openai.com/v1');
 
         if (!apiKey) {
             throw new Error("AI_AUTH_ERROR: OPENAI_API_KEY is required for OpenAI provider");
@@ -31,6 +32,7 @@ export class OpenAIProvider implements AIService {
 
         this.openai = new OpenAI({
             apiKey: apiKey,
+            timeout: 60000, maxRetries: 0, fetch: aiFetch,
             baseURL: baseURL || undefined,
             defaultHeaders: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -46,7 +48,7 @@ export class OpenAIProvider implements AIService {
             provider: 'OpenAI',
             model: this.model,
             baseURL: this.baseURL,
-            apiKeyPrefix: apiKey.substring(0, 8) + '...'
+
         }, 'AI Provider initialized');
     }
 
@@ -237,7 +239,7 @@ export class OpenAIProvider implements AIService {
                     },
                 ]);
 
-                const res = await fetch(`${this.baseURL}/chat/completions`, {
+                const res = await aiFetch(`${this.baseURL}/chat/completions`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.apiKey}`,

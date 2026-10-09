@@ -8,7 +8,7 @@ import { CorrectionEditor } from "@/components/correction-editor";
 import { ImageCropper } from "@/components/image-cropper";
 import { ParsedQuestion } from "@/lib/ai";
 import { apiClient } from "@/lib/api-client";
-import { AnalyzeResponse, Notebook, AppConfig } from "@/types/api";
+import { AnalyzeResponse, Notebook, ClientSettings } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { processImageFile } from "@/lib/image-utils";
@@ -28,7 +28,7 @@ export default function AddErrorPage() {
     const [currentImage, setCurrentImage] = useState<string | null>(null);
     const { t, language } = useLanguage();
     const [notebook, setNotebook] = useState<Notebook | null>(null);
-    const [config, setConfig] = useState<AppConfig | null>(null);
+    const [config, setConfig] = useState<ClientSettings | null>(null);
 
     // Input mode: "image" for photo upload, "text" for manual text input
     const [inputMode, setInputMode] = useState<"image" | "text">("image");
@@ -60,7 +60,7 @@ export default function AddErrorPage() {
             });
 
         // Fetch settings for timeouts
-        apiClient.get<AppConfig>("/api/settings")
+        apiClient.get<ClientSettings>("/api/settings/client")
             .then(data => {
                 setConfig(data);
                 if (data.timeouts?.analyze) {

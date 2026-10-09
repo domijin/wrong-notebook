@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id' } } : null;
+    },
+}));
 /**
  * /api/user API 集成测试
  * 测试用户信息获取和更新接口
@@ -11,7 +19,9 @@ const mocks = vi.hoisted(() => ({
         update: vi.fn(),
     },
     mockSession: {
+        expires: '2030-01-01',
         user: {
+            id: 'test-user-id',
             email: 'test@example.com',
             name: 'Test User',
         },
@@ -36,6 +46,7 @@ vi.mock('@/lib/auth', () => ({
 
 // Mock bcryptjs
 vi.mock('bcryptjs', () => ({
+    compare: vi.fn(() => Promise.resolve(true)),
     hash: vi.fn((password: string) => Promise.resolve(`hashed_${password}`)),
 }));
 
@@ -43,8 +54,11 @@ vi.mock('bcryptjs', () => ({
 import { GET, PATCH } from '@/app/api/user/route';
 
 describe('/api/user', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.clearAllMocks();
+        const { getServerSession } = await import('next-auth');
+        vi.mocked(getServerSession).mockResolvedValue(mocks.mockSession);
+        mocks.mockPrismaUser.findUnique.mockResolvedValue({ password: 'old-hash' });
     });
 
     describe('GET /api/user', () => {
@@ -171,7 +185,7 @@ describe('/api/user', () => {
         it('应该拒绝太短的密码', async () => {
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ password: '123' }),
+                body: JSON.stringify({ currentPassword: 'old-password', password: '123' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -193,7 +207,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ password: 'newpassword123' }),
+                body: JSON.stringify({ currentPassword: 'old-password', password: 'newpassword123' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -216,7 +230,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ email: 'admin@localhost' }),
+                body: JSON.stringify({ currentPassword: 'old-password', email: 'admin@localhost' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -238,7 +252,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ email: 'user@example.com' }),
+                body: JSON.stringify({ currentPassword: 'old-password', email: 'user@example.com' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -250,7 +264,7 @@ describe('/api/user', () => {
         it('应该拒绝无效邮箱格式', async () => {
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ email: 'invalid-email' }),
+                body: JSON.stringify({ currentPassword: 'old-password', email: 'invalid-email' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -395,7 +409,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ password: 'newAdminPassword123' }),
+                body: JSON.stringify({ currentPassword: 'old-password', password: 'newAdminPassword123' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -428,7 +442,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ password: 'newUserPassword123' }),
+                body: JSON.stringify({ currentPassword: 'old-password', password: 'newUserPassword123' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -470,7 +484,7 @@ describe('/api/user', () => {
 
             // 验证更新操作使用了 session 中的 email
             const updateCall = mocks.mockPrismaUser.update.mock.calls[0][0];
-            expect(updateCall.where.email).toBe('admin@localhost');
+            expect(updateCall.where.id).toBe('test-user-id');
         });
 
         it('普通用户修改信息时使用的是自己的 session email', async () => {
@@ -502,7 +516,7 @@ describe('/api/user', () => {
 
             // 验证更新操作使用了 session 中的 email（不能修改其他用户）
             const updateCall = mocks.mockPrismaUser.update.mock.calls[0][0];
-            expect(updateCall.where.email).toBe('normaluser@example.com');
+            expect(updateCall.where.id).toBe('test-user-id');
         });
     });
 });

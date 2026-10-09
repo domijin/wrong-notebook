@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Trash2, Loader2, AlertTriangle, Save, Eye, EyeOff, Languages, User, Bot, Shield, RefreshCw, Plus, Zap, CheckCircle2, XCircle, Download, Upload, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { UserManagement } from "@/components/admin/user-management";
 import { apiClient } from "@/lib/api-client";
 import { frontendLogger } from "@/lib/frontend-logger";
@@ -32,6 +32,7 @@ import { ModelSelector } from "@/components/ui/model-selector";
 import { PromptSettings } from "@/components/settings/prompt-settings";
 
 import { MessageSquareText, Info, ExternalLink, Github, ScrollText } from "lucide-react";
+import { usePasswordConfirmation } from "@/components/password-confirmation";
 const MAX_OPENAI_INSTANCES = 10;
 
 // 生成唯一 ID
@@ -49,10 +50,13 @@ interface ProfileFormState {
     educationStage: string;
     enrollmentYear: string | number;
     password: string;
+    currentPassword: string;
 }
 
 export function SettingsDialog() {
     const { data: session } = useSession();
+    const { confirmPassword: confirmAdminPassword, passwordDialog } = usePasswordConfirmation();
+    const [originalEmail, setOriginalEmail] = useState("");
     const { t, language, setLanguage } = useLanguage();
     const [open, setOpen] = useState(false);
     const dialogContentRef = useRef<HTMLDivElement>(null);
@@ -85,7 +89,7 @@ export function SettingsDialog() {
         email: "",
         educationStage: "",
         enrollmentYear: "",
-        password: ""
+        password: "", currentPassword: ""
     });
     const [confirmPassword, setConfirmPassword] = useState("");
     const [profileLoading, setProfileLoading] = useState(false);
@@ -103,7 +107,7 @@ export function SettingsDialog() {
 
     useEffect(() => {
         if (open) {
-            fetchSettings();
+            if (session?.user.role === "admin") fetchSettings();
             fetchProfile();
         }
         // 获取版本号
@@ -111,7 +115,7 @@ export function SettingsDialog() {
             .then((res) => res.json())
             .then((data) => setVersion(data.version))
             .catch(() => {});
-    }, [open]);
+    }, [open, session?.user.role]);
 
     const fetchSettings = async () => {
         setLoading(true);
@@ -129,12 +133,13 @@ export function SettingsDialog() {
         setProfileLoading(true);
         try {
             const data = await apiClient.get<UserProfile>("/api/user");
+            setOriginalEmail(data.email || "");
             setProfile({
                 name: data.name || "",
                 email: data.email || "",
                 educationStage: data.educationStage || "",
                 enrollmentYear: data.enrollmentYear || "",
-                password: ""
+                password: "", currentPassword: ""
             });
         } catch (error) {
             frontendLogger.error('[SettingsDialog]', 'Failed to fetch profile', { error: error instanceof Error ? error.message : String(error) });
@@ -151,7 +156,7 @@ export function SettingsDialog() {
             if (!instance.name?.trim()) {
                 return t.settings?.ai?.validationNameRequired || '实例名称不能为空';
             }
-            if (!instance.apiKey?.trim()) {
+            if (!instance.apiKey?.trim() && !instance.keyConfigured) {
                 return t.settings?.ai?.validationApiKeyRequired || 'API Key 不能为空';
             }
             if (!instance.baseUrl?.trim()) {
@@ -173,7 +178,7 @@ export function SettingsDialog() {
         if (!config.azure?.deploymentName?.trim()) {
             return t.settings?.ai?.validationAzureDeploymentRequired || 'Deployment Name is required';
         }
-        if (!config.azure?.apiKey?.trim()) {
+        if (!config.azure?.apiKey?.trim() && !config.azure?.keyConfigured) {
             return t.settings?.ai?.validationApiKeyRequired || 'API Key is required';
         }
         return null;
@@ -196,7 +201,10 @@ export function SettingsDialog() {
 
         setSaving(true);
         try {
-            await apiClient.post("/api/settings", config);
+            const options = await confirmAdminPassword();
+            if (!options) return;
+            const data = await apiClient.post<AppConfig>("/api/settings", config, options);
+            setConfig(data);
             alert(t.settings?.messages?.saved || "Settings saved");
             // 保存成功后滚动到顶部，方便关闭对话框
             dialogContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -221,6 +229,7 @@ export function SettingsDialog() {
             const payload: UpdateUserProfileRequest = {
                 name: profile.name,
                 email: profile.email,
+                currentPassword: profile.currentPassword,
                 educationStage: profile.educationStage,
             };
 
@@ -235,11 +244,13 @@ export function SettingsDialog() {
             await apiClient.patch("/api/user", payload);
 
             alert(t.settings?.messages?.profileUpdated || "Profile updated");
-            setProfile(prev => ({ ...prev, password: "" })); // Clear password field
+            setProfile(prev => ({ ...prev, password: "", currentPassword: "" })); // Clear password field
             setConfirmPassword(""); // Clear confirm password field
             setShowPassword(false);
             setShowConfirmPassword(false);
-            window.location.reload(); // Reload to update user name in UI
+            if (profile.password || profile.email !== originalEmail) {
+                await signOut({ callbackUrl: '/login' });
+            } else window.location.reload();
         } catch (error: any) {
             frontendLogger.error('[SettingsDialog]', 'Failed to update profile', { error: error?.data?.message || error?.message || String(error) });
             const message = error.data?.message || (t.settings?.messages?.updateFailed || "Update failed");
@@ -302,7 +313,9 @@ export function SettingsDialog() {
 
         setSystemResetting(true);
         try {
-            await apiClient.post("/api/admin/system-reset", {});
+            const options = await confirmAdminPassword();
+            if (!options) return;
+            await apiClient.post("/api/admin/system-reset", {}, options);
             alert(t.settings?.clearSuccess || "Success - System Reset Complete");
             setOpen(false);
             window.location.reload();
@@ -464,7 +477,9 @@ export function SettingsDialog() {
 
         setMigratingTags(true);
         try {
-            const res = await apiClient.post("/api/admin/migrate-tags", {});
+            const options = await confirmAdminPassword();
+            if (!options) return;
+            const res = await apiClient.post("/api/admin/migrate-tags", {}, options);
             alert(`${t.settings?.clearSuccess || "Success"}: ${(res as any).count || 0} tags migrated.`);
             // No reload needed necessarily, but good to refresh if user is viewing tags.
         } catch (error) {
@@ -475,7 +490,7 @@ export function SettingsDialog() {
         }
     };
 
-    const updateConfig = (section: 'openai' | 'gemini', key: string, value: string) => {
+    const updateConfig = (section: 'openai' | 'gemini', key: string, value: string | undefined) => {
         if (section === 'gemini') {
             setConfig(prev => ({
                 ...prev,
@@ -496,7 +511,7 @@ export function SettingsDialog() {
     };
 
     // 更新当前选中的 OpenAI 实例属性
-    const updateOpenAIInstance = (key: keyof OpenAIInstance, value: string) => {
+    const updateOpenAIInstance = (key: keyof OpenAIInstance, value: string | undefined) => {
         const instances = config.openai?.instances || [];
         const activeId = selectedInstanceId || config.openai?.activeInstanceId;
         const updatedInstances = instances.map(instance =>
@@ -569,7 +584,7 @@ export function SettingsDialog() {
         }
     }, [config.openai?.activeInstanceId, selectedInstanceId]);
 
-    const updatePrompts = (type: 'analyze' | 'similar', value: string) => {
+    const updatePrompts = (type: 'analyze' | 'similar', value: string | undefined) => {
         setConfig(prev => ({
             ...prev,
             prompts: {
@@ -587,20 +602,21 @@ export function SettingsDialog() {
             let requestBody: Record<string, unknown>;
             if (config.aiProvider === 'openai') {
                 const instance = getSelectedInstance();
-                if (!instance?.apiKey) {
+                if (!instance?.apiKey && !instance?.keyConfigured) {
                     setTestResult({ success: false, textSupport: false, visionSupport: false, textError: t.settings?.ai?.validationApiKeyRequired || 'API Key is required' });
                     setTesting(false);
                     return;
                 }
                 requestBody = {
                     provider: 'openai',
-                    apiKey: instance.apiKey,
+                    apiKey: instance.apiKey || undefined,
+                    instanceId: instance.id,
                     baseUrl: instance.baseUrl,
                     model: instance.model,
                     language: language
                 };
             } else if (config.aiProvider === 'gemini') {
-                if (!config.gemini?.apiKey) {
+                if (!config.gemini?.apiKey && !config.gemini?.keyConfigured) {
                     setTestResult({ success: false, textSupport: false, visionSupport: false, textError: t.settings?.ai?.validationApiKeyRequired || 'API Key is required' });
                     setTesting(false);
                     return;
@@ -613,7 +629,7 @@ export function SettingsDialog() {
                     language: language
                 };
             } else if (config.aiProvider === 'azure') {
-                if (!config.azure?.apiKey || !config.azure?.endpoint || !config.azure?.deploymentName) {
+                if ((!config.azure?.apiKey && !config.azure?.keyConfigured) || !config.azure?.endpoint || !config.azure?.deploymentName) {
                     setTestResult({ success: false, textSupport: false, visionSupport: false, textError: t.settings?.ai?.validationAzureEndpointRequired || 'Azure config is incomplete' });
                     setTesting(false);
                     return;
@@ -658,6 +674,7 @@ export function SettingsDialog() {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
+            {passwordDialog}
             <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                     <Settings className="h-5 w-5" />
@@ -727,6 +744,7 @@ export function SettingsDialog() {
                                 </Select>
                             </div>
 
+                            {session?.user.role === 'admin' && (
                             <div className="space-y-2 pt-4 border-t">
                                 <Label>{t.settings?.general?.timeoutLabel || "AI Analysis Timeout (Seconds)"}</Label>
                                 <Input
@@ -745,10 +763,10 @@ export function SettingsDialog() {
                                     }}
                                     onBlur={() => {
                                         const currentVal = (config.timeouts?.analyze || 0) / 1000;
-                                        // Valid range 120-600, default 120
+                                        // Match the server timeout bounds.
                                         let safeVal = currentVal;
-                                        if (safeVal < 120) safeVal = 120;
-                                        if (safeVal > 600) safeVal = 600;
+                                        if (safeVal < 1) safeVal = 1;
+                                        if (safeVal > 180) safeVal = 180;
 
                                         if (safeVal !== currentVal) {
                                             setConfig(prev => ({
@@ -760,22 +778,30 @@ export function SettingsDialog() {
                                             }));
                                         }
                                     }}
-                                    min={120}
-                                    max={600}
+                                    min={1}
+                                    max={180}
                                 />
                                 <p className="text-xs text-muted-foreground">
                                     {t.settings?.general?.timeoutDesc || "Increase this value if you experience frequent timeouts during AI analysis."}
                                 </p>
                             </div>
+                            )}
                         </div>
+                        {session?.user.role === 'admin' && (
                         <Button onClick={handleSaveSettings} disabled={saving} className="w-full">
                             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {t.settings?.save || "Save Settings"}
                         </Button>
+                        )}
                     </TabsContent>
 
                     {/* Account Tab */}
                     <TabsContent value="account" className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>{language === 'zh' ? '当前密码（修改邮箱或密码时必填）' : 'Current password (required to change email or password)'}</Label>
+                            <Input type="password" autoComplete="current-password" value={profile.currentPassword}
+                                onChange={event => setProfile({ ...profile, currentPassword: event.target.value })} />
+                        </div>
                         {profileLoading ? (
                             <div className="flex justify-center py-8">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -1003,9 +1029,9 @@ export function SettingsDialog() {
                                                         <Input
                                                             type={showApiKey ? "text" : "password"}
                                                             value={getSelectedInstance()?.apiKey || ''}
-                                                            onChange={(e) => updateOpenAIInstance('apiKey', e.target.value)}
-                                                            placeholder="sk-..."
-                                                            className={`pr-10 ${!getSelectedInstance()?.apiKey?.trim() ? 'border-destructive' : ''}`}
+                                                            onChange={(e) => updateOpenAIInstance('apiKey', e.target.value || undefined)}
+                                                            placeholder={getSelectedInstance()?.keyConfigured ? "Configured — enter a new key to replace" : "sk-..."}
+                                                            className={`pr-10 ${!getSelectedInstance()?.apiKey?.trim() && !getSelectedInstance()?.keyConfigured ? 'border-destructive' : ''}`}
                                                         />
                                                         <Button
                                                             type="button"
@@ -1034,6 +1060,8 @@ export function SettingsDialog() {
                                                 <ModelSelector
                                                     provider="openai"
                                                     apiKey={getSelectedInstance()?.apiKey}
+                                                    keyConfigured={getSelectedInstance()?.keyConfigured}
+                                                    instanceId={getSelectedInstance()?.id}
                                                     baseUrl={getSelectedInstance()?.baseUrl}
                                                     currentModel={getSelectedInstance()?.model}
                                                     onModelChange={(model) => updateOpenAIInstance('model', model)}
@@ -1051,8 +1079,8 @@ export function SettingsDialog() {
                                                 <Input
                                                     type={showApiKey ? "text" : "password"}
                                                     value={config.gemini?.apiKey || ''}
-                                                    onChange={(e) => updateConfig('gemini', 'apiKey', e.target.value)}
-                                                    placeholder="AIza..."
+                                                    onChange={(e) => updateConfig('gemini', 'apiKey', e.target.value || undefined)}
+                                                    placeholder={config.gemini?.keyConfigured ? "Configured — enter a new key to replace" : "AIza..."}
                                                     className="pr-10"
                                                 />
                                                 <Button
@@ -1081,6 +1109,7 @@ export function SettingsDialog() {
                                         <ModelSelector
                                             provider="gemini"
                                             apiKey={config.gemini?.apiKey}
+                                            keyConfigured={config.gemini?.keyConfigured}
                                             baseUrl={config.gemini?.baseUrl}
                                             currentModel={config.gemini?.model}
                                             onModelChange={(model) => updateConfig('gemini', 'model', model)}
@@ -1114,9 +1143,9 @@ export function SettingsDialog() {
                                                 <Input
                                                     type={showApiKey ? "text" : "password"}
                                                     value={config.azure?.apiKey || ''}
-                                                    onChange={(e) => setConfig(prev => ({ ...prev, azure: { ...prev.azure, apiKey: e.target.value } }))}
-                                                    placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                                                    className={`pr-10 ${!config.azure?.apiKey?.trim() ? 'border-destructive' : ''}`}
+                                                    onChange={(e) => setConfig(prev => ({ ...prev, azure: { ...prev.azure, apiKey: e.target.value || undefined } }))}
+                                                    placeholder={config.azure?.keyConfigured ? "Configured — enter a new key to replace" : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}
+                                                    className={`pr-10 ${!config.azure?.apiKey?.trim() && !config.azure?.keyConfigured ? 'border-destructive' : ''}`}
                                                 />
                                                 <Button
                                                     type="button"
@@ -1228,7 +1257,7 @@ export function SettingsDialog() {
                     {/* Prompts Tab */}
                     <TabsContent value="prompts" className="space-y-4 py-4">
                         <PromptSettings config={config} onUpdate={updatePrompts} />
-                        <Button onClick={handleSaveSettings} disabled={saving} className="w-full">
+                        <Button onClick={handleSaveSettings} disabled={saving || session?.user.role !== "admin"} className="w-full">
                             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {t.settings?.prompts?.save || "Save Prompt Settings"}
                         </Button>

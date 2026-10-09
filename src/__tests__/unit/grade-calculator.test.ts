@@ -96,7 +96,7 @@ describe('calculateGrade', () => {
 
     describe('学期判断逻辑', () => {
         it('9月份应该是上期', () => {
-            const result = calculateGrade('junior_high', 2024, new Date('2024-09-01'), 'zh');
+            const result = calculateGrade('junior_high', 2024, new Date(2024, 8, 1), 'zh');
             expect(result).toContain('上');
         });
 

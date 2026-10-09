@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
+import { getCurrentSession } from "@/lib/current-session";
+import { unauthorized } from "@/lib/api-errors";
 
 const logger = createLogger('api:tags:stats');
 
@@ -12,9 +14,12 @@ export const dynamic = "force-dynamic";
  * 获取标签使用频率统计
  */
 export async function GET(req: Request) {
+    const session = await getCurrentSession();
+    if (!session) return unauthorized();
     try {
         // 获取所有错题的知识点
         const errorItems = await prisma.errorItem.findMany({
+            where: { userId: session.user.id },
             select: {
                 knowledgePoints: true,
             },

@@ -1,183 +1,48 @@
+import { describe, it, expect, vi } from 'vitest';
 import { createRequire } from 'module';
-
 const require = createRequire(import.meta.url);
+const { seedAdmin } = require('../../../../scripts/seed-admin.js');
+const { validateProductionEnv } = require('../../../../scripts/validate-production-env.js');
 
-describe('seed-admin docker helper', () => {
-    it('creates the default admin user when it does not exist', async () => {
-        const createdUsers: unknown[] = [];
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue(null),
-                create: vi.fn().mockImplementation(async ({ data }) => {
-                    createdUsers.push(data);
-                    return { email: data.email };
-                }),
-                update: vi.fn(),
-            },
-        };
-        const hash = vi.fn().mockResolvedValue('hashed-password');
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'created', email: 'admin@localhost' });
-        expect(hash).toHaveBeenCalledWith('123456', 12);
-        expect(prisma.user.create).toHaveBeenCalledWith({
-            data: {
-                email: 'admin@localhost',
-                password: 'hashed-password',
-                name: 'Admin',
-                role: 'admin',
-                isActive: true,
-                educationStage: 'junior_high',
-                enrollmentYear: 2025,
-            },
-        });
-        expect(createdUsers).toHaveLength(1);
+const configured = { ADMIN_EMAIL: 'owner@example.com', ADMIN_PASSWORD: 'unique-admin-password-2026', NODE_ENV: 'production' };
+function database(count = 0) {
+    return { user: { count: vi.fn(async () => count), create: vi.fn(), update: vi.fn() } };
+}
+describe('first-time admin provisioning', () => {
+    it('creates an env-configured admin only on an empty installation', async () => {
+        const prisma = database();
+        const hash = vi.fn(async () => 'hashed-password');
+        expect(await seedAdmin({ prisma, hash, env: configured })).toEqual({ action: 'created', email: configured.ADMIN_EMAIL });
+        expect(hash).toHaveBeenCalledWith(configured.ADMIN_PASSWORD, 12);
+        expect(prisma.user.create).toHaveBeenCalledWith({ data: {
+            email: configured.ADMIN_EMAIL, password: 'hashed-password', name: 'Admin', role: 'admin', isActive: true,
+        } });
     });
-
-    it('updates default education fields when the admin user already exists', async () => {
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue({ email: 'admin@localhost', educationStage: 'senior_high', enrollmentYear: 2024 }),
-                create: vi.fn(),
-                update: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-            },
-        };
-        const hash = vi.fn();
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'updated', email: 'admin@localhost' });
-        expect(hash).not.toHaveBeenCalled();
+    it.each([{ role: 'admin', isActive: false }, { role: 'user', isActive: true }, { role: 'user', isActive: false }])(
+        'leaves existing accounts unchanged: %j', async () => {
+            const prisma = database(1);
+            const hash = vi.fn();
+            expect(await seedAdmin({ prisma, hash, env: configured })).toEqual({ action: 'skipped' });
+            expect(prisma.user.create).not.toHaveBeenCalled();
+            expect(prisma.user.update).not.toHaveBeenCalled();
+            expect(hash).not.toHaveBeenCalled();
+        });
+    it('build/development seeding without credentials creates no admin', async () => {
+        const prisma = database();
+        expect(await seedAdmin({ prisma, hash: vi.fn(), env: {} })).toEqual({ action: 'skipped' });
         expect(prisma.user.create).not.toHaveBeenCalled();
-        expect(prisma.user.update).toHaveBeenCalledWith({
-            where: { email: 'admin@localhost' },
-            data: {
-                role: 'admin',
-                isActive: true,
-                educationStage: 'senior_high',
-                enrollmentYear: 2024,
-            },
-        });
     });
-
-    it('preserves existing education fields when admin user has them set', async () => {
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-                create: vi.fn(),
-                update: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-            },
-        };
-        const hash = vi.fn();
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'updated', email: 'admin@localhost' });
-        expect(prisma.user.update).toHaveBeenCalledWith({
-            where: { email: 'admin@localhost' },
-            data: {
-                role: 'admin',
-                isActive: true,
-                educationStage: 'junior_high',
-                enrollmentYear: 2025,
-            },
+    it.each([{}, { ADMIN_EMAIL: 'owner@example.com' }, { ...configured, ADMIN_PASSWORD: '123456' }])(
+        'rejects missing or default credentials at first production startup: %j', async env => {
+            await expect(seedAdmin({ prisma: database(), hash: vi.fn(), env: { ...env, NODE_ENV: 'production' } })).rejects.toThrow('First-time provisioning');
         });
+});
+describe('production auth secret', () => {
+    it.each(['', 'your_secret_key', 'your_secret_key_here_with_extra_padding', 'changeme-with-extra-padding-for-length'])('rejects %s', secret => {
+        expect(() => validateProductionEnv({ NODE_ENV: 'production', NEXTAUTH_SECRET: secret })).toThrow('NEXTAUTH_SECRET');
     });
-
-    it('restores admin role when user role was reset to user', async () => {
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue({
-                    email: 'admin@localhost',
-                    role: 'user', // Role was reset by migration
-                    isActive: true,
-                    educationStage: 'senior_high',
-                    enrollmentYear: 2024,
-                }),
-                create: vi.fn(),
-                update: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-            },
-        };
-        const hash = vi.fn();
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'updated', email: 'admin@localhost' });
-        expect(prisma.user.update).toHaveBeenCalledWith({
-            where: { email: 'admin@localhost' },
-            data: {
-                role: 'admin', // Should restore admin role
-                isActive: true,
-                educationStage: 'senior_high',
-                enrollmentYear: 2024,
-            },
-        });
-    });
-
-    it('reactivates admin when isActive was set to false', async () => {
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue({
-                    email: 'admin@localhost',
-                    role: 'admin',
-                    isActive: false, // Account was disabled
-                    educationStage: 'junior_high',
-                    enrollmentYear: 2025,
-                }),
-                create: vi.fn(),
-                update: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-            },
-        };
-        const hash = vi.fn();
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'updated', email: 'admin@localhost' });
-        expect(prisma.user.update).toHaveBeenCalledWith({
-            where: { email: 'admin@localhost' },
-            data: {
-                role: 'admin',
-                isActive: true, // Should reactivate account
-                educationStage: 'junior_high',
-                enrollmentYear: 2025,
-            },
-        });
-    });
-
-    it('restores both role and isActive when both were corrupted', async () => {
-        const prisma = {
-            user: {
-                findUnique: vi.fn().mockResolvedValue({
-                    email: 'admin@localhost',
-                    role: 'user', // Downgraded
-                    isActive: false, // Disabled
-                    educationStage: 'senior_high',
-                    enrollmentYear: 2024,
-                }),
-                create: vi.fn(),
-                update: vi.fn().mockResolvedValue({ email: 'admin@localhost' }),
-            },
-        };
-        const hash = vi.fn();
-        const { seedAdmin } = require('../../../../scripts/seed-admin.js');
-
-        const result = await seedAdmin({ prisma, hash });
-
-        expect(result).toEqual({ action: 'updated', email: 'admin@localhost' });
-        expect(prisma.user.update).toHaveBeenCalledWith({
-            where: { email: 'admin@localhost' },
-            data: {
-                role: 'admin', // Restore admin role
-                isActive: true, // Reactivate account
-                educationStage: 'senior_high',
-                enrollmentYear: 2024,
-            },
-        });
+    it('accepts a non-placeholder secret and permits development without one', () => {
+        expect(() => validateProductionEnv({ NODE_ENV: 'production', NEXTAUTH_SECRET: '64e7d80a6ac986d8b507e1a7f032d9b3e34bc1516e1839bd201c75a1a10f491e' })).not.toThrow();
+        expect(() => validateProductionEnv({ NODE_ENV: 'development' })).not.toThrow();
     });
 });

@@ -1,6 +1,6 @@
+import { acquireAIWork } from "@/lib/rate-limit";
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { unauthorized } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 import { getAIService } from "@/lib/ai";
@@ -13,7 +13,11 @@ const logger = createLogger('api:geogebra-analyze');
  * Does NOT require an item ID.
  */
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
+
+    if (!session?.user) return unauthorized("Authentication required");
+    const work = acquireAIWork(session.user.id);
+    if (work instanceof Response) return work;
 
     try {
         if (!session?.user?.email) {
@@ -56,5 +60,7 @@ export async function POST(req: Request) {
             { message: "Failed to analyze for GeoGebra" },
             { status: 500 }
         );
+    } finally {
+        work.release();
     }
 }

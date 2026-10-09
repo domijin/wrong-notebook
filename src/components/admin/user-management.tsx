@@ -19,12 +19,15 @@ import { Trash2, Ban, CheckCircle, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { AdminUser, AppConfig } from "@/types/api";
 
+import { usePasswordConfirmation } from "@/components/password-confirmation";
+
 export function UserManagement() {
+    const { confirmPassword, passwordDialog } = usePasswordConfirmation();
     const { data: session } = useSession();
     const { t, language } = useLanguage();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
-    const [allowRegistration, setAllowRegistration] = useState(true);
+    const [allowRegistration, setAllowRegistration] = useState(false);
     const [savingRegistration, setSavingRegistration] = useState(false);
 
     useEffect(() => {
@@ -35,7 +38,7 @@ export function UserManagement() {
     const fetchConfig = async () => {
         try {
             const data = await apiClient.get<AppConfig>("/api/settings");
-            setAllowRegistration(data.allowRegistration !== false);
+            setAllowRegistration(data.allowRegistration === true);
         } catch (error) {
             console.error("Failed to fetch config", error);
         }
@@ -44,7 +47,9 @@ export function UserManagement() {
     const handleToggleRegistration = async (checked: boolean) => {
         setSavingRegistration(true);
         try {
-            await apiClient.post("/api/settings", { allowRegistration: checked });
+            const options = await confirmPassword();
+            if (!options) return;
+            await apiClient.post("/api/settings", { allowRegistration: checked }, options);
             setAllowRegistration(checked);
         } catch (error) {
             console.error("Failed to update registration setting", error);
@@ -74,7 +79,9 @@ export function UserManagement() {
         if (!confirm(confirmMsg)) return;
 
         try {
-            await apiClient.patch(`/api/admin/users/${user.id}`, { isActive: !user.isActive });
+            const options = await confirmPassword();
+            if (!options) return;
+            await apiClient.patch(`/api/admin/users/${user.id}`, { isActive: !user.isActive }, options);
             fetchUsers();
         } catch (error) {
             console.error("Failed to update user status", error);
@@ -86,7 +93,9 @@ export function UserManagement() {
         if (!confirm(t.admin.confirmDelete)) return;
 
         try {
-            await apiClient.delete(`/api/admin/users/${user.id}`);
+            const options = await confirmPassword();
+            if (!options) return;
+            await apiClient.delete(`/api/admin/users/${user.id}`, options);
             fetchUsers();
         } catch (error: any) {
             console.error("Failed to delete user", error);
@@ -101,6 +110,7 @@ export function UserManagement() {
 
     return (
         <div className="space-y-4">
+            {passwordDialog}
             {/* 注册开关 */}
             <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/30">
                 <div className="space-y-0.5">

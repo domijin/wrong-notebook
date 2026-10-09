@@ -66,12 +66,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy Prisma schema and migrations for runtime usage if needed (e.g. for migrations)
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Copy config directory for runtime
-COPY --from=builder --chown=nextjs:nodejs /app/config ./config
+# Create an empty config directory; live settings never enter the image.
+RUN mkdir -p /app/config && chown nextjs:nodejs /app/config
 
 # Copy pre-compiled runtime scripts
 COPY --from=builder --chown=nextjs:nodejs /app/dist-scripts ./dist-scripts
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/seed-admin.js ./dist-scripts/scripts/seed-admin.js
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/validate-production-env.js ./dist-scripts/scripts/validate-production-env.js
 
 # Create data directory for SQLite persistence
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
