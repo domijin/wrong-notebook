@@ -14,6 +14,7 @@
 - **📊 数据统计**：可视化展示错题掌握情况和学习进度。
 - **🔐 用户管理**：支持多用户注册、登录，数据安全隔离。
 - **🛡️ 管理员后台**：提供用户管理功能，可禁用/启用用户、删除违规用户。
+- **🔒 安全加固（Tier A + B2）**：设置页管理员鉴权、密钥不回传、IDOR 修复、AI 出口白名单、session 撤销、步进鉴权 + 审计。详见 [SECURITY.md](SECURITY.md)。
 
 
 ## 📸 屏幕截图功能 (HTTPS 设置)
@@ -34,6 +35,81 @@
 - **iPhone / iPad (Safari)**: 点击底部 **分享** 按钮 -> 选择 **"添加到主屏幕"**。
 - **Android (Chrome)**: 点击右上角 **菜单** -> 选择 **"添加到主屏幕"** 或 **"安装应用"**。
 
+## 🔒 私有部署（推荐：Tailscale）
+
+本应用面向小范围可信用户（家人、自家小孩、同学小群），**不要直接暴露在公网**。推荐使用 [Tailscale](https://tailscale.com/) 把服务接入你的私有 tailnet，Compose 默认绑定 `127.0.0.1:3000`，再通过 Tailscale Serve 暴露 HTTPS。
+
+### 1. 准备环境变量
+
+```bash
+export NEXTAUTH_SECRET="$(openssl rand -base64 32)"   # 必填，至少 32 字符；占位/默认值会被启动时拒绝
+export NEXTAUTH_URL="https://notebook.example-tailnet.ts.net"  # 必须是客户端实际访问的 HTTPS URL
+export ADMIN_EMAIL="you@example.com"                 # 首次启动空数据库时创建管理员
+export ADMIN_PASSWORD="$(openssl rand -base64 18)"     # 至少 12 字符、最多 72 字节；首次登录后移除
+```
+
+> 生产启动会校验 `NEXTAUTH_SECRET`：缺失、过短、占位值（如 `supersecret-dev-secret`）会直接退出。
+
+### 2. 启动 Docker
+
+```bash
+docker compose up -d
+```
+
+Compose 文件已经把容器端口绑到 `127.0.0.1:3000`，外部无法直连。`./data` 存 SQLite，`./config` 存 `app-config.json`，请保持这两个目录的权限私有。
+
+### 3. 用 Tailscale Serve 暴露 HTTPS（推荐）
+
+在运行容器的机器上：
+
+```bash
+sudo tailscale serve --bg --https=443 \
+  --set-path=/ http://127.0.0.1:3000
+```
+
+把 `<machine-name>.ts.net` 给允许的人。**不要**用 `tailscale funnel`（那是公网暴露）。
+
+### 4. （可选）Tailscale Funnel 给特定用户
+
+只有在你能接受被加上 ACL / device approval 限制的访问者时，才考虑 Funnel：
+
+```bash
+sudo tailscale funnel --bg 443 http://127.0.0.1:3000
+```
+
+并在 Tailscale ACL 里收紧：
+
+```json
+{
+  "acls": [
+    { "action": "accept", "src": ["tag:trusted"], "dst": ["tag:server:443"] }
+  ],
+  "tagOwners": { "tag:trusted": ["autogroup:admin"] }
+}
+```
+
+### 5. 用户与密钥
+
+- 首次启动时由 `ADMIN_EMAIL` / `ADMIN_PASSWORD` 创建第一个管理员。
+- `allowRegistration` 默认关闭。需要新用户时由管理员在“设置 → 用户管理”里创建。
+- 登录后到“设置”里配置 AI 提供商（Gemini / OpenAI / Azure），页面只回传 `keyConfigured`，不会回传明文 key。
+- 轮换任何历史默认密码后登出所有会话。
+- Openclaw 集成默认禁用；启用时需配置 `OPENCLAW_API_URL`，apikey 模式还需 `OPENCLAW_USER_EMAIL` 把共享 key 绑定到单一可信账户。
+
+### 6. 验证
+
+```bash
+# 应用只对 loopback 监听
+ss -lnt | grep ':3000' | grep 127.0.0.1
+
+# 启动必须读到真实 NEXTAUTH_SECRET；缺失会退出
+docker logs wrong-notebook | grep -i "NEXTAUTH_SECRET" || true
+```
+
+完整威胁模型、剩余风险和运维说明：[SECURITY.md](SECURITY.md)。
+
+---
+
 ## 🛠️ 技术栈
 
 - **框架**: [Next.js 16](https://nextjs.org/) (App Router)
@@ -44,6 +120,8 @@
 - **认证**: [NextAuth.js](https://next-auth.js.org/)
 
 ## 🚀 快速开始
+
+> 计划在公网或共享网络上部署？请先看 [🔒 私有部署（Tailscale）](#-私有部署推荐tailscale)。
 
 ### 方式一：使用 Docker 部署
 
