@@ -57,6 +57,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modul
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
+# Install bcryptjs at runtime: it's listed in next.config.ts
+# `serverExternalPackages` so Next.js won't bundle it into the standalone
+# output. Copying the whole package from the deps stage is the cleanest
+# way to ensure the umd/ subdir (the require() entry) is present.
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
+
 COPY --from=builder /app/public ./public
 
 # Automatically leverage output traces to reduce image size
