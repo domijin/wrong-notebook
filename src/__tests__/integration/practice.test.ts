@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id' } } : null;
+    },
+}));
 /**
  * /api/practice API 集成测试
  * 测试举一反三功能（生成类似题目和记录练习结果）
@@ -7,7 +15,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Use vi.hoisted to ensure mocks are initialized before module imports
 const mocks = vi.hoisted(() => ({
     mockPrismaErrorItem: {
-        findUnique: vi.fn(),
+        findFirst: vi.fn(),
     },
     mockPrismaPracticeRecord: {
         create: vi.fn(),
@@ -67,7 +75,7 @@ describe('/api/practice', () => {
         };
 
         it('应该成功生成类似题目', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(mockErrorItem);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(mockErrorItem);
             const aiResult = {
                 questionText: '求解 2x - 3 = 7',
                 answerText: 'x = 5',
@@ -96,7 +104,7 @@ describe('/api/practice', () => {
         });
 
         it('应该支持不同难度级别', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(mockErrorItem);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(mockErrorItem);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '简单题目',
                 answerText: '答案',
@@ -126,7 +134,7 @@ describe('/api/practice', () => {
         });
 
         it('应该默认使用 medium 难度', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(mockErrorItem);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(mockErrorItem);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -156,7 +164,7 @@ describe('/api/practice', () => {
         });
 
         it('应该返回 404 当错题不存在', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(null);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(null);
 
             const request = new Request('http://localhost/api/practice/generate', {
                 method: 'POST',
@@ -175,7 +183,7 @@ describe('/api/practice', () => {
         });
 
         it('应该正确解析知识点标签', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(mockErrorItem);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(mockErrorItem);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -208,7 +216,7 @@ describe('/api/practice', () => {
                 ...mockErrorItem,
                 knowledgePoints: 'invalid json{',
             };
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(errorItemWithInvalidTags);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(errorItemWithInvalidTags);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -243,7 +251,7 @@ describe('/api/practice', () => {
                 ...mockErrorItem,
                 knowledgePoints: null,
             };
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(errorItemWithNoTags);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(errorItemWithNoTags);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -270,7 +278,7 @@ describe('/api/practice', () => {
                 ...mockErrorItem,
                 subject: { id: 'physics', name: '物理' },
             };
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(errorItemWithPhysics);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(errorItemWithPhysics);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '物理题目',
                 answerText: '答案',
@@ -300,7 +308,7 @@ describe('/api/practice', () => {
                 ...mockErrorItem,
                 subject: { id: 'unknown', name: '未知学科' },
             };
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(errorItemWithUnknownSubject);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(errorItemWithUnknownSubject);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -329,7 +337,7 @@ describe('/api/practice', () => {
                 ...mockErrorItem,
                 subject: null,
             };
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(errorItemWithNoSubject);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(errorItemWithNoSubject);
             mocks.mockAIService.generateSimilarQuestion.mockResolvedValue({
                 questionText: '题目',
                 answerText: '答案',
@@ -354,7 +362,7 @@ describe('/api/practice', () => {
         });
 
         it('应该处理 AI 服务错误', async () => {
-            mocks.mockPrismaErrorItem.findUnique.mockResolvedValue(mockErrorItem);
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue(mockErrorItem);
             mocks.mockAIService.generateSimilarQuestion.mockRejectedValue(
                 new Error('AI service unavailable')
             );

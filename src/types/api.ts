@@ -99,12 +99,14 @@ export interface UpdateUserProfileRequest {
     educationStage?: string;
     enrollmentYear?: number;
     password?: string;
+    currentPassword?: string;
 }
 
 export interface OpenAIInstance {
     id: string;           // 唯一标识 (UUID)
     name: string;         // 用户自定义名称
-    apiKey: string;
+    apiKey?: string;
+    keyConfigured?: boolean;
     baseUrl: string;
     model: string;
 }
@@ -118,11 +120,13 @@ export interface AppConfig {
     };
     gemini?: {
         apiKey?: string;
+        keyConfigured?: boolean;
         baseUrl?: string;
         model?: string;
     };
     azure?: {
         apiKey?: string;
+        keyConfigured?: boolean;
         endpoint?: string;       // Azure 资源端点 (https://xxx.openai.azure.com)
         deploymentName?: string; // 部署名称
         apiVersion?: string;     // API 版本 (如 2024-02-15-preview)
@@ -135,6 +139,10 @@ export interface AppConfig {
     timeouts?: {
         analyze?: number; // 毫秒
     };
+}
+
+export interface ClientSettings {
+    timeouts: { analyze: number };
 }
 
 

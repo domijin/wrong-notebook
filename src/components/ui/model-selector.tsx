@@ -19,12 +19,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 interface ModelSelectorProps {
     provider: 'openai' | 'gemini';
     apiKey?: string;
+    keyConfigured?: boolean;
+    instanceId?: string;
     baseUrl?: string;
     currentModel?: string;
     onModelChange: (model: string) => void;
 }
 
-export function ModelSelector({ provider, apiKey, baseUrl, currentModel, onModelChange }: ModelSelectorProps) {
+export function ModelSelector({ provider, apiKey, keyConfigured, instanceId, baseUrl, currentModel, onModelChange }: ModelSelectorProps) {
     const { t } = useLanguage();
     const [models, setModels] = useState<AIModel[]>([]);
     const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export function ModelSelector({ provider, apiKey, baseUrl, currentModel, onModel
     }, [currentModel]);
 
     const fetchModels = async () => {
-        if (!apiKey) {
+        if (!apiKey && !keyConfigured) {
             setError(t.modelSelector?.enterApiKeyFirst || "Please enter API Key first");
             return;
         }
@@ -47,13 +49,9 @@ export function ModelSelector({ provider, apiKey, baseUrl, currentModel, onModel
         setError(null);
 
         try {
-            const params = new URLSearchParams({
-                provider,
-                apiKey,
-                ...(baseUrl && { baseUrl }),
+            const data = await apiClient.post<ModelsResponse>('/api/ai/models', {
+                provider, apiKey: apiKey || undefined, instanceId, baseUrl,
             });
-
-            const data = await apiClient.get<ModelsResponse>(`/api/ai/models?${params}`);
 
             // Check if there's an error message in the response
             if ('error' in data && typeof data.error === 'string') {
@@ -103,7 +101,7 @@ export function ModelSelector({ provider, apiKey, baseUrl, currentModel, onModel
                     variant="outline"
                     size="sm"
                     onClick={fetchModels}
-                    disabled={loading || !apiKey}
+                    disabled={loading || (!apiKey && !keyConfigured)}
                 >
                     {loading ? (
                         <Loader2 className="h-3 w-3 animate-spin" />

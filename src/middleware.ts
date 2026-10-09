@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest) {
         }
     } catch (e) {
         logger.error({ error: e }, 'Error processing token');
-        return NextResponse.next();
+        return NextResponse.redirect(new URL("/login", req.url));
     }
 }
 

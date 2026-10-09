@@ -1,3 +1,4 @@
+import { validateAIDestination, aiFetch } from "../ai-destination";
 import { AzureOpenAI } from "openai";
 import { AIService, ParsedQuestion, DifficultyLevel, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateReanswerPrompt, generateGeogebraPrompt } from './prompts';
@@ -31,7 +32,7 @@ export class AzureOpenAIProvider implements AIService {
 
     constructor(config?: AzureConfig) {
         const apiKey = config?.apiKey;
-        const endpoint = config?.endpoint;
+        const endpoint = config?.endpoint ? validateAIDestination(config.endpoint) : undefined;
         const deployment = config?.deploymentName;
 
         if (!apiKey) {
@@ -47,6 +48,7 @@ export class AzureOpenAIProvider implements AIService {
         }
 
         this.client = new AzureOpenAI({
+            timeout: 60000, maxRetries: 0, fetch: aiFetch,
             apiKey: apiKey,
             endpoint: endpoint,
             deployment: deployment,
@@ -62,7 +64,7 @@ export class AzureOpenAIProvider implements AIService {
             model: this.model,
             deployment: this.deployment,
             endpoint: endpoint,
-            apiKeyPrefix: apiKey.substring(0, 8) + '...'
+
         }, 'Azure AI Provider initialized');
     }
 

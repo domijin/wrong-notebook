@@ -1,7 +1,6 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger('api:tags:suggestions');
@@ -18,7 +17,7 @@ const logger = createLogger('api:tags:suggestions');
  */
 export async function GET(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getCurrentSession();
         const { searchParams } = new URL(req.url);
         const query = searchParams.get("q")?.toLowerCase() || "";
         const subject = searchParams.get("subject") || undefined;

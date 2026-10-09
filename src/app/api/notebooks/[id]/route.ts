@@ -1,7 +1,6 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { unauthorized, forbidden, notFound, badRequest, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
@@ -16,7 +15,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         let user;
@@ -65,7 +64,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         let user;
@@ -128,7 +127,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
         let user;

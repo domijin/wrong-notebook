@@ -1,25 +1,29 @@
+import { acquireAIWork } from "@/lib/rate-limit";
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { getAIService } from "@/lib/ai";
-import { notFound, internalError, unauthorized } from "@/lib/api-errors";
+import { notFound, internalError, unauthorized, badRequest } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger('api:practice:generate');
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     if (!session?.user) {
         return unauthorized("Authentication required");
     }
 
+    const work = acquireAIWork(session.user.id);
+    if (work instanceof Response) return work;
+
     try {
         const { errorItemId, language, difficulty } = await req.json();
+        if (typeof errorItemId !== 'string' || !errorItemId || errorItemId.length > 256) return badRequest("Invalid item id");
 
-        const errorItemWithSubject = await prisma.errorItem.findUnique({
-            where: { id: errorItemId },
+        const errorItemWithSubject = await prisma.errorItem.findFirst({
+            where: { id: errorItemId, userId: session.user.id },
             include: { subject: true }
         });
 
@@ -53,5 +57,7 @@ export async function POST(req: Request) {
         logger.error({ error }, 'Error generating practice');
         const errorMessage = error instanceof Error ? error.message : "Failed to generate practice question";
         return internalError(errorMessage);
+    } finally {
+        work.release();
     }
 }

@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id', authenticatedAt: Date.now() } } : null;
+    },
+}));
 /**
  * /api/admin/users API 集成测试
  * 测试管理员用户管理接口
@@ -8,6 +16,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mocks = vi.hoisted(() => ({
     mockPrismaUser: {
         findMany: vi.fn(),
+        count: vi.fn(async () => 2),
         findUnique: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
@@ -26,6 +35,8 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/prisma', () => ({
     prisma: {
         user: mocks.mockPrismaUser,
+        $transaction: vi.fn(async (perform: (tx: { user: typeof mocks.mockPrismaUser }) => Promise<unknown>) => perform({ user: mocks.mockPrismaUser })),
+        auditLog: { create: vi.fn(async () => ({ id: 'audit-id' })), update: vi.fn(async () => ({})) },
     },
 }));
 
@@ -158,15 +169,16 @@ describe('/api/admin/users', () => {
 
             expect(response.status).toBe(400);
             const data = await response.json();
-            expect(data.message).toBe('Cannot disable your own account');
+            expect(data.message).toBe('Cannot disable or demote your own account');
         });
 
-        it('应该阻止禁用超级管理员', async () => {
+        it('protects the last active admin from disable', async () => {
             const superAdmin = {
                 id: 'super-admin-id',
-                email: 'admin@localhost',
+                email: 'admin@localhost', role: 'admin', isActive: true,
             };
             mocks.mockPrismaUser.findUnique.mockResolvedValue(superAdmin);
+            mocks.mockPrismaUser.count.mockResolvedValueOnce(1);
 
             // 使用另一个管理员身份尝试禁用超级管理员
             vi.mocked(getServerSession).mockResolvedValue({
@@ -184,7 +196,7 @@ describe('/api/admin/users', () => {
 
             expect(response.status).toBe(400);
             const data = await response.json();
-            expect(data.message).toBe('Cannot disable super admin');
+            expect(data.message).toBe('Cannot remove the last active admin');
         });
 
         it('应该拒绝非管理员访问', async () => {
@@ -238,13 +250,14 @@ describe('/api/admin/users', () => {
             expect(data.message).toBe('Cannot delete your own account');
         });
 
-        it('应该阻止删除超级管理员', async () => {
+        it('protects the last active admin from deletion', async () => {
             const superAdmin = {
                 id: 'super-admin-id',
                 email: 'admin@localhost',
-                role: 'admin',
+                role: 'admin', isActive: true,
             };
             mocks.mockPrismaUser.findUnique.mockResolvedValue(superAdmin);
+            mocks.mockPrismaUser.count.mockResolvedValueOnce(1);
 
             // 使用另一个管理员身份
             vi.mocked(getServerSession).mockResolvedValue({
@@ -260,14 +273,14 @@ describe('/api/admin/users', () => {
 
             expect(response.status).toBe(400);
             const data = await response.json();
-            expect(data.message).toBe('Cannot delete super admin');
+            expect(data.message).toBe('Cannot remove the last active admin');
         });
 
         it('应该允许删除其他普通管理员', async () => {
             const otherAdmin = {
                 id: 'other-admin-id',
                 email: 'admin2@example.com',
-                role: 'admin',
+                role: 'admin', isActive: true,
             };
             mocks.mockPrismaUser.findUnique.mockResolvedValue(otherAdmin);
             mocks.mockPrismaUser.delete.mockResolvedValue(otherAdmin);

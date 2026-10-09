@@ -1,8 +1,7 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { unauthorized, internalError } from "@/lib/api-errors";
+import { unauthorized, internalError, notFound, badRequest } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger('api:error-items:notes');
@@ -12,25 +11,22 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     try {
-        let user;
-        if (session?.user?.email) {
-            user = await prisma.user.findUnique({
-                where: { email: session.user.email },
-            });
-        }
-
-        if (!user) {
+        if (!session?.user) {
             return unauthorized("Authentication required");
         }
 
         const { userNotes } = await req.json();
+        if (typeof userNotes !== 'string' || userNotes.length > 50000) return badRequest("Invalid notes");
+        const owned = await prisma.errorItem.findFirst({ where: { id, userId: session.user.id } });
+        if (!owned) return notFound("Item not found");
 
         const errorItem = await prisma.errorItem.update({
             where: {
                 id: id,
+                userId: session.user.id,
             },
             data: {
                 userNotes: userNotes,

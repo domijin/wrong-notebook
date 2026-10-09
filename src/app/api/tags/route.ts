@@ -1,3 +1,4 @@
+import { getCurrentSession } from "@/lib/current-session";
 /**
  * 知识点标签 API
  * GET /api/tags - 获取标签树
@@ -5,9 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '@/lib/auth';
 import { createLogger } from '@/lib/logger';
 
 const logger = createLogger('api:tags');
@@ -59,7 +58,7 @@ function buildTagTree(tags: any[]): TagTreeNode[] {
  */
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getCurrentSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -132,7 +131,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getCurrentSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -185,7 +184,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getCurrentSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

@@ -14,17 +14,7 @@ async function main() {
         console.log('Users found:', users.length);
         users.forEach(u => console.log(`- ${u.email} (${u.id})`));
 
-        if (users.length === 0) {
-            console.log('No users found. Creating default user...');
-            const newUser = await prisma.user.create({
-                data: {
-                    email: 'test@example.com',
-                    password: 'password_hash_placeholder',
-                    name: 'Test User',
-                },
-            });
-            console.log('Created user:', newUser);
-        }
+
     } catch (e) {
         console.error('Error:', e);
     } finally {

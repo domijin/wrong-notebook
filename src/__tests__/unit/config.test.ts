@@ -13,10 +13,14 @@ vi.mock('fs', () => ({
         existsSync: vi.fn(),
         readFileSync: vi.fn(),
         writeFileSync: vi.fn(),
+        mkdirSync: vi.fn(),
+        renameSync: vi.fn(),
     },
     existsSync: vi.fn(),
     readFileSync: vi.fn(),
     writeFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    renameSync: vi.fn(),
 }));
 
 // Store original env
@@ -43,7 +47,7 @@ describe('config module', () => {
             const config = getAppConfig();
 
             expect(config.aiProvider).toBe('gemini'); // 默认值
-            expect(config.allowRegistration).toBe(true);
+            expect(config.allowRegistration).toBe(false);
         });
 
         it('应该从环境变量读取 AI Provider', async () => {
@@ -93,7 +97,7 @@ describe('config module', () => {
             expect(config.aiProvider).toBe('openai');
             expect(config.openai?.instances?.[0]?.apiKey).toBe('sk-file-key');
             // 其他默认值应该保留
-            expect(config.allowRegistration).toBe(true);
+            expect(config.allowRegistration).toBe(false);
             expect(config.gemini).toBeDefined();
         });
 
@@ -136,6 +140,16 @@ describe('config module', () => {
     });
 
     describe('updateAppConfig', () => {
+        it('persists removal of the last OpenAI instance and its active selection', async () => {
+            vi.mocked(fs.existsSync).mockReturnValue(true);
+            vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({
+                openai: { instances: [{ id: 'old', name: 'Old', apiKey: 'secret', baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o' }], activeInstanceId: 'old' },
+            }));
+            const { updateAppConfig } = await import('@/lib/config');
+            expect(updateAppConfig({ openai: { instances: [], activeInstanceId: undefined } }).openai).toEqual({ instances: [], activeInstanceId: undefined });
+            const written = JSON.parse(vi.mocked(fs.writeFileSync).mock.calls[0][1] as string);
+            expect(written.openai.activeInstanceId).toBeUndefined();
+        });
         it('应该成功写入配置文件', async () => {
             vi.mocked(fs.existsSync).mockReturnValue(false);
             vi.mocked(fs.writeFileSync).mockImplementation(() => { });

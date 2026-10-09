@@ -1,3 +1,9 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: vi.fn(async () => ({ user: { id: 'admin-id', role: 'admin', sessionVersion: 0, authenticatedAt: Date.now() } })),
+}));
+vi.mock('@/lib/prisma', () => ({ prisma: { auditLog: {
+    create: vi.fn(async () => ({ id: 'audit-id' })), update: vi.fn(async () => ({})),
+} } }));
 /**
  * /api/settings API 集成测试
  * 测试应用配置获取和更新接口
@@ -65,8 +71,10 @@ describe('/api/settings', () => {
             const response = await GET();
             const data = await response.json();
 
-            expect(data.openai.instances[0].apiKey).toBe('sk-test-key');
-            expect(data.gemini.apiKey).toBe('AIza-test-key');
+            expect(data.openai.instances[0].apiKey).toBeUndefined();
+            expect(data.openai.instances[0].keyConfigured).toBe(true);
+            expect(data.gemini.apiKey).toBeUndefined();
+            expect(data.gemini.keyConfigured).toBe(true);
             expect(data.gemini.model).toBe('gemini-2.5-flash');
         });
 
@@ -102,7 +110,7 @@ describe('/api/settings', () => {
                         id: 'new-instance',
                         name: 'New Instance',
                         apiKey: 'sk-new-key',
-                        baseUrl: 'https://custom.api.com',
+                        baseUrl: 'https://api.openai.com/v1',
                         model: 'gpt-4-turbo',
                     }],
                     activeInstanceId: 'new-instance',

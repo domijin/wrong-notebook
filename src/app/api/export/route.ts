@@ -1,14 +1,13 @@
+import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
 import { unauthorized, internalError, forbidden } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger('api:export');
 
 export async function GET(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await getCurrentSession();
 
     if (!session?.user?.email) {
         return unauthorized("Not authenticated");

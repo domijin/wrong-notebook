@@ -16,12 +16,16 @@ async function main() {
         return;
     }
 
+    if (newPassword.length < 12 || Buffer.byteLength(newPassword) > 72) {
+        throw new Error('Use a password of at least 12 characters and at most 72 bytes');
+    }
+
     const hashedPassword = await hash(newPassword, 12);
 
     try {
         await prisma.user.update({
             where: { email },
-            data: { password: hashedPassword },
+            data: { password: hashedPassword, sessionVersion: { increment: 1 } },
         });
         console.log(`\nPassword for ${email} has been reset successfully.`);
     } catch (e) {

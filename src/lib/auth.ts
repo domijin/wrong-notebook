@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
 import { createLogger } from "@/lib/logger"
+import { consumeRateLimit } from "@/lib/rate-limit"
 
 const logger = createLogger('auth');
 
@@ -46,6 +47,10 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
+                if (Buffer.byteLength(credentials.password) > 72 || credentials.email.length > 254
+                    || !consumeRateLimit('login:global', 100, 15 * 60000)
+                    || !consumeRateLimit(`login:${credentials.email.toLowerCase()}`, 10, 15 * 60000)) return null;
+
                 const user = await prisma.user.findUnique({
                     where: {
                         email: credentials.email
@@ -77,12 +82,14 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     name: user.name,
                     role: user.role,
+                    sessionVersion: user.sessionVersion,
+                    authenticatedAt: Date.now(),
                 }
             }
         })
     ],
     // Enable debug messages in the console
-    debug: true,
+    debug: process.env.NODE_ENV !== 'production',
     logger: {
         error(code, metadata) {
             logger.error({ code, metadata }, 'NextAuth error');
@@ -103,16 +110,20 @@ export const authOptions: NextAuthOptions = {
                     ...session.user,
                     id: token.id,
                     role: token.role,
+                    sessionVersion: token.sessionVersion as number,
+                    authenticatedAt: token.authenticatedAt,
                 }
             }
         },
-        async jwt({ token, user, account, profile }) {
+        async jwt({ token, user }) {
             if (user) {
                 logger.debug({ userId: user.id }, 'JWT callback - Initial signin');
                 return {
                     ...token,
                     id: user.id,
-                    role: (user as any).role,
+                    role: user.role,
+                    sessionVersion: user.sessionVersion,
+                    authenticatedAt: user.authenticatedAt,
                 }
             }
             logger.debug('JWT callback - Subsequent call');

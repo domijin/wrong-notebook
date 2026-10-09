@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id' } } : null;
+    },
+}));
 /**
  * /api/error-items API 集成测试
  * 测试错题创建、获取、更新等接口
@@ -581,6 +589,9 @@ describe('/api/error-items', () => {
     });
 
     describe('PATCH /api/error-items/[id]/notes (更新笔记)', () => {
+        beforeEach(() => {
+            mocks.mockPrismaErrorItem.findFirst.mockResolvedValue({ id: 'error-item-1', userId: 'test-user-id' });
+        });
         it('应该成功更新用户笔记', async () => {
             const existingItem = {
                 id: 'error-item-1',
@@ -649,7 +660,7 @@ describe('/api/error-items', () => {
         });
 
         it('应该拒绝未登录用户', async () => {
-            mocks.mockPrismaUser.findUnique.mockResolvedValue(null);
+            vi.mocked(getServerSession).mockResolvedValueOnce(null);
             mocks.mockPrismaUser.findFirst.mockResolvedValue(null);
 
             const request = new Request('http://localhost/api/error-items/error-item-1/notes', {

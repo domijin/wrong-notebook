@@ -1,0 +1,21 @@
+# Private Tailscale deployment
+
+This package assumes a private tailnet with allowlisted users. Public-edge controls are outside this patch.
+
+1. Set `NEXTAUTH_SECRET` to a random secret of at least 32 characters (`openssl rand -base64 32`). Production startup rejects missing, short, and recognizable placeholder values.
+2. Set `NEXTAUTH_URL` to the exact HTTPS URL clients use, such as `https://notebook.example-tailnet.ts.net`. Compose binds HTTP to `127.0.0.1:3000`. Configure Tailscale Serve to proxy that local port and restrict access with tailnet ACLs. Do not enable Funnel for this deployment.
+3. Before the first start with an empty database, set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (at least 12 characters, at most 72 bytes); `ADMIN_NAME` is optional. No admin is baked into the image. Remove the provisioning password after first startup. Existing accounts are never promoted, reactivated, or overwritten by seeding.
+4. Apply migrations before starting a non-Docker installation: `npx prisma migrate deploy`. Docker applies them automatically and stops on failure. The migration adds session revocation and audit records. Existing sessions lacking a version must sign in again.
+5. Configure provider keys through admin settings or provider environment variables. Settings responses contain `keyConfigured`; omitted keys preserve stored values, and a supplied key replaces the value. Ordinary users receive only the client timeout settings.
+
+Registration defaults to disabled, including missing or unreadable configuration. An explicit saved `allowRegistration: true` remains enabled; review that setting on existing installations. Existing legacy accounts/passwords are preserved: rotate any old default password through account settings or `scripts/reset-password.js` before use. Offline password reset also revokes existing sessions.
+
+Custom AI gateways must have their exact origin listed in `AI_ALLOWED_ORIGINS`, separated by commas (for example `https://gateway.example.com,http://127.0.0.1:8081`). Paths belong in the provider URL, not in this allowlist. OpenAI, Gemini, and HTTPS Azure resource origins are built in. URL credentials, queries, fragments, and implicit private destinations are rejected. Explicit HTTP/private entries are operator trust decisions; review their DNS and network behavior. AI requests have timeouts and reject redirects. Discovery uses POST bodies and credential headers.
+
+Openclaw is disabled until `OPENCLAW_API_URL` is configured. In `OPENCLAW_AUTH_MODE=credentials`, callers use an active account's username/email and password. In `apikey` mode, configure both `OPENCLAW_INTEGRATION_API_KEY` and `OPENCLAW_USER_EMAIL`; the shared key can upload only to that single active account. `OPENCLAW_API_KEY` optionally authenticates outbound recognition requests. `OPENCLAW_TIMEOUT` is bounded to 1–60 seconds. Notebook ownership is checked before recognition.
+
+Settings writes, user administration, system reset, and tag migration require an active current admin plus authentication within five minutes, or password re-entry in `x-reauth-password`. The UI presents a password dialog; passwords remain only in transient component state. Password/email changes require the current password and revoke prior sessions; disabling or changing a role also revokes sessions. The last active admin cannot be removed or demoted. Admin actions record only actor ID, fixed action name, target ID, result, and time in `AuditLog`; audit history survives system reset. A failure to create an audit record blocks the action; a crash after an action starts can leave a `pending` record.
+
+AI work is capped at four simultaneous requests per process, two per user, and 20 requests per user per ten minutes. Login is capped at ten attempts per email and 100 total per process per 15 minutes. Password re-entry is capped at six checks per account per minute. These modest in-memory limits reset on restart and do not coordinate across replicas.
+
+Keep the SQLite database, config directory, and backups private: provider keys are stored server-side in plaintext. Docker excludes live config, certificates, databases, and environment files from its build context. Audit retention and centralized collection remain operator responsibilities.

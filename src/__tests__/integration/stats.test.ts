@@ -1,3 +1,11 @@
+vi.mock('@/lib/current-session', () => ({
+    getCurrentSession: async () => {
+        const { getServerSession } = await import('next-auth');
+        const session = await getServerSession();
+        return session?.user && (session.user.email || session.user.id)
+            ? { ...session, user: { ...session.user, id: session.user.id || 'test-user-id' } } : null;
+    },
+}));
 /**
  * /api/stats API 集成测试
  * 测试练习统计和数据清除接口

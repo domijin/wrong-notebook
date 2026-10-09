@@ -1,3 +1,4 @@
+import { validateAIDestination } from "../ai-destination";
 import { GoogleGenAI } from "@google/genai";
 import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
@@ -21,7 +22,7 @@ export class GeminiProvider implements AIService {
 
     constructor(config?: AIConfig) {
         const apiKey = config?.apiKey;
-        const baseUrl = config?.baseUrl;
+        const baseUrl = validateAIDestination(config?.baseUrl || 'https://generativelanguage.googleapis.com');
 
         if (!apiKey) {
             throw new Error("AI_AUTH_ERROR: GOOGLE_API_KEY is required for Gemini provider");
@@ -31,9 +32,7 @@ export class GeminiProvider implements AIService {
         // 参考：@google/genai 的 GoogleGenAIOptions.httpOptions.baseUrl
         this.ai = new GoogleGenAI({
             apiKey,
-            httpOptions: baseUrl ? {
-                baseUrl: baseUrl
-            } : undefined
+            httpOptions: { baseUrl, timeout: 60000 }
         });
 
         this.modelName = config?.model || 'gemini-2.0-flash';
@@ -43,7 +42,7 @@ export class GeminiProvider implements AIService {
             provider: 'Gemini',
             model: this.modelName,
             baseUrl: this.baseUrl,
-            apiKeyPrefix: apiKey.substring(0, 8) + '...'
+
         }, 'AI Provider initialized');
     }
 

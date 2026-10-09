@@ -89,7 +89,7 @@ function migrateOpenAIConfig(legacy: LegacyOpenAIConfig): AppConfig['openai'] {
 
 const DEFAULT_CONFIG: AppConfig = {
     aiProvider: (process.env.AI_PROVIDER as 'gemini' | 'openai' | 'azure') || 'gemini',
-    allowRegistration: true,
+    allowRegistration: false,
     openai: {
         instances: process.env.OPENAI_API_KEY ? [{
             id: 'env-default',
@@ -145,9 +145,10 @@ export function getAppConfig(): AppConfig {
             return {
                 ...DEFAULT_CONFIG,
                 ...userConfig,
+                allowRegistration: userConfig.allowRegistration === true,
                 openai: {
                     instances: openaiConfig?.instances || DEFAULT_CONFIG.openai?.instances || [],
-                    activeInstanceId: openaiConfig?.activeInstanceId || DEFAULT_CONFIG.openai?.activeInstanceId,
+                    activeInstanceId: openaiConfig?.instances ? openaiConfig.activeInstanceId : DEFAULT_CONFIG.openai?.activeInstanceId,
                 },
                 gemini: { ...DEFAULT_CONFIG.gemini, ...userConfig.gemini },
                 azure: { ...DEFAULT_CONFIG.azure, ...userConfig.azure },
@@ -169,7 +170,8 @@ export function updateAppConfig(newConfig: Partial<AppConfig>) {
         ...newConfig,
         openai: {
             instances: newConfig.openai?.instances ?? currentConfig.openai?.instances ?? [],
-            activeInstanceId: newConfig.openai?.activeInstanceId ?? currentConfig.openai?.activeInstanceId,
+            activeInstanceId: newConfig.openai && 'activeInstanceId' in newConfig.openai
+                ? newConfig.openai.activeInstanceId : currentConfig.openai?.activeInstanceId,
         },
         gemini: { ...currentConfig.gemini, ...newConfig.gemini },
         azure: { ...currentConfig.azure, ...newConfig.azure },
@@ -178,7 +180,10 @@ export function updateAppConfig(newConfig: Partial<AppConfig>) {
     };
 
     try {
-        fs.writeFileSync(CONFIG_FILE_PATH, JSON.stringify(updatedConfig, null, 2));
+        fs.mkdirSync(path.dirname(CONFIG_FILE_PATH), { recursive: true });
+        const temporaryPath = `${CONFIG_FILE_PATH}.tmp`;
+        fs.writeFileSync(temporaryPath, JSON.stringify(updatedConfig, null, 2), { mode: 0o600 });
+        fs.renameSync(temporaryPath, CONFIG_FILE_PATH);
         return updatedConfig;
     } catch (error) {
         logger.error({ error }, 'Failed to write config file');
@@ -201,4 +206,3 @@ export function getActiveOpenAIConfig(): OpenAIInstance | undefined {
 
 // 最大实例数限制
 export const MAX_OPENAI_INSTANCES = 10;
-

@@ -1,3 +1,6 @@
+import { timingSafeEqual } from "crypto";
+import { acquireAIWork, consumeRateLimit } from "@/lib/rate-limit";
+import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
@@ -53,7 +56,7 @@ function validateImage(base64: string, filename: string): { valid: boolean; erro
 }
 
 async function callOpenclawAgent(imageBase64: string, mimeType: string, timeout: number): Promise<OpenclawResponse> {
-    const openclawUrl = process.env.OPENCLAW_API_URL || 'http://localhost:8080';
+    const openclawUrl = process.env.OPENCLAW_API_URL!.replace(/\/$/, '');
     const openclawApiKey = process.env.OPENCLAW_API_KEY || '';
 
     const controller = new AbortController();
@@ -62,6 +65,7 @@ async function callOpenclawAgent(imageBase64: string, mimeType: string, timeout:
     try {
         const response = await fetch(`${openclawUrl}/api/recognize`, {
             method: 'POST',
+            redirect: 'error',
             headers: {
                 'Content-Type': 'application/json',
                 ...(openclawApiKey ? { 'Authorization': `Bearer ${openclawApiKey}` } : {}),
@@ -73,11 +77,8 @@ async function callOpenclawAgent(imageBase64: string, mimeType: string, timeout:
             signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
-
         if (!response.ok) {
-            const errorText = await response.text();
-            logger.error({ status: response.status, error: errorText }, 'Openclaw agent error');
+            logger.error({ status: response.status }, 'Openclaw agent error');
             return {
                 success: false,
                 error: `识别服务异常: HTTP ${response.status}`,
@@ -87,8 +88,6 @@ async function callOpenclawAgent(imageBase64: string, mimeType: string, timeout:
         const data = await response.json() as OpenclawResponse;
         return data;
     } catch (error: any) {
-        clearTimeout(timeoutId);
-        
         if (error.name === 'AbortError') {
             logger.error('Openclaw agent timeout');
             return {
@@ -102,6 +101,8 @@ async function callOpenclawAgent(imageBase64: string, mimeType: string, timeout:
             success: false,
             error: `识别服务请求失败: ${error?.message || String(error)}`,
         };
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
@@ -195,96 +196,66 @@ async function createErrorItem(
 export async function POST(req: Request) {
     logger.info('POST /api/openclaw/batch-upload called');
 
-    // 获取请求头中的 API Key
-    const apiKey = req.headers.get('x-api-key');
-    // 从环境变量获取配置的 API Key
-    const expectedApiKey = process.env.OPENCLAW_INTEGRATION_API_KEY;
-    // 认证模式：credentials（用户名密码，默认）或 apikey（API Key）
     const authMode = process.env.OPENCLAW_AUTH_MODE || 'credentials';
-
-    let user = null;
-    let userEmail = null;
-    let subjectId = null;
-
+    const expectedApiKey = process.env.OPENCLAW_INTEGRATION_API_KEY;
+    const configuredEmail = process.env.OPENCLAW_USER_EMAIL;
+    const agentUrl = process.env.OPENCLAW_API_URL;
+    if (!agentUrl || !['credentials', 'apikey'].includes(authMode)
+        || (authMode === 'apikey' && (!expectedApiKey || !configuredEmail))) {
+        return createErrorResponse('Openclaw integration is not configured', 503, ErrorCode.OPERATION_NOT_ALLOWED);
+    }
     try {
-        const body = await req.json();
-        const requestData = body;
-
-        // 根据认证模式选择验证方式
-        if (authMode === 'apikey' && expectedApiKey) {
-            // API Key 认证模式
-            if (!apiKey) {
-                logger.warn('Missing API key in request');
-                return createErrorResponse(
-                    '未提供API密钥',
-                    401,
-                    ErrorCode.UNAUTHORIZED,
-                    'Missing API key'
-                );
+        const url = new URL(agentUrl);
+        if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) throw new Error();
+    } catch { return createErrorResponse('Invalid Openclaw agent URL', 503, ErrorCode.OPERATION_NOT_ALLOWED); }
+    if (!consumeRateLimit('openclaw:global', 60, 60000)) {
+        return NextResponse.json({ message: "Too many upload requests" }, { status: 429 });
+    }
+    let work: { release: () => void } | undefined;
+    try {
+        const schema = z.object({
+            username: z.string().max(254).optional(), password: z.string().refine(value => Buffer.byteLength(value) <= 72).optional(),
+            userEmail: z.string().max(254).optional(), subjectId: z.string().max(256).optional(),
+            images: z.array(z.object({ base64: z.string().max(7 * 1024 * 1024),
+                mimeType: z.enum(['image/jpeg', 'image/png']), filename: z.string().min(1).max(256),
+            })).min(1).max(MAX_IMAGES),
+        }).strict();
+        const parsed = schema.safeParse(await req.json());
+        if (!parsed.success) return createErrorResponse('Invalid upload data', 400, ErrorCode.BAD_REQUEST);
+        const requestData = parsed.data;
+        let dbUser;
+        if (authMode === 'apikey') {
+            const apiKey = req.headers.get('x-api-key') || '';
+            const actual = Buffer.from(apiKey);
+            const expected = Buffer.from(expectedApiKey!);
+            if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+                return createErrorResponse('Invalid API key', 401, ErrorCode.UNAUTHORIZED);
             }
-
-            if (apiKey !== expectedApiKey) {
-                logger.warn('Invalid API key provided');
-                return createErrorResponse(
-                    'API密钥无效',
-                    401,
-                    ErrorCode.UNAUTHORIZED,
-                    'Invalid API key'
-                );
+            if (requestData.userEmail && requestData.userEmail !== configuredEmail) {
+                return createErrorResponse('Upload target is not authorized', 403, ErrorCode.FORBIDDEN);
             }
-
-            userEmail = requestData.userEmail;
-            subjectId = requestData.subjectId;
+            dbUser = await prisma.user.findUnique({ where: { email: configuredEmail! } });
         } else {
-            // 用户名密码认证模式（默认）
             const { username, password } = requestData;
-
-            if (!username || !password) {
-                return createErrorResponse(
-                    '请提供用户名和密码',
-                    401,
-                    ErrorCode.UNAUTHORIZED,
-                    'Missing username or password'
-                );
+            if (!username || !password || !consumeRateLimit(`openclaw-login:${username.toLowerCase()}`, 10, 15 * 60000)) {
+                return createErrorResponse('Invalid credentials or too many attempts', 401, ErrorCode.UNAUTHORIZED);
             }
-
-            // 从数据库查找用户（支持邮箱或用户名登录）
-            user = await prisma.user.findFirst({
-                where: {
-                    OR: [
-                        { email: username },
-                        { name: username }
-                    ]
-                }
-            });
-
-            if (!user) {
-                logger.warn({ username }, 'User not found');
-                return createErrorResponse(
-                    '用户不存在',
-                    404,
-                    ErrorCode.USER_NOT_FOUND,
-                    'User not found'
-                );
+            dbUser = await prisma.user.findFirst({ where: { OR: [{ email: username }, { name: username }] } });
+            if (!dbUser || !await compare(password, dbUser.password)) {
+                return createErrorResponse('Invalid credentials', 401, ErrorCode.UNAUTHORIZED);
             }
-
-            // 验证密码（使用 bcrypt 比对）
-            const isPasswordValid = await compare(password, user.password);
-            if (!isPasswordValid) {
-                logger.warn({ username }, 'Invalid password');
-                return createErrorResponse(
-                    '密码错误',
-                    401,
-                    ErrorCode.UNAUTHORIZED,
-                    'Invalid password'
-                );
-            }
-
-            userEmail = user.email;
-            subjectId = requestData.subjectId;
-            logger.info({ userId: user.id, email: user.email }, 'User authenticated via credentials');
         }
-
+        if (!dbUser?.isActive) return createErrorResponse('Account is unavailable', 403, ErrorCode.FORBIDDEN);
+        const subjectId = requestData.subjectId;
+        if (subjectId && !await prisma.subject.findFirst({ where: { id: subjectId, userId: dbUser.id } })) {
+            return createErrorResponse('Notebook not found', 404, ErrorCode.NOT_FOUND);
+        }
+        if (requestData.images.reduce((size, image) => size + image.base64.length * 3 / 4, 0) > 20 * 1024 * 1024) {
+            return createErrorResponse('Batch exceeds 20MB', 400, ErrorCode.BAD_REQUEST);
+        }
+        const acquired = acquireAIWork(dbUser.id);
+        if (acquired instanceof Response) return acquired;
+        work = acquired;
         // 获取图片数组
         const { images } = requestData;
 
@@ -308,25 +279,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // 获取用户信息（API Key模式需要单独查询）
-        let dbUser = user;
-        if (!dbUser) {
-            dbUser = await prisma.user.findUnique({
-                where: { email: userEmail },
-            });
-        }
-
-        if (!dbUser) {
-            logger.warn({ userEmail }, 'User not found');
-            return createErrorResponse(
-                '用户不存在',
-                404,
-                ErrorCode.USER_NOT_FOUND,
-                'User not found'
-            );
-        }
-
-        const timeout = parseInt(process.env.OPENCLAW_TIMEOUT || '30000', 10);
+        const timeout = Math.max(1000, Math.min(60000, Number(process.env.OPENCLAW_TIMEOUT) || 30000));
         const singleImageTimeout = Math.min(3000, timeout / images.length);
         const results: Array<{
             success: boolean;
@@ -409,10 +362,12 @@ export async function POST(req: Request) {
     } catch (error: any) {
         logger.error({ error: error?.message || String(error), stack: error?.stack }, 'Batch upload error');
         return createErrorResponse(
-            error?.message || '批量上传失败',
+            'Batch upload failed',
             500,
             ErrorCode.INTERNAL_ERROR,
-            error?.message || String(error)
+            'Batch upload failed'
         );
+    } finally {
+        work?.release();
     }
 }
