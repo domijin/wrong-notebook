@@ -32,9 +32,10 @@ ssh "$REMOTE" bash -lc "set -e
 cd '$REMOTE_DIR'
 chmod 600 .env.new
 mv .env.new .env
-echo '[sync-env] restarting $CONTAINER'
-docker compose restart $CONTAINER
-sleep 4
+echo '[sync-env] recreate $CONTAINER (down + up so compose re-reads .env)'
+docker compose down $CONTAINER
+docker compose up -d $CONTAINER
+sleep 5
 echo '[sync-env] /api/version:'
 curl -fsS -m 5 http://127.0.0.1:3000/api/version || true
 "
