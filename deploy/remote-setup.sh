@@ -39,7 +39,7 @@ log "remote HOME=$REMOTE_HOME  REMOTE_DIR_ABS=$REMOTE_DIR_ABS"
 
 rsync -az --delete \
   --exclude '.git' --exclude 'node_modules' --exclude '.next' --exclude 'data' --exclude 'config' \
-  --exclude 'logs' --exclude 'coverage' --exclude '.env' --exclude '*.log' \
+  --exclude '/logs' --exclude 'coverage' --exclude '.env' --exclude '*.log' \
   --exclude '.assistant-staging' --exclude '*.bak' \
   -e "ssh ${SSH_OPTS[*]}" \
   "$REPO_DIR/" "$REMOTE:$REMOTE_DIR_ABS/"
