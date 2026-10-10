@@ -1,4 +1,5 @@
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { checkPassword, PASSWORD_MESSAGES } from "@/lib/password-policy";
 import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -82,10 +83,9 @@ export async function PATCH(req: Request) {
 
         // 验证密码长度（如果提供了密码）
         if (password && password.length > 0) {
-            if (password.length < 6) {
-                return badRequest("Password must be at least 6 characters");
-            }
-            updateData.password = await hash(password, 10);
+            const problem = checkPassword(password, [session.user.email, session.user.name, email, name]);
+            if (problem) return badRequest(PASSWORD_MESSAGES[problem]);
+            updateData.password = await hash(password, 12);
         }
 
         if (updateData.password || (updateData.email && updateData.email !== session.user.email)) {

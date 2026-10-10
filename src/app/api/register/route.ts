@@ -3,11 +3,12 @@ import { hash } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { getAppConfig } from "@/lib/config"
+import { checkPassword, PASSWORD_MESSAGES } from "@/lib/password-policy"
 
 const userSchema = z.object({
     // 支持标准邮箱和本地邮箱（如 user@localhost）
     email: z.string().regex(/^[^\s@]+@[^\s@]+$/, "Invalid email format"),
-    password: z.string().min(6).refine(value => Buffer.byteLength(value) <= 72),
+    password: z.string().min(1),
     name: z.string().min(1),
     educationStage: z.string().optional(),
     enrollmentYear: z.number().optional(),
@@ -27,6 +28,14 @@ export async function POST(req: Request) {
         const body = await req.json()
         const { email, password, name, educationStage, enrollmentYear } = userSchema.parse(body)
 
+        const problem = checkPassword(password, [email, name])
+        if (problem) {
+            return NextResponse.json(
+                { user: null, message: PASSWORD_MESSAGES[problem], code: `password_${problem}` },
+                { status: 400 }
+            )
+        }
+
         const existingUser = await prisma.user.findUnique({
             where: { email }
         })
@@ -38,7 +47,7 @@ export async function POST(req: Request) {
             )
         }
 
-        const hashedPassword = await hash(password, 10)
+        const hashedPassword = await hash(password, 12)
         const newUser = await prisma.user.create({
             data: {
                 email,

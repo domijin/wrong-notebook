@@ -5,8 +5,12 @@ import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
 import { createLogger } from "@/lib/logger"
 import { consumeRateLimit } from "@/lib/rate-limit"
+import { clearFailures, clientIpFromHeaders, getLockout, recordFailure, throttleKeys } from "@/lib/login-throttle"
 
 const logger = createLogger('auth');
+
+// 邮箱不存在时也做一次同等成本的 bcrypt 比对，避免通过响应时间探测哪些邮箱已注册
+const DUMMY_PASSWORD_HASH = '$2b$12$8glo.QvnPXMSb0nms0tbfex7LuLVp5HDRMnNOX7Nsu.wnCETikY4S';
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -40,7 +44,7 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials) {
+            async authorize(credentials, req) {
                 logger.debug({ email: credentials?.email }, 'Authorize called');
                 if (!credentials?.email || !credentials?.password) {
                     logger.debug('Missing credentials');
@@ -48,8 +52,14 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 if (Buffer.byteLength(credentials.password) > 72 || credentials.email.length > 254
-                    || !consumeRateLimit('login:global', 100, 15 * 60000)
-                    || !consumeRateLimit(`login:${credentials.email.toLowerCase()}`, 10, 15 * 60000)) return null;
+                    || !consumeRateLimit('login:global', 100, 15 * 60000)) return null;
+
+                const keys = throttleKeys(credentials.email, clientIpFromHeaders(req?.headers));
+                const lockedUntil = await getLockout(keys);
+                if (lockedUntil) {
+                    logger.warn({ lockedUntil }, 'Login throttled');
+                    throw new Error("TooManyAttempts")
+                }
 
                 const user = await prisma.user.findUnique({
                     where: {
@@ -59,6 +69,8 @@ export const authOptions: NextAuthOptions = {
 
                 if (!user) {
                     logger.debug('User not found');
+                    await compare(credentials.password, DUMMY_PASSWORD_HASH)
+                    await recordFailure(keys)
                     return null
                 }
 
@@ -72,8 +84,11 @@ export const authOptions: NextAuthOptions = {
 
                 if (!isPasswordValid) {
                     logger.debug('Invalid password');
+                    await recordFailure(keys)
                     return null
                 }
+
+                await clearFailures(keys[0])
 
                 logger.info({ email: user.email }, 'Login successful');
 
