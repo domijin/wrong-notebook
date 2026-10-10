@@ -86,8 +86,11 @@ jobs:
     timeout-minutes: 60
     env:
       DATABASE_URL: "file:./e2e.db"
-      NEXTAUTH_SECRET: "ci-secret-value-123456"
       NEXTAUTH_URL: "http://127.0.0.1:3000"
+      # 种子脚本用它创建管理员，e2e/helpers.ts 用同一组变量登录（仅用于 CI 的一次性数据库）
+      ADMIN_EMAIL: "admin@e2e.test"
+      ADMIN_PASSWORD: "e2e-lantern-harbor-meadow-42"
+      AI_ALLOWED_ORIGINS: "https://gateway.example.com"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -101,8 +104,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate NEXTAUTH_SECRET
+        # 生产模式启动时会拒绝过短或占位的密钥
+        run: echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
 
       - name: Setup Database
         run: |

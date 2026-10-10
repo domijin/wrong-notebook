@@ -1,17 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { ADMIN, loginAsAdmin } from './helpers';
 
 test('Admin can configure OpenAI settings with multi-instance support', async ({ page }) => {
     // 增加测试超时时间
     test.setTimeout(60000);
 
     // 1. Login as Admin
-    await page.goto('/login');
-    await page.locator('input[name="email"]').fill('admin@localhost');
-    await page.locator('input[name="password"]').fill('123456');
-    await page.locator('button[type="submit"]').click();
-
-    // Wait for login to complete
-    await page.waitForURL('**/', { timeout: 15000 });
+    await loginAsAdmin(page);
 
     // 2. Open Settings
     await page.getByRole('button', { name: '设置' }).click();
@@ -36,7 +31,7 @@ test('Admin can configure OpenAI settings with multi-instance support', async ({
     // 6. Fill instance configuration
     const instanceName = '智谱 GLM-4V';
     const apiKey = 'sk-aaa';
-    const baseURL = 'https://new.xxx.net/v1';
+    const baseURL = 'https://gateway.example.com/v1'; // CI 里通过 AI_ALLOWED_ORIGINS 加入白名单
     const modelName = 'claude-haiku-4.5';
 
     // Instance Name Input - use the actual placeholder from the component
@@ -61,6 +56,10 @@ test('Admin can configure OpenAI settings with multi-instance support', async ({
 
     await page.getByRole('button', { name: /保存 AI 设置|Save AI Settings/ }).click();
 
+    // 管理操作需要在「验证身份」对话框里重新输入当前密码
+    await page.getByLabel(/当前密码|Current password/).fill(ADMIN.password);
+    await page.getByRole('button', { name: /^确认$|^Confirm$/ }).click();
+
     // 等待保存完成
     await page.waitForTimeout(1000);
 
@@ -82,7 +81,10 @@ test('Admin can configure OpenAI settings with multi-instance support', async ({
     // Verify values match
     // First combobox should be AI Provider, second should be instance selector
     await expect(page.locator('button[role="combobox"]').first()).toHaveText('OpenAI / Compatible');
-    await expect(page.locator('input[placeholder="sk-..."]')).toHaveValue(apiKey);
+    // 已保存的密钥不会再发回浏览器：输入框为空，只提示已配置
+    const keyInput = page.locator('input[placeholder^="Configured"]');
+    await expect(keyInput).toHaveValue('');
+    await expect(page.locator('body')).not.toContainText(apiKey);
     await expect(page.locator('input[placeholder="https://api.openai.com/v1"]')).toHaveValue(baseURL);
     await expect(page.locator('input[placeholder="gpt-4o"]')).toHaveValue(modelName);
 });
