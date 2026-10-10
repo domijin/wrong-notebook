@@ -4,7 +4,8 @@
  *
  *   node scripts/zhongkao/build.mjs fetch   抓取教材目录 -> scripts/zhongkao/toc/<subject>.json
  *   node scripts/zhongkao/build.mjs enrich  按章调用 LLM 生成细粒度知识点与高频标记（结果缓存）
- *   node scripts/zhongkao/build.mjs emit    校验并输出 src/lib/tag-data/zhongkao/<subject>.json 和审核报告
+ *   node scripts/zhongkao/build.mjs review  按章让 LLM 审查已输出的知识点，生成修正建议 review-proposals.json
+ *   node scripts/zhongkao/build.mjs emit    应用 corrections.json，校验并输出 src/lib/tag-data/zhongkao/<subject>.json 和审核报告
  *   node scripts/zhongkao/build.mjs all     依次执行以上三步
  *
  * 选项：--subject=math,science  只处理指定学科
@@ -195,7 +196,7 @@ function loadApiKey() {
     throw new Error('Set ZK_API_KEY or MINIMAX_API_KEY');
 }
 
-async function callLLM(prompt) {
+async function callLLM(prompt, field = 'sections', tag = 'enrich') {
     const baseUrl = process.env.ZK_BASE_URL || 'https://api.minimax.io/v1';
     const model = process.env.ZK_MODEL || 'MiniMax-M3.1-Flash-Preview';
     for (let attempt = 1; ; attempt++) {
@@ -213,11 +214,11 @@ async function callLLM(prompt) {
             const content = body.choices?.[0]?.message?.content || '';
             const json = content.match(/<json>([\s\S]*?)<\/json>/)?.[1] ?? content.match(/\{[\s\S]*\}/)?.[0];
             const parsed = JSON.parse(json);
-            if (!Array.isArray(parsed.sections)) throw new Error('missing sections array');
-            return { model, sections: parsed.sections, usage: body.usage };
+            if (!Array.isArray(parsed[field])) throw new Error(`missing ${field} array`);
+            return { model, [field]: parsed[field], usage: body.usage };
         } catch (error) {
             if (attempt >= 3) throw error;
-            console.warn(`[enrich] retry ${attempt}: ${error.message}`);
+            console.warn(`[${tag}] retry ${attempt}: ${error.message}`);
             await sleep(5000 * attempt);
         }
     }
@@ -241,22 +242,79 @@ async function runEnrich() {
         }
     }
     console.log(`[enrich] ${jobs.length} 章待生成`);
+    await runPool('enrich', jobs, job => callLLM(job.prompt));
+}
+
+async function runPool(tag, jobs, call) {
     let done = 0, failed = 0;
     const worker = async () => {
         for (let job = jobs.shift(); job; job = jobs.shift()) {
             const started = Date.now();
             try {
-                const result = await callLLM(job.prompt);
+                const result = await call(job);
                 writeJSON(job.file, { label: job.label, ...result });
-                console.log(`[enrich] ${++done} ok ${job.label} (${((Date.now() - started) / 1000).toFixed(0)}s)`);
+                console.log(`[${tag}] ${++done} ok ${job.label} (${((Date.now() - started) / 1000).toFixed(0)}s)`);
             } catch (error) {
                 failed++;
-                console.error(`[enrich] FAILED ${job.label}: ${error.message}`);
+                console.error(`[${tag}] FAILED ${job.label}: ${error.message}`);
             }
         }
     };
     await Promise.all(Array.from({ length: Number(args.concurrency || 3) }, worker));
-    if (failed) { console.error(`[enrich] ${failed} 章失败，重跑 enrich 只会补跑失败的章`); process.exitCode = 1; }
+    if (failed) { console.error(`[${tag}] ${failed} 章失败，重跑只会补跑失败的章`); process.exitCode = 1; }
+}
+
+// ---------------------------------------------------------------- review
+
+const REVIEW_VERSION = 1;
+const PROPOSALS = path.join(HERE, 'review-proposals.json');
+const CORRECTIONS_FILE = path.join(HERE, 'corrections.json');
+
+function buildReviewPrompt(key, grade, chapter) {
+    return `你是熟悉浙江杭州初中教学的${SUBJECTS[key].name}教研员，正在审核错题本的知识点标签。教材：${SUBJECTS[key].edition}。
+下面是 ${grade}「${chapter.name}」一章已生成的知识点（按节列出）。请逐条检查，只报告实质性错误：
+1. 事实或概念错误（如把性质写成判定、把定理条件写反、历史事件张冠李戴、语文篇目与作者或单元不符）；
+2. 明显不属于该节或该年级教材的内容；
+3. 把两个以上独立知识点合成一条（如同时含两首诗名）；
+4. 不是可考查知识点的条目（如空泛的“综合运用”）。
+不要报告措辞偏好、粒度偏好或可有可无的改进；没有问题就返回空数组。
+对每个问题给出处理：action 为 "rename"（给出更正后的 newName，2–16 字）或 "remove"。
+只输出 JSON，放在 <json> 与 </json> 之间：
+{"issues":[{"section":"节名","tag":"原知识点","problem":"问题说明","action":"rename","newName":"更正后名称"}]}
+
+【本章】
+${JSON.stringify(chapter.sections.map(s => ({ section: s.name, tags: s.tags.map(t => t.name) })), null, 1)}`;
+}
+
+async function runReview() {
+    const jobs = [];
+    const all = [];
+    for (const key of subjects) {
+        const output = readJSON(path.join(OUT_DIR, `${key}.json`));
+        for (const grade of output.grades) {
+            for (const chapter of grade.chapters) {
+                const prompt = buildReviewPrompt(key, grade.name, chapter);
+                const hash = crypto.createHash('sha256').update(`${REVIEW_VERSION}\n${process.env.ZK_MODEL || ''}\n${prompt}`).digest('hex').slice(0, 16);
+                const file = path.join(CACHE, 'review', key, `${hash}.json`);
+                all.push({ key, grade: grade.name, chapter: chapter.name, file });
+                if (!args.refresh && fs.existsSync(file)) continue;
+                jobs.push({ label: `${key} ${grade.name} ${chapter.name}`, prompt, file });
+            }
+        }
+    }
+    console.log(`[review] ${jobs.length} 章待审核`);
+    await runPool('review', jobs, job => callLLM(job.prompt, 'issues', 'review'));
+
+    // 汇总成修正建议，供人工逐条确认后写入 corrections.json
+    const proposals = [];
+    for (const item of all) {
+        if (!fs.existsSync(item.file)) continue;
+        for (const issue of readJSON(item.file).issues) {
+            proposals.push({ subject: item.key, grade: item.grade, chapter: item.chapter, ...issue });
+        }
+    }
+    writeJSON(PROPOSALS, proposals);
+    console.log(`[review] ${proposals.length} 条修正建议 -> ${path.relative(ROOT, PROPOSALS)}`);
 }
 
 // ---------------------------------------------------------------- emit
@@ -270,6 +328,9 @@ function cleanTagName(name) {
 async function runEmit() {
     const evidence = loadEvidence();
     const subjects = Object.keys(SUBJECTS);
+    // 人工确认过的修正：{ subject: { 原名: { rename: 新名 } | { remove: true }, reason } }，独立于 LLM 缓存
+    const corrections = fs.existsSync(CORRECTIONS_FILE) ? readJSON(CORRECTIONS_FILE) : {};
+    const usedCorrections = new Set();
     const report = ['# 杭州中考知识点生成报告', '',
         '由 `node scripts/zhongkao/build.mjs all` 生成，请人工抽查后再发布。高频标记只来自浙江省教育考试院 2024、2025 年官方试题评析（见 `scripts/zhongkao/evidence.md`）。', ''];
 
@@ -281,6 +342,9 @@ async function runEmit() {
         let total = 0, hfCount = 0, missing = 0;
         const hfList = [];
 
+        // 人工整理的条目（静态种子里写明 tags 的章）在重名时优先，LLM 生成的同名条目让位
+        const curated = new Set(loadVolumes(key).flatMap(v => v.chapters.filter(hasAllTags)
+            .flatMap(c => c.sections.flatMap(s => s.tags.map(t => cleanTagName(typeof t === 'string' ? t : t.name))))));
         for (const volume of loadVolumes(key)) {
             const grade = grades.get(volume.grade);
             if (!grade) throw new Error(`${key}: unknown grade ${volume.grade}`);
@@ -302,15 +366,32 @@ async function runEmit() {
                 const reserved = new Set([chapterName]);
                 for (const section of sections) {
                     const tags = [];
-                    for (const raw of section.tags) {
+                    // 先应用人工修正：删除、改名或拆成多条（拆出的条目不继承高频）
+                    const corrected = section.tags.flatMap(raw => {
                         const tag = typeof raw === 'string' ? { name: raw, hf: false, evidence: '' } : raw;
+                        const name = cleanTagName(tag.name);
+                        const fix = corrections[key]?.[name];
+                        if (!fix || (fix.grade && fix.grade !== volume.grade)) return [tag]; // grade 可限定只改某个年级的同名条目
+                        usedCorrections.add(`${key}\u0000${name}`);
+                        if (fix.remove) { issues.push(`人工修正：删除「${name}」（${fix.reason}）`); return []; }
+                        if (fix.split) {
+                            issues.push(`人工修正：「${name}」拆为「${fix.split.join('」「')}」（${fix.reason}）`);
+                            return fix.split.map(part => ({ name: part, hf: false, evidence: '' }));
+                        }
+                        issues.push(`人工修正：「${name}」→「${fix.rename}」（${fix.reason}）`);
+                        return [{ ...tag, name: fix.rename }];
+                    });
+                    for (const tag of corrected) {
                         const name = cleanTagName(tag.name);
                         if (name.length < 2 || name.length > 20) { issues.push(`名称长度不合规，已丢弃：${name}`); continue; }
                         if (reserved.has(name)) { issues.push(`与章名相同，已丢弃：${volume.grade} ${name}`); continue; }
+                        if (generated && curated.has(name)) { issues.push(`与人工整理条目重名，保留人工条目：${volume.grade} ${name}`); continue; }
                         if (seen.has(name)) { issues.push(`重复，保留 ${seen.get(name)} 的那一条：${volume.grade} ${name}`); continue; }
                         let hf = tag.hf === true && !(generated && subject.llmHighFrequency === false);
                         const quote = String(tag.evidence || '').trim();
-                        if (hf && (quote.length < 2 || !(evidence[key]?.quotable || '').includes(quote))) {
+                        // LLM 只能引用具体考点；人工整理的条目可引用依据全文（含背景行）
+                        const citable = generated ? evidence[key]?.quotable : evidence[key]?.text;
+                        if (hf && (quote.length < 2 || !(citable || '').includes(quote))) {
                             issues.push(`高频依据无法核实，降为普通：${name}（引用「${quote}」）`);
                             hf = false;
                         }
@@ -351,13 +432,19 @@ async function runEmit() {
         if (issues.length) report.push('<details><summary>校验记录</summary>', '', ...issues.map(l => `- ${l}`), '', '</details>', '');
         console.log(`[emit] ${key}: ${total} 个知识点，高频 ${hfCount}，校验记录 ${issues.length} 条`);
     }
+    const stale = Object.entries(corrections).flatMap(([key, fixes]) =>
+        Object.keys(fixes).filter(name => !usedCorrections.has(`${key}\u0000${name}`)).map(name => `${key}：${name}`));
+    if (stale.length) {
+        console.warn(`[emit] ${stale.length} 条修正没有匹配到知识点（数据重新生成后可能已过期）：${stale.join('；')}`);
+        report.push('## 未匹配的修正', '', ...stale.map(l => `- ${l}`), '');
+    }
     fs.mkdirSync(path.dirname(REPORT), { recursive: true });
     fs.writeFileSync(REPORT, report.join('\n') + '\n');
 }
 
 // ---------------------------------------------------------------- main
 
-const steps = { fetch: runFetch, enrich: runEnrich, emit: runEmit };
+const steps = { fetch: runFetch, enrich: runEnrich, review: runReview, emit: runEmit };
 if (step === 'all') {
     await runFetch(); await runEnrich(); await runEmit();
 } else if (steps[step]) {
