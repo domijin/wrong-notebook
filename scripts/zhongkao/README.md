@@ -15,10 +15,22 @@ npm run zhongkao:build -- emit           # 只重新校验输出（不调用 LLM
 | --- | --- | --- |
 | `fetch` | `sources.mjs` 中各册教材目录页（dzkbw.com，GBK，限速 1.5s/页，HTML 缓存在 `.cache/zhongkao/html`） | `toc/<subject>.json`（提交到仓库，之后无需联网） |
 | `enrich` | `toc/*.json` + `static/*.json` + `evidence.md` | 每章一次 LLM 调用，结果按提示词哈希缓存在 `.cache/zhongkao/llm`，失败的章重跑即可补齐 |
-| `emit` | 以上全部 | `src/lib/tag-data/zhongkao/<subject>.json` 和审核报告 `doc/zhongkao-tags-report.md` |
+| `review` | 已输出的 `src/lib/tag-data/zhongkao/*.json` | 每章一次 LLM 审查，只找实质性错误，汇总为 `review-proposals.json`（修正建议，未生效） |
+| `emit` | 以上全部 + `corrections.json` | `src/lib/tag-data/zhongkao/<subject>.json` 和审核报告 `doc/zhongkao-tags-report.md` |
 
 `static/` 放没有在线目录的部分：人文地理（按课标主题）、新版九下尚未发行时的暂列内容、
 语文和英语的中考专项。已写明 `tags` 的节不调用 LLM。
+
+## 修正知识点错误
+
+`review` 只产出建议，不直接改数据。人工逐条确认后，把认可的写进 `corrections.json`：
+
+```json
+{ "math": { "等边对等角判定": { "rename": "等角对等边", "reason": "等边对等角是性质，不是判定" } } }
+```
+
+`{ "remove": true }` 表示删除，`{ "split": ["甲", "乙"] }` 表示拆成多条，可加 `"grade": "八年级上"` 只改该年级的同名条目。修正按「学科 + 原知识点名」匹配，独立于 LLM 缓存，
+重新生成后仍然生效；匹配不到的修正会在 `emit` 时提示并写进报告，便于清理。
 
 ## 高频标记的约束
 
