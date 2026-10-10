@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
 import { getAppConfig } from '../config';
-import { safeParseParsedQuestion } from './schema';
-import { getMathTagsFromDB, getTagsFromDB } from './tag-service';
+import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
+import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
 
@@ -32,7 +32,7 @@ export class OpenAIProvider implements AIService {
 
         this.openai = new OpenAI({
             apiKey: apiKey,
-            timeout: 60000, maxRetries: 0, fetch: aiFetch,
+            timeout: 180000, maxRetries: 0, fetch: aiFetch, // 与 aiFetch 和默认 analyze 超时一致；推理模型做计算题可能超过 60s
             baseURL: baseURL || undefined,
             defaultHeaders: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -121,8 +121,8 @@ export class OpenAIProvider implements AIService {
 
         // Process Subject
         let subject: ParsedQuestion['subject'] = '其他';
-        const validSubjects: ParsedQuestion['subject'][] = ["数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "其他"];
-        if (subjectRaw && (validSubjects as string[]).includes(subjectRaw)) {
+        const validSubjects: readonly string[] = AI_SUBJECTS;
+        if (subjectRaw && validSubjects.includes(subjectRaw)) {
             subject = subjectRaw as ParsedQuestion['subject'];
         }
 
@@ -166,21 +166,9 @@ export class OpenAIProvider implements AIService {
     async analyzeImage(imageBase64: string, mimeType: string = "image/jpeg", language: 'zh' | 'en' = 'zh', grade?: 7 | 8 | 9 | 10 | 11 | 12 | null, subject?: string | null, gradeSemester?: string | null): Promise<ParsedQuestion> {
         const config = getAppConfig();
 
-        // 从数据库获取各学科标签
-        // 如果指定了学科，只获取该学科；否则获取所有学科标签供 AI 判断
-        const prefetchedMathTags = (subject === '数学' || !subject) ? await getMathTagsFromDB(grade || null) : [];
-        const prefetchedPhysicsTags = (subject === '物理' || !subject) ? await getTagsFromDB('physics') : [];
-        const prefetchedChemistryTags = (subject === '化学' || !subject) ? await getTagsFromDB('chemistry') : [];
-        const prefetchedBiologyTags = (subject === '生物' || !subject) ? await getTagsFromDB('biology') : [];
-        const prefetchedEnglishTags = (subject === '英语' || !subject) ? await getTagsFromDB('english') : [];
-
         const systemPrompt = generateAnalyzePrompt(language, grade, subject, {
             customTemplate: config.prompts?.analyze,
-            prefetchedMathTags,
-            prefetchedPhysicsTags,
-            prefetchedChemistryTags,
-            prefetchedBiologyTags,
-            prefetchedEnglishTags,
+            ...await prefetchPromptTags(subject, grade),
         }, gradeSemester);
 
         logger.box('🔍 AI Image Analysis Request', {

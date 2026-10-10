@@ -61,6 +61,8 @@ model KnowledgeTag {
 
   // 区分系统预设 vs 用户自定义
   isSystem  Boolean  @default(false)
+  // 中考高频考点（依据官方试题评析，见 scripts/zhongkao/evidence.md）
+  isHighFrequency Boolean @default(false)
   userId    String?  // 如果是用户自定义标签，绑定 userId
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 

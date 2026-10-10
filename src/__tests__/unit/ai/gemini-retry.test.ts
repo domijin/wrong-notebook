@@ -27,12 +27,14 @@ vi.mock('@/lib/config', () => ({
     })),
 }));
 
-vi.mock('@/lib/ai/schema', () => ({
+vi.mock('@/lib/ai/schema', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/ai/schema')>()),
     safeParseParsedQuestion: vi.fn((data) => ({ success: true, data })),
 }));
 
 // Mock tag service to avoid DB calls
 vi.mock('@/lib/ai/tag-service', () => ({
+    prefetchPromptTags: vi.fn(() => Promise.resolve({})),
     getMathTagsFromDB: vi.fn().mockResolvedValue([]),
     getTagsFromDB: vi.fn().mockResolvedValue([]),
 }));

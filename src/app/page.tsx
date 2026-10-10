@@ -164,9 +164,15 @@ function HomeContent() {
             const dataSize = JSON.stringify(data).length;
             // Auto-select notebook based on subject
             if (data.subject) {
-                const matchedNotebook = notebooks.find(n =>
-                    n.name.includes(data.subject!) || data.subject!.includes(n.name)
-                );
+                // 分科题目回退到浙江等地的综合科错题本（如物理题 → 「科学」错题本）
+                const combinedSubject: Record<string, string> = {
+                    物理: '科学', 化学: '科学', 生物: '科学',
+                    历史: '社会', 地理: '社会', 政治: '社会',
+                };
+                const candidates = [data.subject, combinedSubject[data.subject]].filter(Boolean) as string[];
+                const matchedNotebook = candidates
+                    .map(subject => notebooks.find(n => n.name.includes(subject) || subject.includes(n.name)))
+                    .find(Boolean);
                 if (matchedNotebook) {
                     setAutoSelectedNotebookId(matchedNotebook.id);
                     frontendLogger.info('[HomeAnalyze]', 'Auto-selected notebook', {

@@ -1,0 +1,95 @@
+{
+  "note": "语文中考专项：跨年级的题型与能力。按 2024、2025 浙江统考卷结构整理，高频标记引用 evidence.md 中的官方评析原文。",
+  "volumes": [
+    {
+      "grade": "中考专项",
+      "chapters": [
+        {
+          "name": "积累与运用",
+          "sections": [
+            { "name": "字词", "tags": [
+              { "name": "字音字形辨析", "hf": true, "evidence": "汉字音形义辨析" },
+              { "name": "词语理解与运用", "hf": false, "evidence": "" },
+              { "name": "成语运用", "hf": false, "evidence": "" }
+            ] },
+            { "name": "句子与修辞", "tags": [
+              { "name": "病句辨析与修改", "hf": false, "evidence": "" },
+              { "name": "标点符号运用", "hf": false, "evidence": "" },
+              { "name": "修辞手法辨析", "hf": true, "evidence": "反复手法" },
+              { "name": "句子仿写", "hf": true, "evidence": "比喻句仿写" },
+              { "name": "语言表达得体", "hf": false, "evidence": "" }
+            ] }
+          ]
+        },
+        {
+          "name": "古诗文",
+          "sections": [
+            { "name": "古诗词", "tags": [
+              { "name": "古诗文名句默写", "hf": false, "evidence": "" },
+              { "name": "古诗词意象与情感", "hf": true, "evidence": "古典诗文" },
+              { "name": "古诗词炼字与手法", "hf": false, "evidence": "" }
+            ] },
+            { "name": "文言文", "tags": [
+              { "name": "文言实词含义推断", "hf": true, "evidence": "文言词语含义推断" },
+              { "name": "文言虚词用法", "hf": false, "evidence": "" },
+              { "name": "文言句子翻译", "hf": false, "evidence": "" },
+              { "name": "文言文主旨理解", "hf": true, "evidence": "主旨句" },
+              { "name": "课内外文言比较阅读", "hf": true, "evidence": "课内文言文" }
+            ] }
+          ]
+        },
+        {
+          "name": "名著阅读",
+          "sections": [
+            { "name": "名著考查", "tags": [
+              { "name": "名著人物形象分析", "hf": true, "evidence": "名著人物" },
+              { "name": "名著情节梳理", "hf": false, "evidence": "" },
+              { "name": "名著艺术手法", "hf": true, "evidence": "名著象征手法" },
+              { "name": "名著阅读方法运用", "hf": false, "evidence": "" }
+            ] }
+          ]
+        },
+        {
+          "name": "现代文阅读",
+          "sections": [
+            { "name": "文学类文本", "tags": [
+              { "name": "记叙文内容概括", "hf": false, "evidence": "" },
+              { "name": "人物形象与情感分析", "hf": false, "evidence": "" },
+              { "name": "语句赏析", "hf": false, "evidence": "" },
+              { "name": "象征与写作手法", "hf": true, "evidence": "象征意义" },
+              { "name": "想象与描写补写", "hf": true, "evidence": "留白想象与描写" }
+            ] },
+            { "name": "论述与实用类文本", "tags": [
+              { "name": "议论文论点与论证", "hf": true, "evidence": "用材料论证观点" },
+              { "name": "思辨性阅读", "hf": true, "evidence": "逻辑推理与辩证思维" },
+              { "name": "说明文说明方法与语言", "hf": false, "evidence": "" },
+              { "name": "非连续性文本信息提取", "hf": true, "evidence": "数据分析" }
+            ] }
+          ]
+        },
+        {
+          "name": "综合性学习",
+          "sections": [
+            { "name": "活动任务", "tags": [
+              { "name": "活动方案策划", "hf": true, "evidence": "活动方案" },
+              { "name": "材料标题拟写", "hf": true, "evidence": "添加材料标题" },
+              { "name": "调查问卷设计", "hf": true, "evidence": "设计调查问卷" },
+              { "name": "媒介信息辨析", "hf": true, "evidence": "媒介素养" }
+            ] }
+          ]
+        },
+        {
+          "name": "写作",
+          "sections": [
+            { "name": "作文", "tags": [
+              { "name": "命题与半命题作文", "hf": false, "evidence": "" },
+              { "name": "材料作文审题立意", "hf": true, "evidence": "据诗歌写作文" },
+              { "name": "记叙文写作", "hf": false, "evidence": "" },
+              { "name": "议论性文章写作", "hf": false, "evidence": "" }
+            ] }
+          ]
+        }
+      ]
+    }
+  ]
+}

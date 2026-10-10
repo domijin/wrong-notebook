@@ -7,7 +7,7 @@ import { createLogger } from "@/lib/logger";
 import { createErrorResponse, ErrorCode } from "@/lib/api-errors";
 import { calculateGrade } from "@/lib/grade-calculator";
 import { inferSubjectFromName } from "@/lib/knowledge-tags";
-import { findParentTagIdForGrade } from "@/lib/tag-recognition";
+import { findParentTagIdForGrade, findVisibleTagByName } from "@/lib/tag-recognition";
 import { compare } from "bcryptjs";
 
 const logger = createLogger('api:openclaw:batch-upload');
@@ -133,15 +133,7 @@ async function createErrorItem(
 
     for (const tagName of tagNames) {
         try {
-            let tag = await prisma.knowledgeTag.findFirst({
-                where: {
-                    name: tagName,
-                    OR: [
-                        { isSystem: true },
-                        { userId: userId },
-                    ],
-                },
-            });
+            let tag = await findVisibleTagByName(tagName, subjectKey, userId);
 
             if (!tag) {
                 const parentId = finalGradeSemester && subjectKey 

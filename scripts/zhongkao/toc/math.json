@@ -1,0 +1,773 @@
+{
+  "subject": "math",
+  "volumes": [
+    {
+      "grade": "七年级上",
+      "path": "zjb/shuxue/7s_2024",
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/7s_2024/",
+      "chapters": [
+        {
+          "name": "有理数",
+          "sections": [
+            {
+              "name": "从自然数到有理数",
+              "hints": []
+            },
+            {
+              "name": "数轴",
+              "hints": []
+            },
+            {
+              "name": "绝对值",
+              "hints": []
+            },
+            {
+              "name": "有理数的大小比较",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "有理数的运算",
+          "sections": [
+            {
+              "name": "有理数的加法",
+              "hints": []
+            },
+            {
+              "name": "有理数的减法",
+              "hints": []
+            },
+            {
+              "name": "有理数的乘法",
+              "hints": []
+            },
+            {
+              "name": "有理数的除法",
+              "hints": []
+            },
+            {
+              "name": "有理数的乘方",
+              "hints": []
+            },
+            {
+              "name": "有理数的混合运算",
+              "hints": []
+            },
+            {
+              "name": "近似数",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "实数",
+          "sections": [
+            {
+              "name": "平方根",
+              "hints": []
+            },
+            {
+              "name": "从有理数到实数",
+              "hints": []
+            },
+            {
+              "name": "立方根",
+              "hints": []
+            },
+            {
+              "name": "实数的运算",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "代数式",
+          "sections": [
+            {
+              "name": "列代数式",
+              "hints": []
+            },
+            {
+              "name": "代数式的值",
+              "hints": []
+            },
+            {
+              "name": "整式",
+              "hints": []
+            },
+            {
+              "name": "合并同类项",
+              "hints": []
+            },
+            {
+              "name": "整式的加减",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "一元一次方程",
+          "sections": [
+            {
+              "name": "认识方程",
+              "hints": []
+            },
+            {
+              "name": "等式的基本性质",
+              "hints": []
+            },
+            {
+              "name": "一元一次方程和它的解",
+              "hints": []
+            },
+            {
+              "name": "一元一次方程的解法",
+              "hints": []
+            },
+            {
+              "name": "一元一次方程的应用",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "图形的初步知识",
+          "sections": [
+            {
+              "name": "几何图形",
+              "hints": []
+            },
+            {
+              "name": "线段、射线和直线",
+              "hints": []
+            },
+            {
+              "name": "线段的长短比较",
+              "hints": []
+            },
+            {
+              "name": "线段的和差",
+              "hints": []
+            },
+            {
+              "name": "角与角的度量",
+              "hints": []
+            },
+            {
+              "name": "角的大小比较",
+              "hints": []
+            },
+            {
+              "name": "角的和差",
+              "hints": []
+            },
+            {
+              "name": "余角和补角",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "七年级下",
+      "path": "zjb/shuxue/7x_2025",
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/7x_2025/",
+      "chapters": [
+        {
+          "name": "相交线与平行线",
+          "sections": [
+            {
+              "name": "直线的相交",
+              "hints": []
+            },
+            {
+              "name": "同位角、内错角、同旁内角",
+              "hints": []
+            },
+            {
+              "name": "平行线",
+              "hints": []
+            },
+            {
+              "name": "平行线的判定",
+              "hints": []
+            },
+            {
+              "name": "平行线的性质",
+              "hints": []
+            },
+            {
+              "name": "图形的平移",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "二元一次方程组",
+          "sections": [
+            {
+              "name": "二元一次方程",
+              "hints": []
+            },
+            {
+              "name": "二元一次方程组和它的解",
+              "hints": []
+            },
+            {
+              "name": "解二元一次方程组",
+              "hints": []
+            },
+            {
+              "name": "二元一次方程组的应用",
+              "hints": []
+            },
+            {
+              "name": "三元一次方程组及其解法",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "整式的乘除",
+          "sections": [
+            {
+              "name": "同底数幂的乘法",
+              "hints": []
+            },
+            {
+              "name": "单项式的乘法",
+              "hints": []
+            },
+            {
+              "name": "多项式的乘法",
+              "hints": []
+            },
+            {
+              "name": "乘法公式",
+              "hints": []
+            },
+            {
+              "name": "整式的化简",
+              "hints": []
+            },
+            {
+              "name": "同底数幂的除法",
+              "hints": []
+            },
+            {
+              "name": "整式的除法",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "因式分解",
+          "sections": [
+            {
+              "name": "因式分解的意义",
+              "hints": []
+            },
+            {
+              "name": "提取公因式法",
+              "hints": []
+            },
+            {
+              "name": "用乘法公式分解因式",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "分式",
+          "sections": [
+            {
+              "name": "分式的意义",
+              "hints": []
+            },
+            {
+              "name": "分式的基本性质",
+              "hints": []
+            },
+            {
+              "name": "分式的乘除",
+              "hints": []
+            },
+            {
+              "name": "分式的加减",
+              "hints": []
+            },
+            {
+              "name": "分式方程",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "数据与统计图表",
+          "sections": [
+            {
+              "name": "数据的收集与整理",
+              "hints": []
+            },
+            {
+              "name": "条形统计图和折线统计图",
+              "hints": []
+            },
+            {
+              "name": "扇形统计图",
+              "hints": []
+            },
+            {
+              "name": "频数与频率",
+              "hints": []
+            },
+            {
+              "name": "频数直方图",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "八年级上",
+      "path": "zjb/shuxue/8s_2025",
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/8s_2025/",
+      "chapters": [
+        {
+          "name": "三角形",
+          "sections": [
+            {
+              "name": "认识三角形",
+              "hints": []
+            },
+            {
+              "name": "定义与命题",
+              "hints": []
+            },
+            {
+              "name": "证明",
+              "hints": []
+            },
+            {
+              "name": "全等三角形",
+              "hints": []
+            },
+            {
+              "name": "三角形全等的判定",
+              "hints": []
+            },
+            {
+              "name": "线段垂直平分线的性质",
+              "hints": []
+            },
+            {
+              "name": "角平分线的性质",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "特殊三角形",
+          "sections": [
+            {
+              "name": "图形的轴对称",
+              "hints": []
+            },
+            {
+              "name": "等腰三角形",
+              "hints": []
+            },
+            {
+              "name": "等腰三角形的性质定理",
+              "hints": []
+            },
+            {
+              "name": "等腰三角形的判定定理",
+              "hints": []
+            },
+            {
+              "name": "逆命题和逆定理",
+              "hints": []
+            },
+            {
+              "name": "直角三角形",
+              "hints": []
+            },
+            {
+              "name": "探索勾股定理",
+              "hints": []
+            },
+            {
+              "name": "直角三角形全等的判定",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "一元一次不等式",
+          "sections": [
+            {
+              "name": "认识不等式",
+              "hints": []
+            },
+            {
+              "name": "不等式的基本性质",
+              "hints": []
+            },
+            {
+              "name": "一元一次不等式及其解法",
+              "hints": []
+            },
+            {
+              "name": "一元一次不等式的应用",
+              "hints": []
+            },
+            {
+              "name": "一元一次不等式组",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "图形与坐标",
+          "sections": [
+            {
+              "name": "平面直角坐标系",
+              "hints": []
+            },
+            {
+              "name": "用方向和距离确定物体的位置",
+              "hints": []
+            },
+            {
+              "name": "坐标平面内图形的轴对称和平移",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "一次函数",
+          "sections": [
+            {
+              "name": "常量与变量",
+              "hints": []
+            },
+            {
+              "name": "认识函数",
+              "hints": []
+            },
+            {
+              "name": "一次函数的意义",
+              "hints": []
+            },
+            {
+              "name": "一次函数的图象与性质",
+              "hints": []
+            },
+            {
+              "name": "一次函数的简单应用",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "八年级下",
+      "path": "zjb/shuxue/8x_2026",
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/8x_2026/",
+      "chapters": [
+        {
+          "name": "二次根式",
+          "sections": [
+            {
+              "name": "二次根式的意义",
+              "hints": []
+            },
+            {
+              "name": "二次根式的性质",
+              "hints": []
+            },
+            {
+              "name": "二次根式的运算",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "一元二次方程",
+          "sections": [
+            {
+              "name": "一元二次方程和它的解",
+              "hints": []
+            },
+            {
+              "name": "一元二次方程的解法",
+              "hints": []
+            },
+            {
+              "name": "一元二次方程根与系数的关系",
+              "hints": []
+            },
+            {
+              "name": "一元二次方程的应用",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "数据分析初步",
+          "sections": [
+            {
+              "name": "平均数",
+              "hints": []
+            },
+            {
+              "name": "中位数和众数",
+              "hints": []
+            },
+            {
+              "name": "离差平方和与方差",
+              "hints": []
+            },
+            {
+              "name": "四分位数与箱线图",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "平行四边形",
+          "sections": [
+            {
+              "name": "多边形",
+              "hints": []
+            },
+            {
+              "name": "平行四边形及其性质",
+              "hints": []
+            },
+            {
+              "name": "图形的旋转",
+              "hints": []
+            },
+            {
+              "name": "平行四边形的判定定理",
+              "hints": []
+            },
+            {
+              "name": "三角形的中位线",
+              "hints": []
+            },
+            {
+              "name": "反证法",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "特殊平行四边形",
+          "sections": [
+            {
+              "name": "矩形",
+              "hints": []
+            },
+            {
+              "name": "菱形",
+              "hints": []
+            },
+            {
+              "name": "正方形",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "九年级上",
+      "path": "zjb/shuxue/9s_2026",
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/9s_2026/",
+      "chapters": [
+        {
+          "name": "二次函数",
+          "sections": [
+            {
+              "name": "二次函数的意义",
+              "hints": []
+            },
+            {
+              "name": "二次函数的图象",
+              "hints": []
+            },
+            {
+              "name": "二次函数的性质",
+              "hints": []
+            },
+            {
+              "name": "二次函数与一元二次方程的关系",
+              "hints": []
+            },
+            {
+              "name": "二次函数的应用",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "随机事件的概率",
+          "sections": [
+            {
+              "name": "随机事件",
+              "hints": []
+            },
+            {
+              "name": "简单随机事件的概率",
+              "hints": []
+            },
+            {
+              "name": "用频率估计概率",
+              "hints": []
+            },
+            {
+              "name": "概率的简单应用",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "圆的基本性质",
+          "sections": [
+            {
+              "name": "圆的有关概念",
+              "hints": []
+            },
+            {
+              "name": "圆心角",
+              "hints": []
+            },
+            {
+              "name": "垂径定理",
+              "hints": []
+            },
+            {
+              "name": "圆周角",
+              "hints": []
+            },
+            {
+              "name": "圆内接四边形",
+              "hints": []
+            },
+            {
+              "name": "正多边形",
+              "hints": []
+            },
+            {
+              "name": "弧长及扇形的面积",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "相似三角形",
+          "sections": [
+            {
+              "name": "比例线段",
+              "hints": []
+            },
+            {
+              "name": "由平行线截得的比例线段",
+              "hints": []
+            },
+            {
+              "name": "两个相似三角形",
+              "hints": []
+            },
+            {
+              "name": "两个三角形相似的判定",
+              "hints": []
+            },
+            {
+              "name": "相似三角形的性质及其应用",
+              "hints": []
+            },
+            {
+              "name": "相似多边形",
+              "hints": []
+            },
+            {
+              "name": "图形的位似",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "九年级下",
+      "path": "zjb/shuxue/9x",
+      "provisional": true,
+      "source": "http://www.dzkbw.com/books/zjb/shuxue/9x/",
+      "chapters": [
+        {
+          "name": "解直角三角形",
+          "sections": [
+            {
+              "name": "锐角三角函数",
+              "hints": []
+            },
+            {
+              "name": "锐角三角函数的计算",
+              "hints": []
+            },
+            {
+              "name": "解直角三角形",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "直线与圆的位置关系",
+          "sections": [
+            {
+              "name": "直线与圆的位置关系",
+              "hints": []
+            },
+            {
+              "name": "切线长定理",
+              "hints": []
+            },
+            {
+              "name": "三角形的内切圆",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "投影与三视图",
+          "sections": [
+            {
+              "name": "投影",
+              "hints": []
+            },
+            {
+              "name": "简单几何体的三视图",
+              "hints": []
+            },
+            {
+              "name": "由三视图描述几何体",
+              "hints": []
+            },
+            {
+              "name": "简单几何体的表面展开图",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

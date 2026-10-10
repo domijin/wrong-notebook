@@ -1,0 +1,364 @@
+{
+  "subject": "english",
+  "name": "英语",
+  "edition": "人教版（2024 新版）语法体系 + 中考题型",
+  "sources": [],
+  "grades": [
+    {
+      "name": "七年级上",
+      "order": 1,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "词法基础",
+              "tags": [
+                {
+                  "name": "be动词"
+                },
+                {
+                  "name": "人称代词与物主代词"
+                },
+                {
+                  "name": "名词单复数"
+                },
+                {
+                  "name": "名词所有格"
+                },
+                {
+                  "name": "冠词a/an/the"
+                },
+                {
+                  "name": "基数词与序数词"
+                }
+              ]
+            },
+            {
+              "name": "句法基础",
+              "tags": [
+                {
+                  "name": "一般现在时"
+                },
+                {
+                  "name": "therebe句型"
+                },
+                {
+                  "name": "特殊疑问句"
+                },
+                {
+                  "name": "方位介词"
+                },
+                {
+                  "name": "时间介词in/on/at"
+                },
+                {
+                  "name": "祈使句"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "七年级下",
+      "order": 2,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "动词与时态",
+              "tags": [
+                {
+                  "name": "情态动词can/must"
+                },
+                {
+                  "name": "haveto的用法"
+                },
+                {
+                  "name": "现在进行时"
+                },
+                {
+                  "name": "一般过去时"
+                },
+                {
+                  "name": "规则与不规则动词过去式"
+                }
+              ]
+            },
+            {
+              "name": "词法拓展",
+              "tags": [
+                {
+                  "name": "可数名词与不可数名词"
+                },
+                {
+                  "name": "形容词作定语与表语"
+                },
+                {
+                  "name": "副词修饰动词"
+                },
+                {
+                  "name": "感官动词与系动词"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "八年级上",
+      "order": 3,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "时态拓展",
+              "tags": [
+                {
+                  "name": "一般将来时begoingto"
+                },
+                {
+                  "name": "一般将来时will"
+                },
+                {
+                  "name": "频度副词"
+                }
+              ]
+            },
+            {
+              "name": "比较与建议",
+              "tags": [
+                {
+                  "name": "形容词副词比较级"
+                },
+                {
+                  "name": "形容词副词最高级"
+                },
+                {
+                  "name": "情态动词should"
+                },
+                {
+                  "name": "感叹句"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "八年级下",
+      "order": 4,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "时态深化",
+              "tags": [
+                {
+                  "name": "现在完成时"
+                },
+                {
+                  "name": "过去进行时"
+                },
+                {
+                  "name": "现在完成时与一般过去时辨析"
+                }
+              ]
+            },
+            {
+              "name": "非谓语与情态",
+              "tags": [
+                {
+                  "name": "动词不定式"
+                },
+                {
+                  "name": "动名词"
+                },
+                {
+                  "name": "情态动词could/may/might"
+                },
+                {
+                  "name": "反身代词"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "九年级上",
+      "order": 5,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "语态",
+              "tags": [
+                {
+                  "name": "一般现在时被动语态"
+                },
+                {
+                  "name": "一般过去时被动语态"
+                },
+                {
+                  "name": "含情态动词的被动语态"
+                }
+              ]
+            },
+            {
+              "name": "复合句",
+              "tags": [
+                {
+                  "name": "宾语从句"
+                },
+                {
+                  "name": "定语从句"
+                },
+                {
+                  "name": "条件状语从句"
+                },
+                {
+                  "name": "时间状语从句"
+                },
+                {
+                  "name": "让步与原因状语从句"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "九年级下",
+      "order": 6,
+      "provisional": true,
+      "chapters": [
+        {
+          "name": "语法",
+          "sections": [
+            {
+              "name": "综合与辨析",
+              "tags": [
+                {
+                  "name": "主谓一致"
+                },
+                {
+                  "name": "反意疑问句"
+                },
+                {
+                  "name": "时态综合辨析"
+                },
+                {
+                  "name": "连词与并列句"
+                },
+                {
+                  "name": "构词法"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "中考专项",
+      "order": 7,
+      "provisional": false,
+      "chapters": [
+        {
+          "name": "题型",
+          "sections": [
+            {
+              "name": "听说",
+              "tags": [
+                {
+                  "name": "听力理解",
+                  "hf": true
+                },
+                {
+                  "name": "人机对话口语"
+                }
+              ]
+            },
+            {
+              "name": "阅读",
+              "tags": [
+                {
+                  "name": "阅读理解细节题",
+                  "hf": true
+                },
+                {
+                  "name": "阅读理解主旨大意题",
+                  "hf": true
+                },
+                {
+                  "name": "阅读理解写作目的题",
+                  "hf": true
+                },
+                {
+                  "name": "阅读理解词义猜测题",
+                  "hf": true
+                },
+                {
+                  "name": "阅读理解推理判断题"
+                },
+                {
+                  "name": "图表与多模态阅读",
+                  "hf": true
+                },
+                {
+                  "name": "任务型阅读",
+                  "hf": true
+                }
+              ]
+            },
+            {
+              "name": "语言运用",
+              "tags": [
+                {
+                  "name": "完形填空",
+                  "hf": true
+                },
+                {
+                  "name": "词汇运用",
+                  "hf": true
+                },
+                {
+                  "name": "语法填空",
+                  "hf": true
+                }
+              ]
+            },
+            {
+              "name": "写作",
+              "tags": [
+                {
+                  "name": "书面表达",
+                  "hf": true
+                },
+                {
+                  "name": "应用文写作"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

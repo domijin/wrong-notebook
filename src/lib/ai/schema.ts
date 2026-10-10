@@ -4,6 +4,12 @@ import { z } from 'zod';
  * Zod schema for validating AI-parsed questions
  * Ensures type safety and business rule compliance
  */
+export const AI_SUBJECTS = [
+    "数学", "物理", "化学", "生物",
+    "英语", "语文", "历史", "地理",
+    "政治", "科学", "社会", "其他",
+] as const;
+
 export const ParsedQuestionSchema = z.object({
     questionText: z.string().min(1, "题目文本不能为空"),
     answerText: z.string().min(1, "答案不能为空"),
@@ -11,11 +17,7 @@ export const ParsedQuestionSchema = z.object({
     wrongAnswerText: z.string().optional().default(""),
     mistakeAnalysis: z.string().optional().default(""),
     mistakeStatus: z.enum(["not_attempted", "wrong_attempt", "unknown"]).optional().default("unknown"),
-    subject: z.enum([
-        "数学", "物理", "化学", "生物",
-        "英语", "语文", "历史", "地理",
-        "政治", "其他"
-    ]),
+    subject: z.enum(AI_SUBJECTS),
     knowledgePoints: z.array(z.string()).max(5, "知识点最多 5 个"),
     requiresImage: z.boolean().optional().default(false), // 题目是否依赖图片（如几何题）
 });

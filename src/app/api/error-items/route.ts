@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calculateGrade } from "@/lib/grade-calculator";
 import { unauthorized, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
-import { findParentTagIdForGrade } from "@/lib/tag-recognition";
+import { findParentTagIdForGrade, findVisibleTagByName } from "@/lib/tag-recognition";
 import { inferSubjectFromName } from "@/lib/knowledge-tags";
 import { normalizeMistakeStatusForSave } from "@/lib/mistake-status";
 
@@ -119,15 +119,7 @@ export async function POST(req: Request) {
         // 处理每个标签
         for (const tagName of tagNames) {
             try {
-                let tag = await prisma.knowledgeTag.findFirst({
-                    where: {
-                        name: tagName,
-                        OR: [
-                            { isSystem: true },
-                            { userId: user.id },
-                        ],
-                    },
-                });
+                let tag = await findVisibleTagByName(tagName, subjectKey, user.id);
 
                 if (!tag) {
                     const parentId = await findParentTagIdForGrade(finalGradeSemester, subjectKey);

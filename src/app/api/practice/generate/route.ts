@@ -3,6 +3,7 @@ import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAIService } from "@/lib/ai";
+import { AI_SUBJECTS } from "@/lib/ai/schema";
 import { notFound, internalError, unauthorized, badRequest } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 
@@ -48,9 +49,8 @@ export async function POST(req: Request) {
         );
 
         // Inject the subject from the database with type safety
-        const validSubjects = ["数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "其他"] as const;
         const subjectName = errorItemWithSubject.subject?.name || "其他";
-        similarQuestion.subject = validSubjects.includes(subjectName as any) ? subjectName as typeof validSubjects[number] : "其他";
+        similarQuestion.subject = (AI_SUBJECTS as readonly string[]).includes(subjectName) ? subjectName as typeof AI_SUBJECTS[number] : "其他";
 
         return NextResponse.json(similarQuestion);
     } catch (error) {

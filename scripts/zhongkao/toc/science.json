@@ -1,0 +1,537 @@
+{
+  "subject": "science",
+  "volumes": [
+    {
+      "grade": "七年级上",
+      "path": "zjb/kexue/7s_2024",
+      "source": "http://www.dzkbw.com/books/zjb/kexue/7s_2024/",
+      "chapters": [
+        {
+          "name": "探索自然的科学",
+          "sections": [
+            {
+              "name": "科学并不神秘",
+              "hints": []
+            },
+            {
+              "name": "科学测量",
+              "hints": []
+            },
+            {
+              "name": "像科学家那样探究",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "丰富多彩的生命世界",
+          "sections": [
+            {
+              "name": "生物体的基本单位",
+              "hints": []
+            },
+            {
+              "name": "形形色色的植物",
+              "hints": []
+            },
+            {
+              "name": "多姿多彩的动物",
+              "hints": []
+            },
+            {
+              "name": "生物的分类",
+              "hints": []
+            },
+            {
+              "name": "生物多样性",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "广袤浩瀚的宇宙",
+          "sections": [
+            {
+              "name": "认识地球",
+              "hints": []
+            },
+            {
+              "name": "太阳系的组成与结构",
+              "hints": []
+            },
+            {
+              "name": "人类对宇宙的探索",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "多种多样的运动",
+          "sections": [
+            {
+              "name": "机械运动",
+              "hints": []
+            },
+            {
+              "name": "地球的转动",
+              "hints": []
+            },
+            {
+              "name": "日地月的相对运动",
+              "hints": []
+            },
+            {
+              "name": "地球板块的缓慢运动",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "探索技术与工程的世界",
+          "sections": [
+            {
+              "name": "认识技术与工程",
+              "hints": []
+            },
+            {
+              "name": "像工程师那样实践",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "七年级下",
+      "path": "zjb/kexue/7x_2025",
+      "source": "http://www.dzkbw.com/books/zjb/kexue/7x_2025/",
+      "chapters": [
+        {
+          "name": "生物的结构与生殖",
+          "sections": [
+            {
+              "name": "生物体的结构层次",
+              "hints": []
+            },
+            {
+              "name": "人和动物的生殖与发育",
+              "hints": []
+            },
+            {
+              "name": "植物的生殖与发育",
+              "hints": []
+            },
+            {
+              "name": "微生物的结构与生殖",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "物质的微观结构",
+          "sections": [
+            {
+              "name": "走进微观世界",
+              "hints": []
+            },
+            {
+              "name": "建构分子模型",
+              "hints": []
+            },
+            {
+              "name": "建构原子模型",
+              "hints": []
+            },
+            {
+              "name": "探究物质组成的奥秘",
+              "hints": []
+            },
+            {
+              "name": "用化学式表示物质",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "物质的特性",
+          "sections": [
+            {
+              "name": "质量和密度",
+              "hints": []
+            },
+            {
+              "name": "物态变化",
+              "hints": []
+            },
+            {
+              "name": "物质的变化与性质",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "我们生活的大地",
+          "sections": [
+            {
+              "name": "探索地球表面",
+              "hints": []
+            },
+            {
+              "name": "土壤的结构和质地",
+              "hints": []
+            },
+            {
+              "name": "土壤与植物生长",
+              "hints": []
+            },
+            {
+              "name": "保护土壤",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "制造技术与工程",
+          "sections": [
+            {
+              "name": "走进制造",
+              "hints": []
+            },
+            {
+              "name": "我们一起来制造",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "八年级上",
+      "path": "zjb/kexue/8s_2025",
+      "source": "http://www.dzkbw.com/books/zjb/kexue/8s_2025/",
+      "chapters": [
+        {
+          "name": "对环境的察觉",
+          "sections": [
+            {
+              "name": "感觉世界",
+              "hints": []
+            },
+            {
+              "name": "声与听觉",
+              "hints": []
+            },
+            {
+              "name": "声音的特性与应用",
+              "hints": []
+            },
+            {
+              "name": "光的反射和折射",
+              "hints": []
+            },
+            {
+              "name": "透镜和视觉",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "力与空间探索",
+          "sections": [
+            {
+              "name": "力",
+              "hints": []
+            },
+            {
+              "name": "运动与相互作用",
+              "hints": []
+            },
+            {
+              "name": "压强",
+              "hints": []
+            },
+            {
+              "name": "空间探索",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "电路探秘",
+          "sections": [
+            {
+              "name": "电荷与电流",
+              "hints": []
+            },
+            {
+              "name": "物质的导电性",
+              "hints": []
+            },
+            {
+              "name": "电压及其测量",
+              "hints": []
+            },
+            {
+              "name": "欧姆定律及其应用",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "水与人类",
+          "sections": [
+            {
+              "name": "人类家园中的水",
+              "hints": []
+            },
+            {
+              "name": "生活中的水溶液",
+              "hints": []
+            },
+            {
+              "name": "海洋的探索",
+              "hints": []
+            },
+            {
+              "name": "水的浮力",
+              "hints": []
+            },
+            {
+              "name": "水资源的利用和保护",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "建筑结构与工程",
+          "sections": [
+            {
+              "name": "建筑结构与功能",
+              "hints": []
+            },
+            {
+              "name": "桥梁的结构与制作",
+              "hints": []
+            },
+            {
+              "name": "搭建一座简易人行浮桥",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "八年级下",
+      "path": "zjb/kexue/8x_2026",
+      "source": "http://www.dzkbw.com/books/zjb/kexue/8x_2026/",
+      "chapters": [
+        {
+          "name": "我们呼吸的空气",
+          "sections": [
+            {
+              "name": "空气的成分",
+              "hints": []
+            },
+            {
+              "name": "燃烧的奥秘",
+              "hints": []
+            },
+            {
+              "name": "化学反应中物质质量的关系",
+              "hints": []
+            },
+            {
+              "name": "保护我们呼吸的空气",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "大气与气候变化",
+          "sections": [
+            {
+              "name": "天气与气候",
+              "hints": []
+            },
+            {
+              "name": "大气压强",
+              "hints": []
+            },
+            {
+              "name": "大气中的二氧化碳",
+              "hints": []
+            },
+            {
+              "name": "大气圈中氧、碳的循环",
+              "hints": []
+            },
+            {
+              "name": "大气对气候的影响",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "电磁及其应用",
+          "sections": [
+            {
+              "name": "磁体的磁场",
+              "hints": []
+            },
+            {
+              "name": "电流的磁场",
+              "hints": []
+            },
+            {
+              "name": "电动机及其应用",
+              "hints": []
+            },
+            {
+              "name": "磁生电",
+              "hints": []
+            },
+            {
+              "name": "家庭用电",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "人体的系统",
+          "sections": [
+            {
+              "name": "运动与保健",
+              "hints": []
+            },
+            {
+              "name": "食物与消化",
+              "hints": []
+            },
+            {
+              "name": "血液与循环",
+              "hints": []
+            },
+            {
+              "name": "呼吸与排泄",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "控制系统与工程",
+          "sections": [
+            {
+              "name": "自动控制系统",
+              "hints": []
+            },
+            {
+              "name": "设计和制作控制系统",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grade": "九年级上",
+      "path": "zjb/kexue/9s_2026",
+      "source": "http://www.dzkbw.com/books/zjb/kexue/9s_2026/",
+      "chapters": [
+        {
+          "name": "酸碱盐的性质及其变化",
+          "sections": [
+            {
+              "name": "物质的酸碱性",
+              "hints": []
+            },
+            {
+              "name": "酸的性质及其变化",
+              "hints": []
+            },
+            {
+              "name": "碱的性质及其变化",
+              "hints": []
+            },
+            {
+              "name": "盐的性质及其变化",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "能的转化与能量守恒",
+          "sections": [
+            {
+              "name": "功和机械能",
+              "hints": []
+            },
+            {
+              "name": "物体的内能",
+              "hints": []
+            },
+            {
+              "name": "电能",
+              "hints": []
+            },
+            {
+              "name": "核能",
+              "hints": []
+            },
+            {
+              "name": "能的转化与能量守恒",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "生命的稳态与调节",
+          "sections": [
+            {
+              "name": "神经调节",
+              "hints": []
+            },
+            {
+              "name": "人体的激素调节",
+              "hints": []
+            },
+            {
+              "name": "动物行为和植物的感应性",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "生命的起源与进化",
+          "sections": [
+            {
+              "name": "生命的起源",
+              "hints": []
+            },
+            {
+              "name": "生物的进化",
+              "hints": []
+            },
+            {
+              "name": "遗传和变异",
+              "hints": []
+            }
+          ]
+        },
+        {
+          "name": "能源及其利用",
+          "sections": [
+            {
+              "name": "认识能源",
+              "hints": []
+            },
+            {
+              "name": "能源的利用与开发",
+              "hints": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

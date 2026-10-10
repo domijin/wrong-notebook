@@ -57,11 +57,14 @@ export function calculateGradeNumber(
  * @param subjectName 错题本名称
  * @returns 学科标识
  */
-export function inferSubjectFromName(subjectName: string | null): 'math' | 'physics' | 'chemistry' | 'biology' | 'english' | 'chinese' | 'history' | 'geography' | 'politics' | null {
+export function inferSubjectFromName(subjectName: string | null): 'math' | 'physics' | 'chemistry' | 'biology' | 'english' | 'chinese' | 'history' | 'geography' | 'politics' | 'science' | 'society' | null {
     if (!subjectName) return null;
 
     const lowerName = subjectName.toLowerCase();
 
+    // 浙江等地的初中综合科目，要先于「历史」「物理」等判断（如「历史与社会」）
+    if (lowerName.includes('science') || lowerName.includes('科学')) return 'science';
+    if (lowerName.includes('society') || lowerName.includes('社会') || lowerName.includes('道德与法治') || lowerName.includes('道法')) return 'society';
     if (lowerName.includes('math') || lowerName.includes('数学')) return 'math';
     if (lowerName.includes('physics') || lowerName.includes('物理')) return 'physics';
     if (lowerName.includes('chemistry') || lowerName.includes('化学')) return 'chemistry';
