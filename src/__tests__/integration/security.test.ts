@@ -209,7 +209,7 @@ describe('owned items', () => {
 describe('profile credentials and admin account actions', () => {
     it('requires current password for email/password edits', async () => {
         signIn('reader');
-        for (const body of [{ email: 'new@example.com' }, { password: 'new-password' }, { password: 'new-password', currentPassword: 'wrong' }]) {
+        for (const body of [{ email: 'new@example.com' }, { password: 'new-horse-battery-staple' }, { password: 'new-horse-battery-staple', currentPassword: 'wrong' }]) {
             expect((await userPATCH(request(body, 'PATCH'))).status).toBe(401);
         }
         expect((await prisma.user.findUnique({ where: { id: 'reader' } }))?.sessionVersion).toBe(0);

@@ -575,6 +575,7 @@ export const translations = {
             email: "Email",
             password: "Password",
             confirmPassword: "Confirm Password",
+            passwordHint: "At least 12 characters. Avoid common passwords, keyboard patterns and your email or name; a few unrelated words make a strong passphrase.",
             name: "Name",
             educationStage: "Education Stage",
             enrollmentYear: "Enrollment Year",
@@ -586,6 +587,7 @@ export const translations = {
             login: {
                 title: "Login to Wrong Notebook",
                 failed: "Login failed, please check your credentials",
+                tooManyAttempts: "Too many failed attempts. This account is temporarily locked, please try again later.",
                 error: "An error occurred, please try again",
                 loggingIn: "Logging in...",
                 action: "Login",
@@ -1225,6 +1227,7 @@ export const translations = {
             email: "邮箱",
             password: "密码",
             confirmPassword: "确认密码",
+            passwordHint: "至少 12 个字符。避免常见密码、键盘序列以及自己的邮箱或名字；用几个不相关的词组成一句长口令更安全。",
             name: "姓名",
             educationStage: "教育阶段",
             enrollmentYear: "入学年份",
@@ -1236,6 +1239,7 @@ export const translations = {
             login: {
                 title: "登录到错题本",
                 failed: "登录失败，请检查邮箱和密码",
+                tooManyAttempts: "登录失败次数过多，账号已被暂时锁定，请稍后再试",
                 error: "发生错误，请重试",
                 loggingIn: "登录中...",
                 action: "登录",

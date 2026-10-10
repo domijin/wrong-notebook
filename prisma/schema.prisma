@@ -32,6 +32,16 @@ model User {
   customTags KnowledgeTag[] // User's custom tags
 }
 
+// 登录失败限流，持久化以免重启清零。key 形如 "account:<email>" 或 "ip:<address>"
+model AuthThrottle {
+  key           String    @id
+  failures      Int       @default(0)
+  lastFailureAt DateTime?
+  lockedUntil   DateTime?
+
+  @@index([lastFailureAt])
+}
+
 // No user foreign key: audit history survives account deletion and system reset.
 model AuditLog {
   id        String   @id @default(cuid())
