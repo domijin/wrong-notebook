@@ -33,7 +33,11 @@ REMOTE_DIR_ABS="${REMOTE_DIR/#\~/$REMOTE_HOME}"
 
 echo "[sync-env] uploading $SRC -> $REMOTE:$REMOTE_DIR_ABS/.env"
 scp "$SRC" "$REMOTE:$REMOTE_DIR_ABS/.env.new"
-ssh "$REMOTE" bash -lc "set -e
+# Feed the script on stdin: `ssh host bash -lc "<multi-line>"` is re-split by
+# the remote shell, so bash only ran `set` and the rest ran without `set -e`.
+# Variables below expand locally before the script is sent.
+ssh "$REMOTE" bash -l -s <<EOF
+set -e
 cd '$REMOTE_DIR_ABS'
 chmod 600 .env.new
 mv .env.new .env
@@ -43,5 +47,5 @@ docker compose up -d $CONTAINER
 sleep 5
 echo '[sync-env] /api/version:'
 curl -fsS -m 5 http://127.0.0.1:3000/api/version || true
-"
+EOF
 echo "[sync-env] done"
