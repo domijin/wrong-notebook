@@ -96,6 +96,7 @@ export function SettingsDialog() {
     const [profileSaving, setProfileSaving] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [profileStatus, setProfileStatus] = useState<{ ok: boolean; message: string } | null>(null);
 
     // Import/Export state
     const [exporting, setExporting] = useState(false);
@@ -134,6 +135,7 @@ export function SettingsDialog() {
         try {
             const data = await apiClient.get<UserProfile>("/api/user");
             setOriginalEmail(data.email || "");
+            setProfileStatus(null);
             setProfile({
                 name: data.name || "",
                 email: data.email || "",
@@ -217,14 +219,22 @@ export function SettingsDialog() {
     };
 
     const handleSaveProfile = async () => {
+        // 结果直接显示在表单里：浏览器屏蔽弹窗时 alert() 会静默失败，看起来像「点了没反应」
+        setProfileStatus(null);
+        const changingCredentials = !!profile.password || profile.email !== originalEmail;
+        if (profile.password && profile.password !== confirmPassword) {
+            setProfileStatus({ ok: false, message: t.settings?.messages?.passwordMismatch || 'Passwords do not match' });
+            return;
+        }
+        if (changingCredentials && !profile.currentPassword) {
+            setProfileStatus({
+                ok: false,
+                message: language === 'zh' ? '请先在上方输入当前密码' : 'Enter your current password above first',
+            });
+            return;
+        }
         setProfileSaving(true);
         try {
-            // 验证密码一致性（如果用户输入了密码）
-            if (profile.password && profile.password !== confirmPassword) {
-                alert(t.settings?.messages?.passwordMismatch || 'Passwords do not match');
-                setProfileSaving(false);
-                return;
-            }
 
             const payload: UpdateUserProfileRequest = {
                 name: profile.name,
@@ -243,18 +253,26 @@ export function SettingsDialog() {
 
             await apiClient.patch("/api/user", payload);
 
-            alert(t.settings?.messages?.profileUpdated || "Profile updated");
             setProfile(prev => ({ ...prev, password: "", currentPassword: "" })); // Clear password field
             setConfirmPassword(""); // Clear confirm password field
             setShowPassword(false);
             setShowConfirmPassword(false);
-            if (profile.password || profile.email !== originalEmail) {
+            const updated = t.settings?.messages?.profileUpdated || "Profile updated";
+            if (changingCredentials) {
+                setProfileStatus({
+                    ok: true,
+                    message: `${updated}${language === 'zh' ? '，请用新的凭据重新登录…' : '. Sign in again with your new credentials…'}`,
+                });
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 await signOut({ callbackUrl: '/login' });
-            } else window.location.reload();
+            } else {
+                setProfileStatus({ ok: true, message: updated });
+                setTimeout(() => window.location.reload(), 1000);
+            }
         } catch (error: any) {
             frontendLogger.error('[SettingsDialog]', 'Failed to update profile', { error: error?.data?.message || error?.message || String(error) });
             const message = error.data?.message || (t.settings?.messages?.updateFailed || "Update failed");
-            alert(message);
+            setProfileStatus({ ok: false, message });
         } finally {
             setProfileSaving(false);
         }
@@ -797,11 +815,6 @@ export function SettingsDialog() {
 
                     {/* Account Tab */}
                     <TabsContent value="account" className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>{language === 'zh' ? '当前密码（修改邮箱或密码时必填）' : 'Current password (required to change email or password)'}</Label>
-                            <Input type="password" autoComplete="current-password" value={profile.currentPassword}
-                                onChange={event => setProfile({ ...profile, currentPassword: event.target.value })} />
-                        </div>
                         {profileLoading ? (
                             <div className="flex justify-center py-8">
                                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -856,12 +869,19 @@ export function SettingsDialog() {
                                 </div>
 
                                 <div className="space-y-3 pt-2 border-t">
+                                    {/* 放在加载完成后才渲染的区域里：否则资料加载回来时会清空已经输入的当前密码 */}
+                                    <div className="space-y-2">
+                                        <Label>{language === 'zh' ? '当前密码（修改邮箱或密码时必填）' : 'Current password (required to change email or password)'}</Label>
+                                        <Input type="password" autoComplete="current-password" value={profile.currentPassword}
+                                            onChange={event => setProfile({ ...profile, currentPassword: event.target.value })} />
+                                    </div>
                                     <div className="space-y-2">
                                         <Label>{t.settings?.account?.changePassword || "Change Password (Leave empty to keep)"}</Label>
                                         <div className="relative">
                                             <Input
                                                 type={showPassword ? "text" : "password"}
                                                 value={profile.password}
+                                                autoComplete="new-password"
                                                 onChange={(e) => setProfile({ ...profile, password: e.target.value })}
                                                 placeholder="******"
                                                 minLength={12}
@@ -893,6 +913,7 @@ export function SettingsDialog() {
                                                 <Input
                                                     type={showConfirmPassword ? "text" : "password"}
                                                     value={confirmPassword}
+                                                    autoComplete="new-password"
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     placeholder="******"
                                                     minLength={12}
@@ -917,6 +938,12 @@ export function SettingsDialog() {
                                     )}
                                 </div>
 
+                                {profileStatus && (
+                                    <p role={profileStatus.ok ? 'status' : 'alert'} data-testid="profile-status"
+                                        className={`text-sm ${profileStatus.ok ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
+                                        {profileStatus.message}
+                                    </p>
+                                )}
                                 <Button onClick={handleSaveProfile} disabled={profileSaving} className="w-full">
                                     {profileSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     {t.settings?.account?.update || "Update Profile"}

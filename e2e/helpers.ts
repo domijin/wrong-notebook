@@ -26,3 +26,9 @@ export async function logout(page: Page) {
     await page.waitForURL('**/login');
     await expect(page.locator('input[name="email"]')).toBeVisible();
 }
+
+/** 改密码测试专用的普通用户，由 global-setup.ts 每次运行前重置 */
+export const PW_USER = {
+    email: 'password-change@e2e.test',
+    password: 'e2e-granite-tulip-harbor-58',
+};
