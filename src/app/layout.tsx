@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { translations } from "@/lib/translations";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,13 +22,15 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+// Default (server-rendered) metadata. The localized title and description are
+// applied client-side by <AppTitle /> once the stored language is known.
 export const metadata: Metadata = {
-  title: "AI智能错题本",
-  description: "基于AI的智能错题管理系统，帮助学生高效整理、分析和复习错题",
+  title: translations.zh.appTitle,
+  description: translations.zh.app.appDescription,
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: '智能错题本',
+    title: translations.zh.app.appleWebAppTitle,
   },
   formatDetection: {
     telephone: false,
@@ -44,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}

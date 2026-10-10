@@ -73,6 +73,10 @@ export const translations = {
             textInputTip: "After entering the question, AI will automatically solve and generate analysis",
             directEntry: "Direct Entry",
             directEntryHint: "Type the question content directly (Markdown + LaTeX supported)",
+            appName: "AI Study Notebook",
+            appNameShort: "Notebook",
+            appDescription: "An AI-powered system for organising, analysing and reviewing your mistakes",
+            appleWebAppTitle: "Notebook",
         },
         wrongAnswerStats: {
             title: "Wrong Answer Statistics",
@@ -692,6 +696,7 @@ export const translations = {
             targetLanguage: "Translate to",
             noContent: "There is no content to translate yet.",
         },
+        appTitle: "AI Study Notebook",
     },
     zh: {
         common: {
@@ -765,6 +770,10 @@ export const translations = {
             textInputTip: "输入题目后，AI 将自动解答并生成解析",
             directEntry: "直接录入",
             directEntryHint: "直接录入错题内容（支持 Markdown + LaTeX）",
+            appName: "智能错题本",
+            appNameShort: "错题本",
+            appDescription: "基于AI的智能错题管理系统，帮助学生高效整理、分析和复习错题",
+            appleWebAppTitle: "智能错题本",
         },
         wrongAnswerStats: {
             title: "错题统计",
@@ -1384,6 +1393,7 @@ export const translations = {
             targetLanguage: "翻译为",
             noContent: "暂无可翻译的内容。",
         },
+        appTitle: "智能错题本",
     },
     es: {
         common: {
@@ -1457,6 +1467,10 @@ export const translations = {
             textInputTip: "Tras introducir el enunciado, la IA lo resolverá y generará el análisis automáticamente",
             directEntry: "Entrada directa",
             directEntryHint: "Escribe directamente el contenido (compatible con Markdown + LaTeX)",
+            appName: "Cuaderno de Fallos IA",
+            appNameShort: "Cuaderno",
+            appDescription: "Un sistema con IA para organizar, analizar y repasar tus errores",
+            appleWebAppTitle: "Cuaderno",
         },
         wrongAnswerStats: {
             title: "Estadísticas de Errores",
@@ -2076,6 +2090,7 @@ export const translations = {
             targetLanguage: "Traducir a",
             noContent: "Todavía no hay contenido que traducir.",
         },
+        appTitle: "Cuaderno de Fallos IA",
     }
 };
 
