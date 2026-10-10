@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function usePasswordConfirmation() {
-    const { language } = useLanguage();
+    const { t } = useLanguage();
     const [open, setOpen] = useState(false);
     const [password, setPassword] = useState('');
     const pending = useRef<((value: { headers: Record<string, string> } | null) => void) | null>(null);
@@ -25,13 +25,13 @@ export function usePasswordConfirmation() {
         <Dialog open={open} onOpenChange={value => { if (!value) finish(false); }}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{language === 'zh' ? '验证身份' : 'Confirm your identity'}</DialogTitle>
-                    <DialogDescription>{language === 'zh' ? '请输入当前密码以执行管理操作。' : 'Enter your current password to perform this admin action.'}</DialogDescription>
+                    <DialogTitle>{t.passwordConfirm?.title}</DialogTitle>
+                    <DialogDescription>{t.passwordConfirm?.desc}</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={event => { event.preventDefault(); if (password) finish(true); }} className="space-y-4">
                     <Input type="password" autoComplete="current-password" autoFocus value={password}
-                        aria-label={language === 'zh' ? '当前密码' : 'Current password'} onChange={event => setPassword(event.target.value)} />
-                    <Button type="submit" disabled={!password}>{language === 'zh' ? '确认' : 'Confirm'}</Button>
+                        aria-label={t.passwordConfirm?.label} onChange={event => setPassword(event.target.value)} />
+                    <Button type="submit" disabled={!password}>{t.passwordConfirm?.submit}</Button>
                 </form>
             </DialogContent>
         </Dialog>

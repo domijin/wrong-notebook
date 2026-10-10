@@ -1,12 +1,14 @@
+import type { Language } from '../translations';
 import { validateAIDestination } from "../ai-destination";
 import { GoogleGenAI } from "@google/genai";
-import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
+import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult, TranslatableContent, TranslatedContent} from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
 import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
 import { getAppConfig } from '../config';
 import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
+import { runTranslate } from './translate';
 
 const logger = createLogger('ai:gemini');
 
@@ -157,7 +159,7 @@ export class GeminiProvider implements AIService {
         }
     }
 
-    async analyzeImage(imageBase64: string, mimeType: string = "image/jpeg", language: 'zh' | 'en' = 'zh', grade?: 7 | 8 | 9 | 10 | 11 | 12 | null, subject?: string | null, gradeSemester?: string | null): Promise<ParsedQuestion> {
+    async analyzeImage(imageBase64: string, mimeType: string = "image/jpeg", language: Language = 'zh', grade?: 7 | 8 | 9 | 10 | 11 | 12 | null, subject?: string | null, gradeSemester?: string | null): Promise<ParsedQuestion> {
         const config = getAppConfig();
 
         // 从数据库获取各学科标签
@@ -236,7 +238,7 @@ export class GeminiProvider implements AIService {
         }
     }
 
-    async generateSimilarQuestion(originalQuestion: string, knowledgePoints: string[], language: 'zh' | 'en' = 'zh', difficulty: DifficultyLevel = 'medium', gradeSemester?: string | null): Promise<ParsedQuestion> {
+    async generateSimilarQuestion(originalQuestion: string, knowledgePoints: string[], language: Language = 'zh', difficulty: DifficultyLevel = 'medium', gradeSemester?: string | null): Promise<ParsedQuestion> {
         const config = getAppConfig();
         const prompt = generateSimilarQuestionPrompt(language, originalQuestion, knowledgePoints, difficulty, {
             customTemplate: config.prompts?.similar
@@ -279,7 +281,7 @@ export class GeminiProvider implements AIService {
         }
     }
 
-    async reanswerQuestion(questionText: string, language: 'zh' | 'en' = 'zh', subject?: string | null, imageBase64?: string, gradeSemester?: string | null): Promise<ReanswerQuestionResult> {
+    async reanswerQuestion(questionText: string, language: Language = 'zh', subject?: string | null, imageBase64?: string, gradeSemester?: string | null): Promise<ReanswerQuestionResult> {
         const { generateReanswerPrompt } = await import('./prompts');
         const prompt = generateReanswerPrompt(language, questionText, subject, undefined, gradeSemester);
 
@@ -425,4 +427,25 @@ export class GeminiProvider implements AIService {
         }
         throw new Error("AI_UNKNOWN_ERROR");
     }
+
+    async translateContent(content: TranslatableContent, target: Language): Promise<TranslatedContent> {
+        logger.info({ provider: 'Gemini', model: this.modelName, target }, 'Translate request');
+        try {
+            return await runTranslate(content, target, async (prompt) => {
+                const response = await this.retryOperation(() => this.ai.models.generateContent({
+                    model: this.modelName,
+                    contents: [{ text: prompt }],
+                    config: {
+                        responseMimeType: 'application/json',
+                    },
+                }));
+                return response.text || '';
+            });
+        } catch (error) {
+            logger.error({ error }, 'Translate failed');
+            this.handleError(error);
+            throw error;
+        }
+    }
+
 }

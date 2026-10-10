@@ -22,6 +22,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Trash2, Loader2, AlertTriangle, Save, Eye, EyeOff, Languages, User, Bot, Shield, RefreshCw, Plus, Zap, CheckCircle2, XCircle, Download, Upload, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { normalizeLanguage } from "@/lib/translations";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { UserManagement } from "@/components/admin/user-management";
@@ -57,7 +58,7 @@ export function SettingsDialog() {
     const { data: session } = useSession();
     const { confirmPassword: confirmAdminPassword, passwordDialog } = usePasswordConfirmation();
     const [originalEmail, setOriginalEmail] = useState("");
-    const { t, language, setLanguage } = useLanguage();
+    const { t, language, setLanguage, languages, languageLabels } = useLanguage();
     const [open, setOpen] = useState(false);
     const dialogContentRef = useRef<HTMLDivElement>(null);
     const [clearingPractice, setClearingPractice] = useState(false);
@@ -229,7 +230,7 @@ export function SettingsDialog() {
         if (changingCredentials && !profile.currentPassword) {
             setProfileStatus({
                 ok: false,
-                message: language === 'zh' ? '请先在上方输入当前密码' : 'Enter your current password above first',
+                message: t.account?.enterCurrentFirst,
             });
             return;
         }
@@ -261,7 +262,7 @@ export function SettingsDialog() {
             if (changingCredentials) {
                 setProfileStatus({
                     ok: true,
-                    message: `${updated}${language === 'zh' ? '，请用新的凭据重新登录…' : '. Sign in again with your new credentials…'}`,
+                    message: `${updated} ${t.account?.reloginHint}`,
                 });
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 await signOut({ callbackUrl: '/login' });
@@ -750,14 +751,17 @@ export function SettingsDialog() {
                                 <Label>{t.settings?.language || "Language"}</Label>
                                 <Select
                                     value={language}
-                                    onValueChange={(val: 'zh' | 'en') => setLanguage(val)}
+                                    onValueChange={val => setLanguage(normalizeLanguage(val))}
                                 >
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="zh">中文 (Chinese)</SelectItem>
-                                        <SelectItem value="en">English</SelectItem>
+                                        {languages.map(code => (
+                                            <SelectItem key={code} value={code}>
+                                                {languageLabels[code]}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -871,7 +875,7 @@ export function SettingsDialog() {
                                 <div className="space-y-3 pt-2 border-t">
                                     {/* 放在加载完成后才渲染的区域里：否则资料加载回来时会清空已经输入的当前密码 */}
                                     <div className="space-y-2">
-                                        <Label>{language === 'zh' ? '当前密码（修改邮箱或密码时必填）' : 'Current password (required to change email or password)'}</Label>
+                                        <Label>{t.account?.currentPasswordLabel}</Label>
                                         <Input type="password" autoComplete="current-password" value={profile.currentPassword}
                                             onChange={event => setProfile({ ...profile, currentPassword: event.target.value })} />
                                     </div>

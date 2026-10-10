@@ -1,12 +1,14 @@
+import type { Language } from '../translations';
 import { validateAIDestination, aiFetch } from "../ai-destination";
 import { AzureOpenAI } from "openai";
-import { AIService, ParsedQuestion, DifficultyLevel, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
+import { AIService, ParsedQuestion, DifficultyLevel, ReanswerQuestionResult, GeogebraAnalysisResult, TranslatableContent, TranslatedContent} from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateReanswerPrompt, generateGeogebraPrompt } from './prompts';
 import { getAppConfig } from '../config';
 import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
 import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
+import { runTranslate } from './translate';
 
 const logger = createLogger('ai:azure');
 
@@ -144,7 +146,7 @@ export class AzureOpenAIProvider implements AIService {
     async analyzeImage(
         imageBase64: string,
         mimeType: string = 'image/jpeg',
-        language: 'zh' | 'en' = 'zh',
+        language: Language = 'zh',
         grade?: 7 | 8 | 9 | 10 | 11 | 12 | null,
         subject?: string | null,
         gradeSemester?: string | null
@@ -223,7 +225,7 @@ export class AzureOpenAIProvider implements AIService {
     async generateSimilarQuestion(
         originalQuestion: string,
         knowledgePoints: string[],
-        language: 'zh' | 'en' = 'zh',
+        language: Language = 'zh',
         difficulty: DifficultyLevel = 'medium',
         gradeSemester?: string | null
     ): Promise<ParsedQuestion> {
@@ -288,7 +290,7 @@ Knowledge Points: ${knowledgePoints.join(", ")}
 
     async reanswerQuestion(
         questionText: string,
-        language: 'zh' | 'en' = 'zh',
+        language: Language = 'zh',
         subject?: string | null,
         imageBase64?: string,
         gradeSemester?: string | null
@@ -457,4 +459,23 @@ Knowledge Points: ${knowledgePoints.join(", ")}
         }
         throw new Error("AI_UNKNOWN_ERROR");
     }
+
+    async translateContent(content: TranslatableContent, target: Language): Promise<TranslatedContent> {
+        logger.info({ provider: 'Azure', model: this.deployment, target }, 'Translate request');
+        try {
+            return await runTranslate(content, target, async (prompt) => {
+                const response = await this.client.chat.completions.create({
+                    model: this.deployment,
+                    messages: [{ role: 'system', content: prompt }],
+                    max_tokens: 8192,
+                });
+                return response.choices[0]?.message?.content || '';
+            });
+        } catch (error) {
+            logger.error({ error }, 'Translate failed');
+            this.handleError(error);
+            throw error;
+        }
+    }
+
 }

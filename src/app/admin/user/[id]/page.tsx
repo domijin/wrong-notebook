@@ -54,7 +54,7 @@ export default function AdminUserDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
                 <p className="text-muted-foreground">{t.common?.error || "加载失败"}</p>
-                <Button onClick={fetchData}>重试</Button>
+                <Button onClick={fetchData}>{t.admin?.retry}</Button>
             </div>
         )
     }

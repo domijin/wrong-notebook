@@ -409,7 +409,7 @@ export default function TagsPage() {
                                                 <h4 className="text-sm font-semibold text-muted-foreground border-b pb-1 mb-2">{groupName}</h4>
                                             )}
                                             {groupName === "通用" && groupKeys.length > 1 && (
-                                                <h4 className="text-sm font-semibold text-muted-foreground border-b pb-1 mb-2">其他</h4>
+                                                <h4 className="text-sm font-semibold text-muted-foreground border-b pb-1 mb-2">{t.tags?.otherCategory}</h4>
                                             )}
                                             <div className="flex flex-wrap gap-2">
                                                 {groupedByParent[groupName].map((tag) => (

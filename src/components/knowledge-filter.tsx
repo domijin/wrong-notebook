@@ -9,6 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { apiClient } from "@/lib/api-client";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { inferSubjectFromName } from "@/lib/knowledge-tags";
 
 interface TagTreeNode {
@@ -63,6 +64,7 @@ export function KnowledgeFilter({
     onFilterChange,
     className
 }: KnowledgeFilterProps) {
+    const { t } = useLanguage();
     const [gradeSemester, setGradeSemester] = useState<string>(initialGrade || "");
     const [chapter, setChapter] = useState<string>("");
     const [tag, setTag] = useState<string>(initialTag || "");
@@ -240,10 +242,10 @@ export function KnowledgeFilter({
         <div className={`flex gap-2 ${className}`}>
             <Select value={gradeSemester} onValueChange={handleGradeChange} disabled={loading}>
                 <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="年级/学期" />
+                    <SelectValue placeholder={t.filter?.grade || "Grade/Semester"} />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="all">全部年级</SelectItem>
+                    <SelectItem value="all">{t.filter?.allGrades}</SelectItem>
                     {filteredGrades.map(gs => (
                         <SelectItem key={gs} value={gs}>{gs}</SelectItem>
                     ))}
@@ -252,10 +254,10 @@ export function KnowledgeFilter({
 
             <Select value={chapter} onValueChange={handleChapterChange} disabled={!gradeSemester || gradeSemester === "all"}>
                 <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="章节" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">全部章节</SelectItem>
+<SelectValue placeholder={t.filter?.chapter || "Chapter"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t.filter?.allChapters}</SelectItem>
                     {chapters.map(c => (
                         <SelectItem key={c.id} value={c.name}>
                             {c.name.replace(/^第\d+章\s*/, '')}
@@ -266,10 +268,10 @@ export function KnowledgeFilter({
 
             <Select value={tag} onValueChange={handleTagChange} disabled={!chapter || chapter === "all"}>
                 <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="知识点" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">全部知识点</SelectItem>
+<SelectValue placeholder={t.filter?.knowledge || "Knowledge Point"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t.filter?.allKnowledge}</SelectItem>
                     {tags.map(t => (
                         <SelectItem key={t} value={t}>{highFrequencyTags.has(t) ? `★ ${t}` : t}</SelectItem>
                     ))}

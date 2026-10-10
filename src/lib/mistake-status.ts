@@ -1,3 +1,4 @@
+import type { Language } from './translations';
 export type MistakeStatus = 'not_attempted' | 'wrong_attempt' | 'unknown';
 
 export function normalizeMistakeStatus(status?: unknown): MistakeStatus {
@@ -17,7 +18,7 @@ export function normalizeMistakeStatusForSave(
     return normalizeMistakeStatus(status);
 }
 
-export function getMistakeStatusLabel(status?: string | null, language: 'zh' | 'en' = 'zh') {
+export function getMistakeStatusLabel(status?: string | null, language: Language = 'zh') {
     const normalized = normalizeMistakeStatus(status);
 
     const labels = language === 'en'

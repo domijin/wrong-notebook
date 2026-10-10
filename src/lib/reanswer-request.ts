@@ -1,6 +1,7 @@
+import type { Language } from './translations';
 export type ReanswerRequestBody = {
     questionText: string;
-    language: 'zh' | 'en';
+    language: Language;
     subject: string;
     imageBase64?: string;
     gradeSemester?: string;
@@ -14,7 +15,7 @@ export function buildReanswerRequestBody({
     gradeSemester,
 }: {
     questionText: string;
-    language: 'zh' | 'en';
+    language: Language;
     subject: string;
     imagePreview?: string | null;
     gradeSemester?: string;
