@@ -25,18 +25,38 @@ interface LanguageContextType {
 
 const STORAGE_KEY = 'app-language';
 
+/** BCP-47 tag for each locale, used for <html lang>. */
+const HTML_LANG: Record<Language, string> = {
+    zh: 'zh-CN',
+    en: 'en',
+    es: 'es',
+};
+
+/** Keep <html lang> in sync for screen readers and font shaping. */
+function applyDocumentLanguage(lang: Language) {
+    try {
+        document.documentElement.lang = HTML_LANG[lang];
+    } catch {
+        // Non-browser environment; nothing to sync.
+    }
+}
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
     // Default to Chinese; replaced on mount by the persisted preference.
     const [language, setLanguageState] = useState<Language>('zh');
 
+    // Restore the saved locale, then sync <html lang> for it too — a page load
+    // with an already-stored preference must still update the attribute, not
+    // only an explicit setLanguage() call.
     useEffect(() => {
         try {
             const saved = normalizeLanguage(localStorage.getItem(STORAGE_KEY));
             setLanguageState(saved);
+            applyDocumentLanguage(saved);
         } catch {
-            // Private-mode / storage-disabled browsers keep the default.
+            applyDocumentLanguage('zh');
         }
     }, []);
 
@@ -45,11 +65,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         setLanguageState(next);
         try {
             localStorage.setItem(STORAGE_KEY, next);
-            // Keep <html lang> in sync for screen readers and font shaping.
-            document.documentElement.lang = next === 'zh' ? 'zh-CN' : next;
         } catch {
-            // Ignore storage failures; the in-memory state still applies.
+            // Storage unavailable; the in-memory state still applies.
         }
+        applyDocumentLanguage(next);
     };
 
     const value: LanguageContextType = {

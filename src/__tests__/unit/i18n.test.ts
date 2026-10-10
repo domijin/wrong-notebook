@@ -216,3 +216,37 @@ describe('runTranslate', () => {
         ).rejects.toThrow(/AI_RESPONSE_ERROR/);
     });
 });
+
+describe('catalog coverage of strings that were once hardcoded', () => {
+    it('translates the direct-entry entry point', () => {
+        // These two were shipped as literal Chinese inside JSX and only showed
+        // up when the live UI was switched to Spanish.
+        expect(translations.en.app.directEntry).toBe('Direct Entry');
+        expect(translations.zh.app.directEntry).toBe('直接录入');
+        expect(translations.es.app.directEntry).toBe('Entrada directa');
+        for (const lang of LANGUAGES) {
+            expect(translations[lang].app.directEntryHint).toBeTruthy();
+        }
+    });
+
+    it('has no locale that merely copies another locale wholesale', () => {
+        // A cheap guard against shipping a locale that was never translated:
+        // the two locales must disagree on a decent share of the catalog.
+        const asMap = (o: unknown, p = '', out: Record<string, string> = {}) => {
+            for (const [k, v] of Object.entries(o as Record<string, unknown>)) {
+                const kp = p ? `${p}.${k}` : k;
+                if (v && typeof v === 'object') asMap(v, kp, out);
+                else out[kp] = String(v);
+            }
+            return out;
+        };
+        const en = asMap(translations.en);
+        const es = asMap(translations.es);
+        const same = Object.keys(en).filter(k => en[k] === es[k]).length;
+        const ratio = same / Object.keys(en).length;
+        console.log(
+            `es strings identical to en: ${same}/${Object.keys(en).length} (${(ratio * 100).toFixed(1)}%)`
+        );
+        expect(ratio).toBeLessThan(0.25);
+    });
+});

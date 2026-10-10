@@ -66,7 +66,9 @@
     "textInputHint": "Escribe el enunciado",
     "textInputPlaceholder": "Pega o escribe aquí el enunciado...\nCompatible con Markdown y fórmulas LaTeX (p. ej. $x^2 + y^2 = 1$)\n\nCtrl+Intro para enviar",
     "aiSolve": "Resolver con IA",
-    "textInputTip": "Tras introducir el enunciado, la IA lo resolverá y generará el análisis automáticamente"
+    "textInputTip": "Tras introducir el enunciado, la IA lo resolverá y generará el análisis automáticamente",
+    "directEntry": "Entrada directa",
+    "directEntryHint": "Escribe directamente el contenido (compatible con Markdown + LaTeX)"
   },
   "wrongAnswerStats": {
     "title": "Estadísticas de Errores",

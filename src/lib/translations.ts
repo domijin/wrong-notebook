@@ -70,6 +70,8 @@ export const translations = {
             textInputPlaceholder: "Paste or type question text here...\nSupports Markdown and LaTeX formulas (e.g. $x^2 + y^2 = 1$)\n\nCtrl+Enter to submit",
             aiSolve: "AI Solve",
             textInputTip: "After entering the question, AI will automatically solve and generate analysis",
+            directEntry: "Direct Entry",
+            directEntryHint: "Type the question content directly (Markdown + LaTeX supported)",
         },
         wrongAnswerStats: {
             title: "Wrong Answer Statistics",
@@ -759,6 +761,8 @@ export const translations = {
             textInputPlaceholder: "在此粘贴或输入题目文本...\n支持 Markdown 和 LaTeX 公式（如 $x^2 + y^2 = 1$）\n\nCtrl+Enter 快捷提交",
             aiSolve: "AI 解题",
             textInputTip: "输入题目后，AI 将自动解答并生成解析",
+            directEntry: "直接录入",
+            directEntryHint: "直接录入错题内容（支持 Markdown + LaTeX）",
         },
         wrongAnswerStats: {
             title: "错题统计",
@@ -1448,6 +1452,8 @@ export const translations = {
             textInputPlaceholder: "Pega o escribe aquí el enunciado...\nCompatible con Markdown y fórmulas LaTeX (p. ej. $x^2 + y^2 = 1$)\n\nCtrl+Intro para enviar",
             aiSolve: "Resolver con IA",
             textInputTip: "Tras introducir el enunciado, la IA lo resolverá y generará el análisis automáticamente",
+            directEntry: "Entrada directa",
+            directEntryHint: "Escribe directamente el contenido (compatible con Markdown + LaTeX)",
         },
         wrongAnswerStats: {
             title: "Estadísticas de Errores",
