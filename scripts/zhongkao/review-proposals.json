@@ -1,0 +1,1711 @@
+[
+  {
+    "subject": "math",
+    "grade": "七年级上",
+    "chapter": "一元一次方程",
+    "section": "一元一次方程的应用",
+    "tag": "单位换算",
+    "problem": "单位换算是计量与实际问题处理中的基础技能，并非一元一次方程应用题特有的知识类型。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "七年级下",
+    "chapter": "相交线与平行线",
+    "section": "图形的平移",
+    "tag": "坐标系中的平移",
+    "problem": "“坐标系中的平移”不属于七年级下册本章教材内容，属于后续年级相关内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "七年级下",
+    "chapter": "二元一次方程组",
+    "section": "二元一次方程",
+    "tag": "二元一次方程的通解",
+    "problem": "“通解”不是本节教材中的独立知识点，浙教版七下通常只讨论二元一次方程的解及其变形，不讲含任意参数的通解。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "七年级下",
+    "chapter": "二元一次方程组",
+    "section": "三元一次方程组及其解法",
+    "tag": "三元一次方程的解",
+    "problem": "本节研究的是三元一次方程组及其解，原名称将“方程组”误写为“方程”，知识点对象不一致。",
+    "action": "rename",
+    "newName": "三元方程组的解"
+  },
+  {
+    "subject": "math",
+    "grade": "八年级上",
+    "chapter": "三角形",
+    "section": "三角形全等的判定",
+    "tag": "角边角判定",
+    "problem": "“角边角”不能判定两个三角形全等，不属于三角形全等的判定方法。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "八年级上",
+    "chapter": "三角形",
+    "section": "定义与命题",
+    "tag": "基本事实与定理",
+    "problem": "“基本事实”与“定理”是两个独立的知识点，不应合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "八年级上",
+    "chapter": "一元一次不等式",
+    "section": "一元一次不等式及其解法",
+    "tag": "移项与合并同类项",
+    "problem": "将移项和合并同类项两个独立的代数运算合并在同一条知识点中。",
+    "action": "rename",
+    "newName": "移项"
+  },
+  {
+    "subject": "math",
+    "grade": "八年级上",
+    "chapter": "一次函数",
+    "section": "一次函数的图象与性质",
+    "tag": "斜率与截距",
+    "problem": "“斜率”与“截距”是两个相互独立的知识点，不能合并为一条；同时“斜率”不属于本节初中教材的考查内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "八年级下",
+    "chapter": "数据分析初步",
+    "section": "离差平方和与方差",
+    "tag": "标准差",
+    "problem": "“标准差”不属于本节教材内容，本节考查的核心概念是离差平方和与方差。",
+    "action": "remove"
+  },
+  {
+    "subject": "math",
+    "grade": "九年级下",
+    "chapter": "投影与三视图",
+    "section": "由三视图描述几何体",
+    "tag": "几何体的空间结构",
+    "problem": "表述过于宽泛，不是本节明确、可单独考查的知识点，且不属于该节教材内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级上",
+    "chapter": "探索自然的科学",
+    "section": "像科学家那样探究",
+    "tag": "实验数据分析与结论",
+    "problem": "将实验数据分析与实验结论两个相对独立的知识点合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级上",
+    "chapter": "丰富多彩的生命世界",
+    "section": "形形色色的植物",
+    "tag": "光合作用的过程",
+    "problem": "光合作用的过程属于后续植物生理学内容，不属于本节七年级上植物分类与形态结构知识。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级上",
+    "chapter": "广袤浩瀚的宇宙",
+    "section": "太阳系的组成与结构",
+    "tag": "太阳的结构与活动",
+    "problem": "将太阳结构和太阳活动两个相对独立的知识点合为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级上",
+    "chapter": "广袤浩瀚的宇宙",
+    "section": "太阳系的组成与结构",
+    "tag": "日食和月食的形成",
+    "problem": "将日食形成和月食形成两个独立知识点合为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级上",
+    "chapter": "广袤浩瀚的宇宙",
+    "section": "人类对宇宙的探索",
+    "tag": "恒星与星座",
+    "problem": "将恒星和星座两个独立知识点合为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "七年级下",
+    "chapter": "生物的结构与生殖",
+    "section": "植物的生殖与发育",
+    "tag": "花的结构与传粉",
+    "problem": "将花的结构和传粉两个相对独立的知识点合并在同一条目中。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级上",
+    "chapter": "力与空间探索",
+    "section": "力",
+    "tag": "力的概念与作用效果",
+    "problem": "将“力的概念”和“力的作用效果”两个相对独立的知识点合并为一条。",
+    "action": "rename",
+    "newName": "力的作用效果"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级上",
+    "chapter": "水与人类",
+    "section": "人类家园中的水",
+    "tag": "水的组成与性质",
+    "problem": "将水的组成和水的性质两个相对独立的知识点合并在一条中。",
+    "action": "rename",
+    "newName": "水的组成"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级上",
+    "chapter": "水与人类",
+    "section": "生活中的水溶液",
+    "tag": "溶解度与饱和溶液",
+    "problem": "将溶解度和饱和溶液两个独立概念合并在一条中。",
+    "action": "rename",
+    "newName": "溶解度"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级上",
+    "chapter": "水与人类",
+    "section": "生活中的水溶液",
+    "tag": "乳浊液与乳化作用",
+    "problem": "将乳浊液这一物质分散状态和乳化作用这一过程两个知识点合并在一条中。",
+    "action": "rename",
+    "newName": "乳浊液"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级上",
+    "chapter": "水与人类",
+    "section": "水资源的利用和保护",
+    "tag": "水污染及其治理",
+    "problem": "将水污染及其治理两个相对独立的知识点合并在一条中。",
+    "action": "rename",
+    "newName": "水污染"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "大气与气候变化",
+    "section": "天气与气候",
+    "tag": "天气要素与天气预报",
+    "problem": "天气要素与天气预报是两个可独立考查的知识点，合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "大气与气候变化",
+    "section": "天气与气候",
+    "tag": "气候特征与气候变化",
+    "problem": "气候特征与气候变化是两个可独立考查的知识点，合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "大气与气候变化",
+    "section": "大气中的二氧化碳",
+    "tag": "二氧化碳的制取与性质",
+    "problem": "二氧化碳的制取方法与二氧化碳的性质是两个可独立考查的知识点，合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "大气与气候变化",
+    "section": "大气圈中氧、碳的循环",
+    "tag": "氧气循环与碳循环",
+    "problem": "氧气循环和碳循环是两个独立的循环知识体系，合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "大气与气候变化",
+    "section": "大气圈中氧、碳的循环",
+    "tag": "光合作用与呼吸作用",
+    "problem": "光合作用和呼吸作用是两个独立的生理过程，合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "电磁及其应用",
+    "section": "家庭用电",
+    "tag": "电路故障与安全用电",
+    "problem": "将电路故障的识别与处理、家庭安全用电规则两个相对独立的知识点合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "电磁及其应用",
+    "section": "家庭用电",
+    "tag": "电能的使用与节约",
+    "problem": "将电能的使用与节约用电两个相对独立的知识点合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "八年级下",
+    "chapter": "人体的系统",
+    "section": "呼吸与排泄",
+    "tag": "泌尿系统的组成与排泄",
+    "problem": "将泌尿系统的组成与尿的形成、排出两个相对独立的知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级上",
+    "chapter": "能的转化与能量守恒",
+    "section": "物体的内能",
+    "tag": "热传递与热量",
+    "problem": "热传递是改变内能的过程，热量是热传递过程中转移的能量，二者属于相互关联但可独立考查的知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级上",
+    "chapter": "能的转化与能量守恒",
+    "section": "核能",
+    "tag": "核能的利用与防护",
+    "problem": "核能的利用与核辐射防护属于两个相互独立的知识内容，合并为一条不准确。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级上",
+    "chapter": "能的转化与能量守恒",
+    "section": "能的转化与能量守恒",
+    "tag": "能源危机与开发",
+    "problem": "能源危机与能源开发属于两个相互独立的知识内容，合并为一条不准确。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级上",
+    "chapter": "生命的起源与进化",
+    "section": "生物的进化",
+    "tag": "生物的分类",
+    "problem": "生物的分类属于生物多样性等相关内容，不属于本节的生物进化知识。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级下",
+    "chapter": "物质的转化与材料利用",
+    "section": "物质的鉴别与除杂",
+    "tag": "离子检验方法",
+    "problem": "离子检验方法属于高中化学的系统性内容，超出九年级下教材范围。",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "九年级下",
+    "chapter": "人的健康",
+    "section": "健康生活与非传染性疾病",
+    "tag": "肥胖成因、危害及预防",
+    "problem": "将肥胖的成因、危害和预防三个独立知识点合并为一条",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "中考专项",
+    "chapter": "情境综合",
+    "section": "跨学科综合分析",
+    "tag": "生活情境建模",
+    "problem": "表述过于空泛，不是具体可考查的知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "中考专项",
+    "chapter": "情境综合",
+    "section": "跨学科综合分析",
+    "tag": "物理综合分析",
+    "problem": "仅为学科范围的概括，不对应具体可考查的知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "中考专项",
+    "chapter": "情境综合",
+    "section": "跨学科综合分析",
+    "tag": "化学综合分析",
+    "problem": "仅为学科范围的概括，不对应具体可考查的知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "science",
+    "grade": "中考专项",
+    "chapter": "情境综合",
+    "section": "跨学科综合分析",
+    "tag": "生物综合分析",
+    "problem": "仅为学科范围的概括，不对应具体可考查的知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "道法·少年有梦",
+    "section": "开启初中生活",
+    "tag": "初中生活的规划",
+    "problem": "该知识点并非本节教材的明确知识内容，容易把一般性的生活规划误作教材知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "道法·珍爱我们的生命",
+    "section": "守护生命安全",
+    "tag": "交通与消防安全",
+    "problem": "交通安全与消防安全是两个相对独立的安全知识，不宜合并为一个知识点条目。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "道法·珍爱我们的生命",
+    "section": "保持身心健康",
+    "tag": "合理饮食与作息",
+    "problem": "合理饮食与合理作息是两个相对独立的健康知识，不宜合并为一个知识点条目。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "历史·史前时期：原始社会与中华文明的起源",
+    "section": "远古时期的人类活动",
+    "tag": "元谋人与北京人",
+    "problem": "元谋人和北京人是两个独立的早期人类知识对象，合并为一条超出单一知识点范围。",
+    "action": "rename",
+    "newName": "元谋人"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "历史·史前时期：原始社会与中华文明的起源",
+    "section": "中华文明的起源",
+    "tag": "炎黄传说与早期国家",
+    "problem": "炎黄传说与早期国家属于两个相对独立的知识内容，合并为一条不符合知识点标注要求。",
+    "action": "rename",
+    "newName": "炎黄传说"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "历史·秦汉时期：统一多民族封建国家的建立和巩固",
+    "section": "秦统一中国",
+    "tag": "秦朝暴政与灭亡",
+    "problem": "“秦朝暴政”与“秦朝灭亡”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "历史·秦汉时期：统一多民族封建国家的建立和巩固",
+    "section": "秦汉时期的科技与文化",
+    "tag": "张仲景与华佗",
+    "problem": "张仲景和华佗是两位相对独立的医学家，合并为一条知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "历史·三国两晋南北朝时期：政权分立与民族交融",
+    "section": "三国两晋南北朝时期的科技与文化",
+    "tag": "云冈石窟与龙门石窟",
+    "problem": "将云冈石窟和龙门石窟两个独立的可考查知识点合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级上",
+    "chapter": "地理·人类共同生活的世界",
+    "section": "世界的人口与文化",
+    "tag": "世界语言与宗教",
+    "problem": "语言分布与宗教信仰属于相互独立的知识_points，不宜合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "道法·珍惜青春时光",
+    "section": "做情绪情感的主人",
+    "tag": "情绪的作用与特点",
+    "problem": "将“情绪的作用”和“情绪的特点”两个相对独立的知识点合并为一条。",
+    "action": "rename",
+    "newName": "情绪的作用"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "道法·传承中华优秀传统文化",
+    "section": "传承核心思想理念",
+    "tag": "天下为公的和平理念",
+    "problem": "“天下为公”属于政治或社会理想，“和平理念”在教材中主要指“和为贵”等观念，两者不能组合为该知识点。",
+    "action": "rename",
+    "newName": "和为贵的和平理念"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·隋唐时期：繁荣与开放的时代",
+    "section": "隋朝统一与灭亡",
+    "tag": "李渊建立唐朝",
+    "problem": "“李渊建立唐朝”属于“唐朝建立与‘贞观之治’”一节，不属于“隋朝统一与灭亡”一节。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·隋唐时期：繁荣与开放的时代",
+    "section": "隋唐时期的科技与文化",
+    "tag": "唐诗与书画艺术",
+    "problem": "“唐诗”与“书画艺术”是两个相对独立的知识点，合并为一条不符合知识点标注要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·辽宋夏金元时期：民族关系发展和社会变化",
+    "section": "辽宋夏金元时期经济的繁荣",
+    "tag": "农业与手工业发展",
+    "problem": "将农业发展与手工业发展两个相对独立的知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·辽宋夏金元时期：民族关系发展和社会变化",
+    "section": "辽宋夏金元时期的科技与文化",
+    "tag": "指南针与火药应用",
+    "problem": "将指南针应用与火药应用两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·辽宋夏金元时期：民族关系发展和社会变化",
+    "section": "辽宋夏金元时期的科技与文化",
+    "tag": "宋词与元曲",
+    "problem": "将宋词和元曲两个独立的文学知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的统治",
+    "tag": "明朝建立与统一",
+    "problem": "将明朝建立与统一全国这一相对独立的历史进程合并为一条知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的统治",
+    "tag": "废丞相与设内阁",
+    "problem": "废丞相和设立内阁是两项独立的制度变更，不宜合并为一条知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的统治",
+    "tag": "迁都北京与北方防御",
+    "problem": "迁都北京与加强北方防御是两项相对独立的史实",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的对外关系",
+    "tag": "台湾开发与荷兰殖民",
+    "problem": "台湾开发与荷兰殖民分别属于不同的历史事项，合并后不宜作为单一知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的灭亡和清朝的建立",
+    "tag": "李自成起义与明朝灭亡",
+    "problem": "李自成起义与明朝灭亡是起义及其结果两个独立知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明朝的灭亡和清朝的建立",
+    "tag": "清朝建立与统一全国",
+    "problem": "清朝建立与统一全国是不同时间、不同性质的独立历史进程",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明清时期社会经济的发展",
+    "tag": "手工业发展与资本主义萌芽",
+    "problem": "手工业发展与资本主义萌芽是社会经济发展和商品经济关系两个独立知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "历史·明清时期（至鸦片战争前）：统一多民族封建国家的巩固与发展",
+    "section": "明清时期的科技与文化",
+    "tag": "《本草纲目》与《天工开物》",
+    "problem": "《本草纲目》和《天工开物》是两部独立的科技著作，不应合并为一条知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "七年级下",
+    "chapter": "地理·中国的自然环境",
+    "section": "中国的河流",
+    "tag": "流域的区域特征",
+    "problem": "表述过于笼统，未明确具体的流域及其可考查特征，不宜作为本节独立知识点标签。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级上",
+    "chapter": "历史·新民主主义革命的兴起",
+    "section": "五四运动",
+    "tag": "五四运动的性质与影响",
+    "problem": "将五四运动的性质与影响两个相对独立的知识点合并为一条。",
+    "action": "rename",
+    "newName": "五四运动的性质"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级上",
+    "chapter": "历史·人民解放战争",
+    "section": "国民党挑起内战",
+    "tag": "重庆谈判与和平建国主张",
+    "problem": "将重庆谈判这一历史事件与和平建国主张合并为一条，包含两个可独立考查的知识点。",
+    "action": "rename",
+    "newName": "重庆谈判"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级上",
+    "chapter": "历史·人民解放战争",
+    "section": "人民解放战争的胜利",
+    "tag": "渡江战役与南京解放",
+    "problem": "将渡江战役与南京解放这一具体事件合并为一条，二者可分别考查。",
+    "action": "rename",
+    "newName": "渡江战役"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级下",
+    "chapter": "道法·建设法治中国",
+    "section": "坚持全面依法治国",
+    "tag": "科学立法与严格执法",
+    "problem": "将科学立法和严格执法两个独立的法治要求合并为一条，超出单一可考查知识点范围。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级下",
+    "chapter": "道法·建设法治中国",
+    "section": "坚持全面依法治国",
+    "tag": "公正司法与全民守法",
+    "problem": "将公正司法和全民守法两个独立的法治要求合并为一条，超出单一可考查知识点范围。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级下",
+    "chapter": "历史·社会主义建设道路的探索",
+    "section": "艰辛探索与曲折发展",
+    "tag": "“大跃进”与人民公社化运动",
+    "problem": "同一标签合并了“大跃进”和人民公社化运动两个相互独立的知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级下",
+    "chapter": "历史·社会主义建设道路的探索",
+    "section": "社会主义建设的巨大成就和先锋模范",
+    "tag": "焦裕禄、王进喜等先锋模范",
+    "problem": "同一标签合并了焦裕禄和王进喜两位相互独立的先锋模范人物知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "八年级下",
+    "chapter": "历史·中国特色社会主义迈向21世纪",
+    "section": "中国特色社会主义事业取得新成就",
+    "tag": "西部大开发与加入世界贸易组织",
+    "problem": "将西部大开发和加入世界贸易组织两个相互独立的知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "道法·我们共同的世界",
+    "section": "同住地球村",
+    "tag": "反对科技霸权",
+    "problem": "教材相关内容是反对霸权主义和强权政治，“科技霸权”不是该知识点。",
+    "action": "rename",
+    "newName": "反对霸权主义和强权政治"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "道法·走向未来的少年",
+    "section": "我的毕业季",
+    "tag": "职业素养与劳动观念",
+    "problem": "将“职业素养”和“劳动观念”两个相对独立的知识点合并为一条。",
+    "action": "rename",
+    "newName": "职业素养"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "道法·走向未来的少年",
+    "section": "从这里出发",
+    "tag": "亲子关系与沟通",
+    "problem": "将“亲子关系”和“亲子沟通”两个相对独立的知识点合并为一条。",
+    "action": "rename",
+    "newName": "亲子沟通"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·殖民地人民的反抗与资本主义制度的扩展",
+    "section": "殖民地人民的反抗斗争",
+    "tag": "玻利瓦尔与圣马丁",
+    "problem": "将玻利瓦尔和圣马丁两位独立历史人物的知识点合并为一条。",
+    "action": "rename",
+    "newName": "玻利瓦尔"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·殖民地人民的反抗与资本主义制度的扩展",
+    "section": "俄国的改革",
+    "tag": "农奴制改革的性质与局限",
+    "problem": "将改革性质和历史局限两个可独立考查的知识点合并为一条。",
+    "action": "rename",
+    "newName": "农奴制改革性质"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·殖民地人民的反抗与资本主义制度的扩展",
+    "section": "日本明治维新",
+    "tag": "殖产兴业与文明开化",
+    "problem": "将经济措施“殖产兴业”和社会生活举措“文明开化”两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "殖产兴业"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·第二次工业革命和近代科学文化",
+    "section": "第二次工业革命",
+    "tag": "第二次工业革命的科技成就",
+    "problem": "该条目是概括性标题，包含电力、内燃机、化学工业等多个独立知识点，不能作为单一可考查知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·第二次工业革命和近代科学文化",
+    "section": "近代科学与文化",
+    "tag": "近代文学艺术成就",
+    "problem": "该条目同时概括文学和艺术两个相对独立的知识领域，且表述过于宽泛，不宜作为单一知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·二战后的世界变化",
+    "section": "冷战",
+    "tag": "杜鲁门主义与马歇尔计划",
+    "problem": "将两个独立的冷战政策合并为一条知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·二战后的世界变化",
+    "section": "冷战",
+    "tag": "德国分裂与朝鲜战争",
+    "problem": "将德国分裂和朝鲜战争两个相互独立的历史事件合并为一条知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "society",
+    "grade": "九年级下",
+    "chapter": "历史·二战后的世界变化",
+    "section": "二战后资本主义的新变化",
+    "tag": "资本主义经济与社会运动",
+    "problem": "将资本主义经济和社会运动两个相对独立的内容合并为一条，且表述过于宽泛。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第一单元",
+    "section": "古代诗歌四首",
+    "tag": "古诗词默写与赏析",
+    "problem": "将古诗词默写和古诗词赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "整本书阅读：《朝花夕拾》 精读、略读、浏览",
+    "tag": "《朝花夕拾》主要情节与人物",
+    "problem": "“主要情节”和“人物”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "整本书阅读：《朝花夕拾》 精读、略读、浏览",
+    "tag": "《朝花夕拾》略读与浏览",
+    "problem": "“略读”和“浏览”是两个相对独立的阅读方法，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《秋词（其一）》默写与赏析",
+    "problem": "“默写”和“赏析”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《夜雨寄北》默写与赏析",
+    "problem": "“默写”和“赏析”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《十一月四日风雨大作（其二）》默写与赏析",
+    "problem": "“默写”和“赏析”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《潼关》默写与赏析",
+    "problem": "“默写”和“赏析”是两个相对独立的知识点，合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第四单元",
+    "section": "梅岭三章",
+    "tag": "《梅岭三章》诗句默写与赏析",
+    "problem": "将诗句默写和诗句赏析两个独立知识点合并在一条中。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "活动·探究",
+    "section": "我的白鸽",
+    "tag": "散文中的借物抒情",
+    "problem": "《我的白鸽》是顾城的散文诗，不属于一般散文；应准确标为散文诗中的借物抒情。",
+    "action": "rename",
+    "newName": "散文诗中的借物抒情"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第六单元",
+    "section": "寓言四则",
+    "tag": "寓言寓意与辩证思维",
+    "problem": "将寓言的寓意和辩证思维两个相对独立的知识点合并在一条中。",
+    "action": "rename",
+    "newName": "寓言的寓意"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第六单元",
+    "section": "写作：发挥联想和想象",
+    "tag": "由诗歌生发联想",
+    "problem": "本节写作材料并非以诗歌为依据，知识点表述与教材内容不符。",
+    "action": "rename",
+    "newName": "由文字生发联想"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第六单元",
+    "section": "整本书阅读：《西游记》",
+    "tag": "《西游记》主要情节与人物",
+    "problem": "将主要情节和人物两个相对独立的知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《西游记》主要情节"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级上",
+    "chapter": "第六单元",
+    "section": "整本书阅读：《西游记》",
+    "tag": "《西游记》精读与跳读",
+    "problem": "将精读和跳读两种相对独立的阅读方法合并在一条中。",
+    "action": "rename",
+    "newName": "《西游记》精读方法"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "写作：抓住细节",
+    "tag": "选材与详略安排",
+    "problem": "将“选材”和“详略安排”两个相对独立的写作知识点合并在一条中。",
+    "action": "rename",
+    "newName": "选材安排"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "整本书阅读：《骆驼祥子》 圈点、批注、做笔记",
+    "tag": "《骆驼祥子》主要情节与人物",
+    "problem": "将“主要情节”和“人物”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《骆驼祥子》主要情节"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《竹里馆》默写与赏析",
+    "problem": "将“默写”和“赏析”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《竹里馆》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《春夜洛城闻笛》默写与赏析",
+    "problem": "将“默写”和“赏析”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《春夜洛城闻笛》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《逢入京使》默写与赏析",
+    "problem": "将“默写”和“赏析”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《逢入京使》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《晚春》默写与赏析",
+    "problem": "将“默写”和“赏析”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《晚春》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第四单元",
+    "section": "驿路梨花",
+    "tag": "小说人物形象与情节",
+    "problem": "“人物形象”和“情节”是两个可以分别考查的知识点，合并为一条不符合知识点拆分要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第四单元",
+    "section": "青春之光",
+    "tag": "比喻与反复手法",
+    "problem": "“比喻”和“反复”是两种独立的表达手法，合并为一条不符合知识点拆分要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第四单元",
+    "section": "写作：怎样选材",
+    "tag": "选材的真实与典型",
+    "problem": "“真实”和“典型”是选材的两个独立标准，合并为一条不符合知识点拆分要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "井冈翠竹",
+    "tag": "托物言志的象征手法",
+    "problem": "《井冈翠竹》主要运用象征手法寄托情感，不宜表述为“托物言志”；且原标签混合了托物言志与象征手法两个概念。",
+    "action": "rename",
+    "newName": "象征手法"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "紫藤萝瀑布",
+    "tag": "借景抒情的生命感悟",
+    "problem": "将“借景抒情”这一表达手法与“生命感悟”这一思想内容合并为一条，涵盖两个独立知识点。",
+    "action": "rename",
+    "newName": "借景抒情"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "外国诗二首",
+    "tag": "《假如生活欺骗了你》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《假如生活欺骗了你》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "外国诗二首",
+    "tag": "《未选择的路》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《未选择的路》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "古代诗歌五首",
+    "tag": "《登幽州台歌》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《登幽州台歌》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "古代诗歌五首",
+    "tag": "《望岳》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《望岳》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "古代诗歌五首",
+    "tag": "《登飞来峰》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《登飞来峰》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "古代诗歌五首",
+    "tag": "《游山西村》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《游山西村》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "古代诗歌五首",
+    "tag": "《己亥杂诗（其五）》默写与赏析",
+    "problem": "将同一首诗的默写与诗歌赏析两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "《己亥杂诗（其五）》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第五单元",
+    "section": "整本书阅读：《钢铁是怎样炼成的》",
+    "tag": "《钢铁是怎样炼成的》人物情节",
+    "problem": "将人物形象与故事情节两个独立考查点合并为一条。",
+    "action": "rename",
+    "newName": "人物形象"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第六单元",
+    "section": "“蛟龙”探海",
+    "tag": "新闻结构与信息概括",
+    "problem": "将新闻结构和信息概括两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "新闻结构"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《泊秦淮》默写与赏析",
+    "problem": "将默写和赏析两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "《泊秦淮》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《贾生》默写与赏析",
+    "problem": "将默写和赏析两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "《贾生》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《过松源晨炊漆公店（其五）》默写与赏析",
+    "problem": "将默写和赏析两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "《过松源晨炊漆公店（其五）》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "七年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《约客》默写与赏析",
+    "problem": "将默写和赏析两个独立知识点合并为一条。",
+    "action": "rename",
+    "newName": "《约客》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第二单元",
+    "section": "整本书阅读：《红星照耀中国》 怎样读红色经典作品",
+    "tag": "《红星照耀中国》人物情节",
+    "problem": "将“人物”和“情节”两个独立知识点合并在一条中。",
+    "action": "rename",
+    "newName": "《红星照耀中国》人物"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第三单元",
+    "section": "唐诗五首",
+    "tag": "《野望》《黄鹤楼》默写与赏析",
+    "problem": "一条中同时包含《野望》和《黄鹤楼》两首诗的知识点，应拆分。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第三单元",
+    "section": "写作：学习描写景物",
+    "tag": "景物描写方法与顺序",
+    "problem": "将景物描写方法与描写顺序两个独立知识点合为一条，应拆分。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第三单元",
+    "section": "写作：学习描写景物",
+    "tag": "活动方案设计",
+    "problem": "该内容属于综合性学习“我们的互联网时代”，不属于本节写作教学。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第三单元",
+    "section": "写作：学习描写景物",
+    "tag": "调查问卷设计",
+    "problem": "该内容属于综合性学习“我们的互联网时代”，不属于本节写作教学。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第三单元",
+    "section": "写作：学习描写景物",
+    "tag": "数据分析",
+    "problem": "该内容属于综合性学习“我们的互联网时代”，不属于本节写作教学。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第四单元",
+    "section": "整本书阅读：《红岩》",
+    "tag": "《红岩》主要情节与人物",
+    "problem": "将主要情节和人物两个独立知识点合并为一条",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第五单元",
+    "section": "人民英雄永垂不朽——瞻仰首都人民英雄纪念碑",
+    "tag": "纪念性文章的抒情议论",
+    "problem": "该课文不属于八年级上册第五单元，且不属于本章所列课文。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级上",
+    "chapter": "第六单元",
+    "section": "诗词五首",
+    "tag": "《赤壁》《渔家傲》默写与赏析",
+    "problem": "同一条目同时包含《赤壁》和《渔家傲》两首诗的知识点，属于将两个独立篇目合并。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第一单元",
+    "section": "写作：考虑目的和对象",
+    "tag": "根据目的选择文体",
+    "problem": "教材强调根据表达需要选择恰当的表达方式，不能简单表述为根据目的选择文体。",
+    "action": "rename",
+    "newName": "根据目的选择表达方式"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第二单元",
+    "section": "写作：说明的顺序",
+    "tag": "综合性学习方案设计",
+    "problem": "“综合性学习方案设计”不属于“说明的顺序”这一写作课，也不属于八年级下第二单元的说明文写作知识。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《式微》默写与赏析",
+    "problem": "《式微》不属于八年级下册第三单元的课外古诗词诵读内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《子衿》默写与赏析",
+    "problem": "《子衿》不属于八年级下册第三单元的课外古诗词诵读内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第五单元",
+    "section": "整本书阅读：《昆虫记》",
+    "tag": "《昆虫记》主要情节与人物",
+    "problem": "《昆虫记》是以昆虫及其生活习性为主要内容的科普作品，不以传统情节和人物为核心；该条还将两个不适用的知识点合并在一起。",
+    "action": "rename",
+    "newName": "《昆虫记》的内容与特色"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第六单元",
+    "section": "唐诗三首",
+    "tag": "《石壕吏》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立的可考查知识点，合并在同一条中。",
+    "action": "rename",
+    "newName": "《石壕吏》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第六单元",
+    "section": "唐诗三首",
+    "tag": "《卖炭翁》诗歌手法与情感",
+    "problem": "“诗歌手法”与“诗歌情感”是两个独立的可考查知识点，合并在同一条中。",
+    "action": "rename",
+    "newName": "《卖炭翁》诗歌手法"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《送友人》默写赏析",
+    "problem": "“默写”与“赏析”是两个独立的可考查知识点，合并在同一条中。",
+    "action": "rename",
+    "newName": "《送友人》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "八年级下",
+    "chapter": "第六单元",
+    "section": "写作：负责任地表达",
+    "tag": "诗歌意象写作",
+    "problem": "“诗歌意象写作”与“负责任地表达”这一写作专题内容不相符，属于明显不属于该节的内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第一单元",
+    "section": "沁园春·雪",
+    "tag": "《沁园春·雪》默写与赏析",
+    "problem": "将默写与赏析两个独立知识点合为一条",
+    "action": "rename",
+    "newName": "《沁园春·雪》赏析"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "诗词三首",
+    "tag": "《行路难（其一）》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《行路难（其一）》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "诗词三首",
+    "tag": "《水调歌头》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《水调歌头》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《月夜忆舍弟》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《月夜忆舍弟》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《长沙过贾谊宅》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《长沙过贾谊宅》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《左迁至蓝关示侄孙湘》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《左迁至蓝关示侄孙湘》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《商山早行》默写与赏析",
+    "problem": "“默写”与“赏析”是两个独立可考查知识点，不应合并为一条。",
+    "action": "rename",
+    "newName": "《商山早行》名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "诗词曲五首",
+    "tag": "《十五从军征》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "诗词曲五首",
+    "tag": "《白雪歌送武判官归京》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "诗词曲五首",
+    "tag": "《南乡子·登京口北固亭有怀》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "诗词曲五首",
+    "tag": "《过零丁洋》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "诗词曲五首",
+    "tag": "《山坡羊·潼关怀古》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《咸阳城东楼》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《无题》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《浣溪沙（漠漠轻寒）》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级上",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《丑奴儿·书博山道中壁》默写与赏析",
+    "problem": "将默写与诗歌赏析两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第一单元",
+    "section": "梅岭三章",
+    "tag": "革命情怀与诗剧情境",
+    "problem": "将“革命情怀”和“诗剧情境”两个独立知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第一单元",
+    "section": "短诗五首",
+    "tag": "《月夜》《萧红墓畔口占》意象与情感",
+    "problem": "将《月夜》和《萧红墓畔口占》两首诗的知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "词四首",
+    "tag": "《渔家傲·秋思》默写与赏析",
+    "problem": "同一条目合并了古诗词默写和古诗词赏析两个独立知识点。",
+    "action": "rename",
+    "newName": "《渔家傲·秋思》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "词四首",
+    "tag": "《江城子·密州出猎》默写与赏析",
+    "problem": "同一条目合并了古诗词默写和古诗词赏析两个独立知识点。",
+    "action": "rename",
+    "newName": "《江城子·密州出猎》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "词四首",
+    "tag": "《满江红（小住京华）》默写与赏析",
+    "problem": "同一条目合并了古诗词默写和古诗词赏析两个独立知识点。",
+    "action": "rename",
+    "newName": "《满江红（小住京华）》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "整本书阅读：《儒林外史》：讽刺作品的阅读",
+    "tag": "《儒林外史》主要情节与人物",
+    "problem": "同一条目合并了主要情节和人物形象两个独立知识点。",
+    "action": "rename",
+    "newName": "《儒林外史》人物形象"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《定风波（莫听穿林打叶声）》默写与赏析",
+    "problem": "同一条目合并了古诗词默写和古诗词赏析两个独立知识点。",
+    "action": "rename",
+    "newName": "《定风波（莫听穿林打叶声）》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第三单元",
+    "section": "课外古诗词诵读",
+    "tag": "《浣溪沙（身向云山那畔行）》默写与赏析",
+    "problem": "同一条目合并了古诗词默写和古诗词赏析两个独立知识点。",
+    "action": "rename",
+    "newName": "《浣溪沙（身向云山那畔行）》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第四单元",
+    "section": "写作：修改润色",
+    "tag": "辩论中的材料论证",
+    "problem": "该内容不属于“修改润色”写作知识，属于口语交际或议论文论证相关内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "活动·探究",
+    "section": "枣儿",
+    "tag": "剧本人物与情节",
+    "problem": "将“人物”和“情节”两个相对独立的知识点合并在一条中。",
+    "action": "rename",
+    "newName": "剧本人物"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "陈涉世家",
+    "tag": "《陈涉世家》人物与事件",
+    "problem": "将人物形象与主要事件两个相对独立的知识 点合并在一条中。",
+    "action": "rename",
+    "newName": "《陈涉世家》人物形象"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "整本书阅读：《简·爱》：外国小说的阅读",
+    "tag": "《简·爱》主要情节与人物",
+    "problem": "《简·爱》整本书阅读不属于九年级下册第六单元。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "整本书阅读：《简·爱》：外国小说的阅读",
+    "tag": "《简·爱》阅读方法",
+    "problem": "《简·爱》整本书阅读不属于九年级下册第六单元。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《南安军》默写与赏析",
+    "problem": "将默写与诗歌赏析两个相对独立的知识 点合并在一条中。",
+    "action": "rename",
+    "newName": "《南安军》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《别云间》默写与赏析",
+    "problem": "将默写与诗歌赏析两个相对独立的知识 点合并在一条中。",
+    "action": "rename",
+    "newName": "《别云间》默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《山坡羊·骊山怀古》默写与赏析",
+    "problem": "《山坡羊·骊山怀古》属于九年级上册第六单元，不属于九年级下册第六单元；且将默写与赏析两个知识点合并。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "九年级下",
+    "chapter": "第六单元",
+    "section": "课外古诗词诵读",
+    "tag": "《朝天子·咏喇叭》默写与赏析",
+    "problem": "《朝天子·咏喇叭》不属于九年级下册第六单元课外古诗词诵读内容；且将默写与赏析两个知识点合并。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "古诗文",
+    "section": "古诗词",
+    "tag": "古诗文名句默写",
+    "problem": "本节为古诗词，“古诗文”范围包含文言文，名称与节内容不完全对应。",
+    "action": "rename",
+    "newName": "古诗词名句默写"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "古诗文",
+    "section": "古诗词",
+    "tag": "古诗词炼字与手法",
+    "problem": "将“炼字赏析”和“表达手法鉴赏”两个相对独立的知识点合并为一条。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "名著阅读",
+    "section": "名著考查",
+    "tag": "名著阅读方法运用",
+    "problem": "表述空泛，缺少明确、可考查的阅读方法或具体名著阅读知识点",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "现代文阅读",
+    "section": "文学类文本",
+    "tag": "象征与写作手法",
+    "problem": "“象征”与“写作手法”并非同一具体知识点，名称含两个独立概念。",
+    "action": "rename",
+    "newName": "象征手法"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "现代文阅读",
+    "section": "文学类文本",
+    "tag": "想象与描写补写",
+    "problem": "“想象”与“描写补写”是不同的能力或任务，且“描写补写”不属于九下现代文阅读的核心教材知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "现代文阅读",
+    "section": "论述与实用类文本",
+    "tag": "思辨性阅读",
+    "problem": "“思辨性阅读”表述过于宽泛，不对应具体、可独立考查的阅读知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "写作",
+    "section": "作文",
+    "tag": "命题与半命题作文",
+    "problem": "“命题作文”和“半命题作文”是两个独立的作文类型，合并为一条不符合知识点标注要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "chinese",
+    "grade": "中考专项",
+    "chapter": "写作",
+    "section": "作文",
+    "tag": "材料作文审题立意",
+    "problem": "“审题”和“立意”是两个相对独立的写作知识要点，合并为一条不符合知识点标注要求。",
+    "action": "remove"
+  },
+  {
+    "subject": "english",
+    "grade": "七年级下",
+    "chapter": "语法",
+    "section": "词法拓展",
+    "tag": "感官动词与系动词",
+    "problem": "将感官动词和系动词两个相互独立的词汇类别合并为一条知识点。",
+    "action": "remove"
+  },
+  {
+    "subject": "english",
+    "grade": "八年级下",
+    "chapter": "语法",
+    "section": "非谓语与情态",
+    "tag": "反身代词",
+    "problem": "反身代词属于代词范畴，不属于本节的非谓语动词或情态动词内容。",
+    "action": "remove"
+  },
+  {
+    "subject": "english",
+    "grade": "九年级上",
+    "chapter": "语法",
+    "section": "复合句",
+    "tag": "让步与原因状语从句",
+    "problem": "将让步状语从句和原因状语从句两个独立知识点合并为一条",
+    "action": "remove"
+  }
+]
