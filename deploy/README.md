@@ -52,6 +52,31 @@ curl -fsS https://<host>.<tailnet>.ts.net/api/version
 docker logs --tail=200 wrong-notebook
 ```
 
+## Admin scripts
+
+Manual maintenance scripts live in `deploy/admin/`. `admin-run.sh` copies one
+into the running container (which has Prisma, the database and the AI config),
+runs it there, and removes it again. It reads `REMOTE` from `deploy/hosts.env`.
+
+```bash
+./deploy/admin-run.sh ai-ping.mjs                                  # check the active AI provider
+./deploy/admin-run.sh generate-questions.mjs --dry-run 数学:3 科学:3 # preview which knowledge points it would use
+./deploy/admin-run.sh generate-questions.mjs 数学:3 科学:3           # AI-written practice questions
+./deploy/admin-run.sh generate-questions.mjs '浮力的应用|科学'        # one named knowledge point (retry a failure)
+./deploy/admin-run.sh list-generated.mjs                           # what has been generated, by owner and notebook
+./deploy/admin-run.sh delete-generated.mjs                         # preview; add --yes to delete them
+```
+
+- Generated questions are saved as error items with source `中考知识点生成` in
+  the owner's notebook for that subject. The answers are AI-written and not
+  reviewed. `--owner=<email>` picks the account; without it the only active
+  admin gets them. Re-running skips knowledge points that already have one.
+- Back up the database before scripts that change data:
+  `ssh "$REMOTE" 'docker exec wrong-notebook cp /app/data/dev.db /app/data/dev.db.bak-$(date +%s)'`
+- `scripts/screenshot.mjs` runs on your machine instead: it signs in to a
+  running instance (`WN_BASE_URL`, `WN_EMAIL`, `WN_PASSWORD`) and saves
+  full-page screenshots for visual review.
+
 ## Notes on WSL
 
 If the host is a Windows machine running WSL:

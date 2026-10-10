@@ -76,11 +76,3 @@ upload_test_output*.txt
 # 本机真实主机信息：HOSTS.md 与 hosts.env.example 是占位符版本
 /deploy/HOSTS.local.md
 /deploy/hosts.env
-
-# 本机运维脚本（含主机/账号信息，不提交）
-/deploy/cleanup-partial.mjs
-/deploy/debug-ai.mjs
-/deploy/seed-missing.mjs
-/deploy/seed-questions.mjs
-/deploy/verify-seed.mjs
-/shot_wn.mjs
