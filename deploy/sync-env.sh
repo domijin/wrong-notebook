@@ -5,14 +5,19 @@
 # Usage:  ./deploy/sync-env.sh
 #   ./deploy/sync-env.sh /path/to/.env.local
 #
-# Pre:  - ssh access to <ssh-user>@<wsl-host> works (key auth)
+# Pre:  - deploy/hosts.env sets REMOTE (see hosts.env.example) and ssh
+#         access to it works (key auth)
 #       - the remote repo lives at ~/wrong-notebook on the WSL host
 #       - the container is named wrong-notebook (or override CONTAINER)
 
 set -euo pipefail
 
+# 主机信息放在不提交的 deploy/hosts.env（模板见 hosts.env.example），调用时的环境变量优先
+HOSTS_ENV="$(dirname "$0")/hosts.env"
+[[ -f "$HOSTS_ENV" ]] && . "$HOSTS_ENV"
+
 SRC="${1:-.env.local}"
-REMOTE="${REMOTE:-<ssh-user>@<wsl-host>}"
+REMOTE="${REMOTE:?set REMOTE in deploy/hosts.env (see deploy/hosts.env.example)}"
 REMOTE_DIR="${REMOTE_DIR:-~/wrong-notebook}"
 CONTAINER="${CONTAINER:-wrong-notebook}"
 

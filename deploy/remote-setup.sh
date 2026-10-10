@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-# remote-setup.sh — bootstrap wrong-notebook on <ssh-user>@<wsl-host>.
+# remote-setup.sh — bootstrap wrong-notebook on the WSL host in deploy/hosts.env.
 # Run LOCALLY. Streams progress to stderr; only the last "ok" line goes to stdout.
 
 set -euo pipefail
 
-REMOTE="${REMOTE:-<ssh-user>@<wsl-host>}"
+# 主机信息放在不提交的 deploy/hosts.env（模板见 hosts.env.example），调用时的环境变量优先
+HOSTS_ENV="$(dirname "$0")/hosts.env"
+[[ -f "$HOSTS_ENV" ]] && . "$HOSTS_ENV"
+REMOTE="${REMOTE:?set REMOTE in deploy/hosts.env (see deploy/hosts.env.example)}"
 # REMOTE_DIR is resolved on the REMOTE side (uses remote $HOME)
 REMOTE_DIR="${REMOTE_DIR:-~/wrong-notebook}"
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
@@ -46,7 +49,7 @@ rsync -az --delete \
 
 log "build env on remote"
 NEXTAUTH_SECRET_VAL="${NEXTAUTH_SECRET_VAL:-$(openssl rand -base64 32)}"
-NEXTAUTH_URL_VAL="${NEXTAUTH_URL_VAL:-https://<wsl-host>.<tailnet>.ts.net}"
+NEXTAUTH_URL_VAL="${NEXTAUTH_URL_VAL:?set NEXTAUTH_URL_VAL in deploy/hosts.env}"
 
 runr bash -lc "set -e
 cd '$REMOTE_DIR_ABS/deploy'
@@ -80,11 +83,11 @@ cat <<EOF
   APP_PORT        : $APP_PORT (bound to 127.0.0.1)
   NEXTAUTH_URL    : $NEXTAUTH_URL_VAL
 
-  Next (on the WINDOWS host <windows-host>, not WSL):
-    ssh <windows-host> 'tailscale serve --https=443 --set-path=/ http://<wsl-host>:3000'
-    # Or, if MagicDNS resolves <wsl-host> to <tailscale-ip> from <windows-host>, use that IP.
+  Next (on the WINDOWS host that runs Tailscale, not WSL):
+    ssh ${WINDOWS_HOST:-<windows-host>} 'tailscale serve --https=443 --set-path=/ http://${REMOTE#*@}:$APP_PORT'
+    # Or use the WSL host's Tailscale IP if MagicDNS does not resolve it there.
 
-  Then open https://<windows-host>.<tailnet>.ts.net/ in your tailnet browser.
+  Then open $NEXTAUTH_URL_VAL in your tailnet browser.
 
   After first admin login, rotate ADMIN_PASSWORD and remove it from
   $REMOTE_DIR/.env on the remote.

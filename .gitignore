@@ -72,3 +72,7 @@ upload_test_output*.txt
 
 # zhongkao tag pipeline cache
 /.cache/
+
+# 本机真实主机信息：HOSTS.md 与 hosts.env.example 是占位符版本
+/deploy/HOSTS.local.md
+/deploy/hosts.env

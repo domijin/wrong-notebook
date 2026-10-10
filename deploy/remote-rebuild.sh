@@ -2,11 +2,16 @@
 # remote-rebuild.sh — patch remote compose to build from local Dockerfile,
 # drop the wrong image, build, and start the patched app.
 set -euo pipefail
-REMOTE="${REMOTE:-<ssh-user>@<wsl-host>}"
-REMOTE_DIR="${REMOTE_DIR:-/home/<ssh-user>/wrong-notebook}"
-NEXTAUTH_URL_VAL="${NEXTAUTH_URL_VAL:-https://<wsl-host>.<tailnet>.ts.net}"
+# 主机信息放在不提交的 deploy/hosts.env（模板见 hosts.env.example），调用时的环境变量优先
+HOSTS_ENV="$(dirname "$0")/hosts.env"
+[[ -f "$HOSTS_ENV" ]] && . "$HOSTS_ENV"
+REMOTE="${REMOTE:?set REMOTE in deploy/hosts.env (see deploy/hosts.env.example)}"
+NEXTAUTH_URL_VAL="${NEXTAUTH_URL_VAL:?set NEXTAUTH_URL_VAL in deploy/hosts.env}"
 SSH_OPTS=(-o ServerAliveInterval=15 -o ServerAliveCountMax=4 -o ConnectTimeout=10)
 runr() { ssh "${SSH_OPTS[@]}" "$REMOTE" "$@"; }
+# 远端命令里路径被单引号包住，~ 不会展开，所以先在远端解析 $HOME
+REMOTE_DIR="${REMOTE_DIR:-~/wrong-notebook}"
+REMOTE_DIR="${REMOTE_DIR/#\~/$(runr 'printf %s "$HOME"')}"
 
 log()  { printf '[rebuild] %s\n' "$*" >&2; }
 
