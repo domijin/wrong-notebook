@@ -864,7 +864,7 @@ export function SettingsDialog() {
                                                 value={profile.password}
                                                 onChange={(e) => setProfile({ ...profile, password: e.target.value })}
                                                 placeholder="******"
-                                                minLength={6}
+                                                minLength={12}
                                                 className="pr-10"
                                             />
                                             <Button
@@ -882,6 +882,9 @@ export function SettingsDialog() {
                                                 )}
                                             </Button>
                                         </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {t.auth?.passwordHint || "至少 12 个字符"}
+                                        </p>
                                     </div>
                                     {profile.password && (
                                         <div className="space-y-2">
@@ -892,7 +895,7 @@ export function SettingsDialog() {
                                                     value={confirmPassword}
                                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                                     placeholder="******"
-                                                    minLength={6}
+                                                    minLength={12}
                                                     className="pr-10"
                                                 />
                                                 <Button

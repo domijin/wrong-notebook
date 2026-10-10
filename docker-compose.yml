@@ -14,6 +14,8 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       # First start only: no built-in admin credentials. Remove password after provisioning.
       - AI_ALLOWED_ORIGINS=${AI_ALLOWED_ORIGINS:-}
+      # 可信反向代理写入客户端 IP 的请求头，启用按 IP 的登录限流（见 SECURITY.md）
+      - AUTH_CLIENT_IP_HEADER=${AUTH_CLIENT_IP_HEADER:-}
       # NEXTAUTH_URL 根据实际情况设置你的信息
       - NEXTAUTH_URL=${NEXTAUTH_URL:?Set the Tailscale HTTPS URL}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?Set a random secret of at least 32 characters}

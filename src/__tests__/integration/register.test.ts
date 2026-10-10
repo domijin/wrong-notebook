@@ -50,7 +50,7 @@ describe('/api/register', () => {
     describe('POST /api/register', () => {
         const validUserData = {
             email: 'newuser@example.com',
-            password: 'password123',
+            password: 'horse-battery-staple-9',
             name: 'New User',
             educationStage: 'junior_high',
             enrollmentYear: 2024,
@@ -61,7 +61,7 @@ describe('/api/register', () => {
             mocks.mockPrismaUser.create.mockResolvedValue({
                 id: 'new-user-id',
                 ...validUserData,
-                password: 'hashed_password123',
+                password: 'hashed_horse-battery-staple-9',
             });
 
             const request = new Request('http://localhost/api/register', {
@@ -103,7 +103,7 @@ describe('/api/register', () => {
             mocks.mockPrismaUser.create.mockResolvedValue({
                 id: 'new-user-id',
                 email: 'user@localhost',
-                password: 'hashed_password123',
+                password: 'hashed_horse-battery-staple-9',
                 name: 'Local User',
             });
 
@@ -150,7 +150,8 @@ describe('/api/register', () => {
 
             const response = await POST(request);
 
-            expect(response.status).toBe(500); // Zod validation error
+            expect(response.status).toBe(400);
+            expect((await response.json()).code).toBe('password_too_short');
         });
 
         it('应该拒绝空用户名', async () => {
@@ -193,7 +194,7 @@ describe('/api/register', () => {
             mocks.mockPrismaUser.create.mockResolvedValue({
                 id: 'new-user-id',
                 email: validUserData.email,
-                password: 'hashed_password123',
+                password: 'hashed_horse-battery-staple-9',
                 name: validUserData.name,
             });
 

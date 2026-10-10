@@ -162,7 +162,7 @@ export default function RegisterPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    minLength={6}
+                                    minLength={12}
                                     className="pr-10"
                                 />
                                 <Button
@@ -180,6 +180,9 @@ export default function RegisterPage() {
                                     )}
                                 </Button>
                             </div>
+                            <p className="text-xs text-muted-foreground">
+                                {t.auth?.passwordHint || '至少 12 个字符'}
+                            </p>
                         </div>
                         <div className="space-y-2">
                             <label htmlFor="confirmPassword" className="text-sm font-medium">
@@ -193,7 +196,7 @@ export default function RegisterPage() {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
-                                    minLength={6}
+                                    minLength={12}
                                     className="pr-10"
                                 />
                                 <Button

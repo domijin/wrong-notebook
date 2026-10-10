@@ -33,8 +33,8 @@ if (!email || !/^[^\s@]+@[^\s@]+$/.test(email)) {
   console.error("ADMIN_EMAIL is required and must look like an email");
   process.exit(2);
 }
-if (!password || password.length < 6 || Buffer.byteLength(password) > 72) {
-  console.error("ADMIN_PW must be 6-72 bytes");
+if (!password || [...password].length < 12 || Buffer.byteLength(password) > 72) {
+  console.error("ADMIN_PW must be at least 12 characters and at most 72 bytes");
   process.exit(2);
 }
 

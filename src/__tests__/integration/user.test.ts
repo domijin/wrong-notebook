@@ -193,10 +193,10 @@ describe('/api/user', () => {
             const data = await response.json();
 
             expect(response.status).toBe(400);
-            expect(data.message).toBe('Password must be at least 6 characters');
+            expect(data.message).toBe('密码至少需要 12 个字符');
         });
 
-        it('应该成功更新密码（>=6字符）', async () => {
+        it('应该成功更新为足够强的密码', async () => {
             const updatedUser = {
                 name: 'Test User',
                 email: 'test@example.com',
@@ -207,7 +207,7 @@ describe('/api/user', () => {
 
             const request = new Request('http://localhost/api/user', {
                 method: 'PATCH',
-                body: JSON.stringify({ currentPassword: 'old-password', password: 'newpassword123' }),
+                body: JSON.stringify({ currentPassword: 'old-password', password: 'new-horse-battery-staple' }),
                 headers: { 'Content-Type': 'application/json' },
             });
 
@@ -216,7 +216,7 @@ describe('/api/user', () => {
             expect(response.status).toBe(200);
             // 验证密码被哈希处理
             const updateCall = mocks.mockPrismaUser.update.mock.calls[0][0];
-            expect(updateCall.data.password).toBe('hashed_newpassword123');
+            expect(updateCall.data.password).toBe('hashed_new-horse-battery-staple');
         });
 
         it('应该接受 admin@localhost 邮箱格式', async () => {

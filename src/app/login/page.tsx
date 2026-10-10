@@ -29,7 +29,9 @@ export default function LoginPage() {
                 password,
             });
 
-            if (result?.error) {
+            if (result?.error === 'TooManyAttempts') {
+                setError(t.auth?.login?.tooManyAttempts || '登录失败次数过多，账号已被暂时锁定，请稍后再试');
+            } else if (result?.error) {
                 setError(t.auth?.login?.failed || 'Login failed');
             } else {
                 router.push("/");
