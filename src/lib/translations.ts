@@ -1799,7 +1799,7 @@ export const translations = {
                 timeoutDesc: "Aumenta este valor si experimentas tiempo de espera frecuente durante el análisis con IA.",
             },
             tabs: {
-                general: "General",
+                general: "Generales",
                 account: "Cuenta",
                 ai: "Proveedor de IA",
                 prompts: "Instrucciones",
