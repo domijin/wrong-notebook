@@ -20,12 +20,15 @@ interface TagTreeNode {
     name: string;
     code: string | null;
     isSystem: boolean;
+    isHighFrequency?: boolean;
     children: TagTreeNode[];
 }
 
 // 学科配置
 const SUBJECTS = [
     { key: 'math', name: '数学' },
+    { key: 'science', name: '科学' },
+    { key: 'society', name: '社会' },
     { key: 'english', name: '英语' },
     { key: 'physics', name: '物理' },
     { key: 'chemistry', name: '化学' },
@@ -46,6 +49,8 @@ export default function TagsPage() {
     // 标签数据 (按学科) - null 表示未加载，[] 表示已加载但无数据
     const [tagsBySubject, setTagsBySubject] = useState<Record<SubjectKey, TagTreeNode[] | null>>({
         math: null,
+        science: null,
+        society: null,
         english: null,
         physics: null,
         chemistry: null,
@@ -196,7 +201,14 @@ export default function TagsPage() {
         if (!hasChildren) {
             // 叶子节点 - 显示为 Badge
             return (
-                <Badge key={node.id} variant="outline" className="cursor-default hover:bg-accent" style={{ marginLeft: isLeafContext ? 0 : paddingLeft }}>
+                <Badge
+                    key={node.id}
+                    variant="outline"
+                    className={`cursor-default hover:bg-accent ${node.isHighFrequency ? 'border-amber-500/60 text-amber-700 dark:text-amber-400' : ''}`}
+                    style={{ marginLeft: isLeafContext ? 0 : paddingLeft }}
+                    title={node.isHighFrequency ? (t.tags?.highFrequency || '中考高频考点') : undefined}
+                >
+                    {node.isHighFrequency && <span aria-hidden className="mr-0.5">★</span>}
                     {node.name}
                     {(() => {
                         const stat = stats.find(s => s.tag === node.name);

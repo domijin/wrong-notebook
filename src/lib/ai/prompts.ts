@@ -110,6 +110,9 @@ export interface PromptOptions {
   prefetchedChemistryTags?: string[];
   prefetchedBiologyTags?: string[];
   prefetchedEnglishTags?: string[];
+  prefetchedScienceTags?: string[];
+  prefetchedSocietyTags?: string[];
+  prefetchedChineseTags?: string[];
 }
 
 export const DEFAULT_ANALYZE_TEMPLATE = `【角色与核心任务 (ROLE AND CORE TASK)】
@@ -123,7 +126,7 @@ export const DEFAULT_ANALYZE_TEMPLATE = `【角色与核心任务 (ROLE AND CORE
 请严格按照以下结构输出内容：
 
 <subject>
-在此处填写学科，必须是以下之一："数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "其他"。
+在此处填写学科，必须是以下之一："数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "科学", "社会", "其他"。"科学"、"社会"是浙江等地初中的综合科目（科学含物理、化学、生物、地球与宇宙；社会含道德与法治、历史、人文地理），只在下方提供了科学或社会标签时使用。
 </subject>
 
 <knowledge_points>
@@ -323,82 +326,35 @@ export function generateAnalyzePrompt(
     ? "IMPORTANT: For the 'analysis' field, use Simplified Chinese. For 'questionText' and 'answerText', YOU MUST USE THE SAME LANGUAGE AS THE ORIGINAL QUESTION. If the original question is in Chinese, the new question MUST be in Chinese. If the original is in English, keep it in English. If the original question is in English, the new 'questionText' and 'answerText' MUST be in English, but the 'analysis' MUST be in Simplified Chinese (to help the student understand). "
     : "Please ensure all text fields are in English.";
 
-  // 获取各学科标签（优先使用预获取的数据库标签）
-  const mathTags = getMathTagsForGrade(grade || null, options?.prefetchedMathTags);
-  const mathTagsString = mathTags.length > 0 ? mathTags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
+  // 各学科标签（必须由调用方从数据库预获取；数学按年级累进）
+  const subjectTags: Array<{ subject: string; label: string; tags: string[] }> = [
+    { subject: '数学', label: '数学标签 (Math Tags)', tags: getMathTagsForGrade(grade || null, options?.prefetchedMathTags) },
+    { subject: '物理', label: '物理标签 (Physics Tags)', tags: options?.prefetchedPhysicsTags || [] },
+    { subject: '化学', label: '化学标签 (Chemistry Tags)', tags: options?.prefetchedChemistryTags || [] },
+    { subject: '生物', label: '生物标签 (Biology Tags)', tags: options?.prefetchedBiologyTags || [] },
+    { subject: '英语', label: '英语标签 (English Tags)', tags: options?.prefetchedEnglishTags || [] },
+    { subject: '科学', label: '科学标签 (Science Tags)', tags: options?.prefetchedScienceTags || [] },
+    { subject: '社会', label: '社会标签 (Society Tags)', tags: options?.prefetchedSocietyTags || [] },
+    { subject: '语文', label: '语文标签 (Chinese Tags)', tags: options?.prefetchedChineseTags || [] },
+  ];
+  const formatTags = (tags: string[]) => tags.length > 0 ? tags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
 
-  const physicsTags = options?.prefetchedPhysicsTags || [];
-  const physicsTagsString = physicsTags.length > 0 ? physicsTags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
+  // 已知科目只显示该科标签（节省 token，提高准确性）；未知科目显示所有有标签的学科让 AI 判断
+  const known = subjectTags.find(entry => entry.subject === subject);
+  const tagsSection = known
+    ? `本题来自「${known.subject}」错题本，<subject> 请填写"${known.subject}"。
 
-  const chemistryTags = options?.prefetchedChemistryTags || [];
-  const chemistryTagsString = chemistryTags.length > 0 ? chemistryTags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
-
-  const biologyTags = options?.prefetchedBiologyTags || [];
-  const biologyTagsString = biologyTags.length > 0 ? biologyTags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
-
-  const englishTags = options?.prefetchedEnglishTags || [];
-  const englishTagsString = englishTags.length > 0 ? englishTags.map(tag => `"${tag}"`).join(", ") : '（无可用标签）';
-
-  // 根据科目决定显示哪些标签（节省 token，提高准确性）
-  let tagsSection = "";
-
-  if (subject === '数学') {
-    tagsSection = `**数学标签 (Math Tags):**
-使用人教版课程大纲中的**精确标签名称**，可选标签如下：
-${mathTagsString}
-
-**重要提示**：
-- 必须从上述列表中选择精确匹配的标签
-- 每题最多 5 个标签`;
-  } else if (subject === '物理') {
-    tagsSection = `**物理标签 (Physics Tags):**
+**${known.label}:**
 使用课程大纲中的**精确标签名称**，可选标签如下：
-${physicsTagsString}
+${formatTags(known.tags)}
 
 **重要提示**：
 - 必须从上述列表中选择精确匹配的标签
-- 每题最多 5 个标签`;
-  } else if (subject === '化学') {
-    tagsSection = `**化学标签 (Chemistry Tags):**
-使用课程大纲中的**精确标签名称**，可选标签如下：
-${chemistryTagsString}
-
-**重要提示**：
-- 必须从上述列表中选择精确匹配的标签
-- 每题最多 5 个标签`;
-  } else if (subject === '生物') {
-    tagsSection = `**生物标签 (Biology Tags):**
-使用课程大纲中的**精确标签名称**，可选标签如下：
-${biologyTagsString}
-
-**重要提示**：
-- 必须从上述列表中选择精确匹配的标签
-- 每题最多 5 个标签`;
-  } else if (subject === '英语') {
-    tagsSection = `**英语标签 (English Tags):**
-使用课程大纲中的**精确标签名称**，可选标签如下：
-${englishTagsString}
-
-**重要提示**：
-- 必须从上述列表中选择精确匹配的标签
-- 每题最多 5 个标签`;
-  } else {
-    // 未知科目：显示所有标签让 AI 判断
-    tagsSection = `**数学标签 (Math Tags):**
-${mathTagsString}
-
-**物理标签 (Physics Tags):**
-${physicsTagsString}
-
-**化学标签 (Chemistry Tags):**
-${chemistryTagsString}
-
-**生物标签 (Biology Tags):**
-${biologyTagsString}
-
-**英语标签 (English Tags):**
-${englishTagsString}`;
-  }
+- 每题最多 5 个标签`
+    : subjectTags
+      .filter(entry => entry.tags.length > 0 || ['数学', '物理', '化学', '生物', '英语'].includes(entry.subject))
+      .map(entry => `**${entry.label}:**\n${formatTags(entry.tags)}`)
+      .join('\n\n');
 
   const template = options?.customTemplate || DEFAULT_ANALYZE_TEMPLATE;
 

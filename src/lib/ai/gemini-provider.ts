@@ -2,9 +2,9 @@ import { validateAIDestination } from "../ai-destination";
 import { GoogleGenAI } from "@google/genai";
 import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
-import { safeParseParsedQuestion } from './schema';
+import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
 import { getAppConfig } from '../config';
-import { getMathTagsFromDB, getTagsFromDB } from './tag-service';
+import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
 
@@ -118,7 +118,7 @@ export class GeminiProvider implements AIService {
 
         // Process Subject
         let subject: ParsedQuestion['subject'] = '其他';
-        const validSubjects = ["数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "其他"];
+        const validSubjects: readonly string[] = AI_SUBJECTS;
         if (subjectRaw && validSubjects.includes(subjectRaw)) {
             subject = subjectRaw as ParsedQuestion['subject'];
         }
@@ -161,19 +161,9 @@ export class GeminiProvider implements AIService {
         const config = getAppConfig();
 
         // 从数据库获取各学科标签
-        const prefetchedMathTags = (subject === '数学' || !subject) ? await getMathTagsFromDB(grade || null) : [];
-        const prefetchedPhysicsTags = (subject === '物理' || !subject) ? await getTagsFromDB('physics') : [];
-        const prefetchedChemistryTags = (subject === '化学' || !subject) ? await getTagsFromDB('chemistry') : [];
-        const prefetchedBiologyTags = (subject === '生物' || !subject) ? await getTagsFromDB('biology') : [];
-        const prefetchedEnglishTags = (subject === '英语' || !subject) ? await getTagsFromDB('english') : [];
-
         const prompt = generateAnalyzePrompt(language, grade, subject, {
             customTemplate: config.prompts?.analyze,
-            prefetchedMathTags,
-            prefetchedPhysicsTags,
-            prefetchedChemistryTags,
-            prefetchedBiologyTags,
-            prefetchedEnglishTags,
+            ...await prefetchPromptTags(subject, grade),
         }, gradeSemester);
 
         logger.box('🔍 AI Image Analysis Request', {

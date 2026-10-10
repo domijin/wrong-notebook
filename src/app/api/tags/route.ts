@@ -16,6 +16,7 @@ interface TagTreeNode {
     name: string;
     code: string | null;
     isSystem: boolean;
+    isHighFrequency: boolean;
     children: TagTreeNode[];
 }
 
@@ -33,6 +34,7 @@ function buildTagTree(tags: any[]): TagTreeNode[] {
             name: tag.name,
             code: tag.code,
             isSystem: tag.isSystem,
+            isHighFrequency: tag.isHighFrequency,
             children: [],
         });
     }
@@ -98,6 +100,7 @@ export async function GET(request: NextRequest) {
                         id: t.id,
                         name: t.name,
                         isSystem: t.isSystem,
+                        isHighFrequency: t.isHighFrequency,
                         parentId: t.parentId,
                         parentName: parent ? parent.name : null,
                     };

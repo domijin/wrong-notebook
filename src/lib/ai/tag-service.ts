@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { createLogger } from '@/lib/logger';
+import type { PromptOptions } from './prompts';
 
 const logger = createLogger('ai:tag-service');
 
@@ -133,4 +134,37 @@ export async function getTagsFromDB(subject: string): Promise<string[]> {
         logger.error({ error }, 'getTagsFromDB error');
         return [];
     }
+}
+
+/**
+ * 按科目预取 analyze 提示词所需的标签：已知科目只取该科，未知科目取全部
+ * @param subject - 中文科目名（如 "数学"），null 表示未知
+ * @param grade - 年级，数学按年级累进过滤
+ */
+export async function prefetchPromptTags(
+    subject: string | null | undefined,
+    grade: 7 | 8 | 9 | 10 | 11 | 12 | null | undefined,
+): Promise<Pick<PromptOptions, 'prefetchedMathTags' | 'prefetchedPhysicsTags' | 'prefetchedChemistryTags' | 'prefetchedBiologyTags' | 'prefetchedEnglishTags' | 'prefetchedScienceTags' | 'prefetchedSocietyTags' | 'prefetchedChineseTags'>> {
+    const wants = (name: string) => !subject || subject === name;
+    const fetchIf = (name: string, key: string) => wants(name) ? getTagsFromDB(key) : Promise.resolve([]);
+    const [math, physics, chemistry, biology, english, science, society, chinese] = await Promise.all([
+        wants('数学') ? getMathTagsFromDB(grade || null) : Promise.resolve([]),
+        fetchIf('物理', 'physics'),
+        fetchIf('化学', 'chemistry'),
+        fetchIf('生物', 'biology'),
+        fetchIf('英语', 'english'),
+        fetchIf('科学', 'science'),
+        fetchIf('社会', 'society'),
+        fetchIf('语文', 'chinese'),
+    ]);
+    return {
+        prefetchedMathTags: math,
+        prefetchedPhysicsTags: physics,
+        prefetchedChemistryTags: chemistry,
+        prefetchedBiologyTags: biology,
+        prefetchedEnglishTags: english,
+        prefetchedScienceTags: science,
+        prefetchedSocietyTags: society,
+        prefetchedChineseTags: chinese,
+    };
 }

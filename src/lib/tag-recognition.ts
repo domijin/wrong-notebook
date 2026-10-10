@@ -83,3 +83,15 @@ export async function findParentTagIdForGrade(gradeSemester: string | null | und
 
     return null;
 }
+
+/**
+ * 按名称查找用户可见的标签（系统标签或本人的自定义标签）。
+ * 优先在当前学科里找：同名知识点可能同时存在于「科学」和「物理」等学科。
+ */
+export async function findVisibleTagByName(name: string, subjectKey: string | null, userId: string) {
+    const visible = { OR: [{ isSystem: true }, { userId }] };
+    const inSubject = subjectKey
+        ? await prisma.knowledgeTag.findFirst({ where: { name, subject: subjectKey, ...visible }, orderBy: { isSystem: 'desc' } })
+        : null;
+    return inSubject ?? await prisma.knowledgeTag.findFirst({ where: { name, ...visible } });
+}

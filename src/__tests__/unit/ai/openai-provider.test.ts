@@ -45,6 +45,7 @@ vi.mock('@/lib/config', () => ({
 
 // Mock tag service
 vi.mock('@/lib/ai/tag-service', () => ({
+    prefetchPromptTags: vi.fn(() => Promise.resolve({})),
     getMathTagsFromDB: vi.fn(() => Promise.resolve([])),
     getTagsFromDB: vi.fn(() => Promise.resolve([])),
 }));

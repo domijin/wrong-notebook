@@ -16,6 +16,7 @@ interface TagTreeNode {
     name: string;
     code: string | null;
     isSystem: boolean;
+    isHighFrequency?: boolean;
     children: TagTreeNode[];
 }
 
@@ -139,7 +140,9 @@ export function KnowledgeFilter({
         // 可以在这里根据 enrollmentYear 做进一步优化，比如高亮当前年级
         // 但目前先返回该阶段的所有年级
 
-        return grades.flatMap(g => GRADE_TO_SEMESTERS[g] || []);
+        const semesters = grades.flatMap(g => GRADE_TO_SEMESTERS[g] || []);
+        // 初中阶段额外提供跨年级的「中考专项」（题型与能力类知识点）
+        return grades.some(g => g >= 7 && g <= 9) ? [...semesters, '中考专项'] : semesters;
     }, [calculateCurrentGrade]);
 
     // 加载用户信息和标签树
@@ -213,14 +216,14 @@ export function KnowledgeFilter({
     const currentChapterNode = chapters.find(node => node.name === chapter);
 
     // 递归获取所有叶子标签
-    const getLeafTags = (node: TagTreeNode): string[] => {
-        if (node.children.length === 0) return [node.name];
+    const getLeafTags = (node: TagTreeNode): TagTreeNode[] => {
+        if (node.children.length === 0) return [node];
         return node.children.flatMap(child => getLeafTags(child));
     };
+    const leafNodes = currentChapterNode ? getLeafTags(currentChapterNode) : [];
+    const highFrequencyTags = new Set(leafNodes.filter(n => n.isHighFrequency).map(n => n.name));
     // 去重标签，避免 React key 冲突
-    const tags = currentChapterNode
-        ? [...new Set(getLeafTags(currentChapterNode))]
-        : [];
+    const tags = [...new Set(leafNodes.map(n => n.name))];
 
     // 过滤可用年级 (只显示数据库中存在的)
     // 对于非数学科目，如果不按照年级结构存储，这里可能会被清空
@@ -268,7 +271,7 @@ export function KnowledgeFilter({
                 <SelectContent>
                     <SelectItem value="all">全部知识点</SelectItem>
                     {tags.map(t => (
-                        <SelectItem key={t} value={t}>{t}</SelectItem>
+                        <SelectItem key={t} value={t}>{highFrequencyTags.has(t) ? `★ ${t}` : t}</SelectItem>
                     ))}
                 </SelectContent>
             </Select>

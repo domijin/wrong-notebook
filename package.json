@@ -1,6 +1,6 @@
 {
   "name": "wrong-notebook",
-  "version": "1.9.1",
+  "version": "1.10.0",
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
-    "test:report": "playwright show-report --host 0.0.0.0"
+    "test:report": "playwright show-report --host 0.0.0.0",
+    "zhongkao:build": "node scripts/zhongkao/build.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.34.0",

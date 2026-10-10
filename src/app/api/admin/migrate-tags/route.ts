@@ -2,17 +2,7 @@ import { adminAction } from "@/lib/admin-action";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { internalError, unauthorized, forbidden } from "@/lib/api-errors";
-import {
-    MATH_CURRICULUM, MATH_GRADE_ORDER,
-    PHYSICS_CURRICULUM, PHYSICS_GRADE_ORDER,
-    ENGLISH_CURRICULUM, ENGLISH_GRADE_ORDER,
-    CHEMISTRY_CURRICULUM, CHEMISTRY_GRADE_ORDER,
-    BIOLOGY_CURRICULUM, BIOLOGY_GRADE_ORDER,
-    CHINESE_CURRICULUM, CHINESE_GRADE_ORDER,
-    HISTORY_CURRICULUM, HISTORY_GRADE_ORDER,
-    GEOGRAPHY_CURRICULUM, GEOGRAPHY_GRADE_ORDER,
-    POLITICS_CURRICULUM, POLITICS_GRADE_ORDER
-} from "@/lib/tag-data";
+import { seedSystemTags, findSystemTagByName } from "@/lib/tag-data/seed";
 import { createLogger } from "@/lib/logger";
 import { findParentTagIdForGrade } from "@/lib/tag-recognition";
 
@@ -64,41 +54,7 @@ export async function POST(req: Request) {
                 // ========== STEP 2: 删除旧标签并重建 ==========
                 logger.info('Step 2: Rebuilding system tags...');
 
-                // Math
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'math' } });
-                totalCreated += await seedMath(tx, MATH_CURRICULUM, MATH_GRADE_ORDER);
-
-                // Physics
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'physics' } });
-                totalCreated += await seedStandardSubject(tx, 'physics', PHYSICS_CURRICULUM, PHYSICS_GRADE_ORDER);
-
-                // English
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'english' } });
-                totalCreated += await seedStandardSubject(tx, 'english', ENGLISH_CURRICULUM, ENGLISH_GRADE_ORDER);
-
-                // Chemistry
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'chemistry' } });
-                totalCreated += await seedStandardSubject(tx, 'chemistry', CHEMISTRY_CURRICULUM, CHEMISTRY_GRADE_ORDER);
-
-                // Biology
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'biology' } });
-                totalCreated += await seedStandardSubject(tx, 'biology', BIOLOGY_CURRICULUM, BIOLOGY_GRADE_ORDER);
-
-                // Chinese
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'chinese' } });
-                totalCreated += await seedStandardSubject(tx, 'chinese', CHINESE_CURRICULUM, CHINESE_GRADE_ORDER);
-
-                // History
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'history' } });
-                totalCreated += await seedStandardSubject(tx, 'history', HISTORY_CURRICULUM, HISTORY_GRADE_ORDER);
-
-                // Geography
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'geography' } });
-                totalCreated += await seedStandardSubject(tx, 'geography', GEOGRAPHY_CURRICULUM, GEOGRAPHY_GRADE_ORDER);
-
-                // Politics
-                await tx.knowledgeTag.deleteMany({ where: { isSystem: true, subject: 'politics' } });
-                totalCreated += await seedStandardSubject(tx, 'politics', POLITICS_CURRICULUM, POLITICS_GRADE_ORDER);
+                totalCreated = await seedSystemTags(tx);
 
                 logger.info({ totalCreated }, 'Tags created');
 
@@ -119,14 +75,7 @@ export async function POST(req: Request) {
 
                     for (const assoc of itemAssociations) {
                         // 按名称+学科查找新标签
-                        let newTag = await tx.knowledgeTag.findFirst({
-                            where: {
-                                name: assoc.tagName,
-                                subject: assoc.subject,
-                                isSystem: true
-                            },
-                            select: { id: true }
-                        });
+                        const newTag = await findSystemTagByName(tx, assoc.tagName, assoc.subject);
 
                         if (newTag) {
                             newTagIds.push(newTag.id);
@@ -219,108 +168,4 @@ export async function POST(req: Request) {
             return internalError("Failed to migrate tags");
         }
     });
-}
-
-async function seedMath(tx: any, curriculum: any, gradeOrder: any) {
-    let count = 0;
-    for (const [gradeSemester, chapters] of Object.entries(curriculum) as any) {
-        const gradeNode = await tx.knowledgeTag.create({
-            data: {
-                name: gradeSemester,
-                subject: 'math',
-                parentId: null,
-                isSystem: true,
-                order: gradeOrder[gradeSemester] || 99,
-            },
-        });
-        count++;
-
-        for (let chapterIdx = 0; chapterIdx < chapters.length; chapterIdx++) {
-            const chapter = chapters[chapterIdx];
-            const chapterNode = await tx.knowledgeTag.create({
-                data: {
-                    name: chapter.chapter,
-                    subject: 'math',
-                    parentId: gradeNode.id,
-                    isSystem: true,
-                    order: chapterIdx + 1,
-                },
-            });
-            count++;
-
-            for (let sectionIdx = 0; sectionIdx < chapter.sections.length; sectionIdx++) {
-                const section = chapter.sections[sectionIdx];
-                const sectionNode = await tx.knowledgeTag.create({
-                    data: {
-                        name: section.section,
-                        subject: 'math',
-                        parentId: chapterNode.id,
-                        isSystem: true,
-                        order: sectionIdx + 1,
-                    },
-                });
-                count++;
-
-                for (let tagIdx = 0; tagIdx < section.tags.length; tagIdx++) {
-                    const tagName = section.tags[tagIdx];
-                    await tx.knowledgeTag.create({
-                        data: {
-                            name: tagName,
-                            subject: 'math',
-                            parentId: sectionNode.id,
-                            isSystem: true,
-                            order: tagIdx + 1,
-                        },
-                    });
-                    count++;
-                }
-            }
-        }
-    }
-    return count;
-}
-
-async function seedStandardSubject(tx: any, subject: string, curriculum: any, gradeOrder: any) {
-    let count = 0;
-    for (const [gradeSemester, chapters] of Object.entries(curriculum) as any) {
-        const gradeNode = await tx.knowledgeTag.create({
-            data: {
-                name: gradeSemester,
-                subject: subject,
-                parentId: null,
-                isSystem: true,
-                order: gradeOrder[gradeSemester] || 99,
-            },
-        });
-        count++;
-
-        for (let chapterIdx = 0; chapterIdx < chapters.length; chapterIdx++) {
-            const chapter = chapters[chapterIdx];
-            const chapterNode = await tx.knowledgeTag.create({
-                data: {
-                    name: chapter.chapter,
-                    subject: subject,
-                    parentId: gradeNode.id,
-                    isSystem: true,
-                    order: chapterIdx + 1,
-                },
-            });
-            count++;
-
-            for (let tagIdx = 0; tagIdx < chapter.tags.length; tagIdx++) {
-                const tagName = chapter.tags[tagIdx];
-                await tx.knowledgeTag.create({
-                    data: {
-                        name: tagName,
-                        subject: subject,
-                        parentId: chapterNode.id,
-                        isSystem: true,
-                        order: tagIdx + 1,
-                    },
-                });
-                count++;
-            }
-        }
-    }
-    return count;
 }

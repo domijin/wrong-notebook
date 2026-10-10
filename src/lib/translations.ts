@@ -274,6 +274,7 @@ export const translations = {
                 custom: "Custom Tags",
                 stats: "Usage Statistics",
             },
+            highFrequency: "High-frequency Zhongkao topic",
             subjects: {
                 math: "Math",
                 english: "English",
@@ -284,6 +285,8 @@ export const translations = {
                 history: "History",
                 geography: "Geography",
                 politics: "Politics",
+                science: "Science",
+                society: "Society",
                 other: "Other",
             },
             categories: {
@@ -922,6 +925,7 @@ export const translations = {
                 custom: "自定义标签",
                 stats: "使用统计",
             },
+            highFrequency: "中考高频考点",
             subjects: {
                 math: "数学",
                 english: "英语",
@@ -932,6 +936,8 @@ export const translations = {
                 history: "历史",
                 geography: "地理",
                 politics: "政治",
+                science: "科学",
+                society: "社会",
                 other: "其他",
             },
             categories: {

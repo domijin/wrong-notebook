@@ -3,8 +3,8 @@ import { AzureOpenAI } from "openai";
 import { AIService, ParsedQuestion, DifficultyLevel, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateReanswerPrompt, generateGeogebraPrompt } from './prompts';
 import { getAppConfig } from '../config';
-import { safeParseParsedQuestion } from './schema';
-import { getMathTagsFromDB, getTagsFromDB } from './tag-service';
+import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
+import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
 
@@ -102,8 +102,8 @@ export class AzureOpenAIProvider implements AIService {
 
         // Process Subject
         let subject: ParsedQuestion['subject'] = '其他';
-        const validSubjects: ParsedQuestion['subject'][] = ["数学", "物理", "化学", "生物", "英语", "语文", "历史", "地理", "政治", "其他"];
-        if (subjectRaw && (validSubjects as string[]).includes(subjectRaw)) {
+        const validSubjects: readonly string[] = AI_SUBJECTS;
+        if (subjectRaw && validSubjects.includes(subjectRaw)) {
             subject = subjectRaw as ParsedQuestion['subject'];
         }
 
@@ -151,21 +151,9 @@ export class AzureOpenAIProvider implements AIService {
     ): Promise<ParsedQuestion> {
         const config = getAppConfig();
 
-        // 从数据库获取各学科标签（参考 openai-provider.ts）
-        // 如果指定了学科，只获取该学科；否则获取所有学科标签供 AI 判断
-        const prefetchedMathTags = (subject === '数学' || !subject) ? await getMathTagsFromDB(grade || null) : [];
-        const prefetchedPhysicsTags = (subject === '物理' || !subject) ? await getTagsFromDB('physics') : [];
-        const prefetchedChemistryTags = (subject === '化学' || !subject) ? await getTagsFromDB('chemistry') : [];
-        const prefetchedBiologyTags = (subject === '生物' || !subject) ? await getTagsFromDB('biology') : [];
-        const prefetchedEnglishTags = (subject === '英语' || !subject) ? await getTagsFromDB('english') : [];
-
         const systemPrompt = generateAnalyzePrompt(language, grade, subject, {
             customTemplate: config.prompts?.analyze,
-            prefetchedMathTags,
-            prefetchedPhysicsTags,
-            prefetchedChemistryTags,
-            prefetchedBiologyTags,
-            prefetchedEnglishTags,
+            ...await prefetchPromptTags(subject, grade),
         }, gradeSemester);
 
         logger.box('🔍 AI Image Analysis Request', {

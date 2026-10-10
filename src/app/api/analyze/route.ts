@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         // 先获取用户年级信息，用于动态生成 AI prompt 中的标签列表
         let userGrade: 7 | 8 | 9 | 10 | 11 | 12 | null = null;
         let userGradeSemester: string | null = null;
-        let subjectName: 'math' | 'physics' | 'chemistry' | 'biology' | 'english' | 'chinese' | 'history' | 'geography' | 'politics' | null = null;
+        let subjectName: 'math' | 'physics' | 'chemistry' | 'biology' | 'english' | 'chinese' | 'history' | 'geography' | 'politics' | 'science' | 'society' | null = null;
 
         if (session?.user?.email) {
             try {
@@ -101,6 +101,8 @@ export async function POST(req: Request) {
             'history': '历史',
             'geography': '地理',
             'politics': '政治',
+            'science': '科学',
+            'society': '社会',
         };
         const subjectChinese = subjectName ? subjectNameMapping[subjectName] : null;
 

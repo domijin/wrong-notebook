@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { unauthorized, forbidden, notFound, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
-import { findParentTagIdForGrade } from "@/lib/tag-recognition";
+import { findParentTagIdForGrade, findVisibleTagByName } from "@/lib/tag-recognition";
+import { inferSubjectFromName } from "@/lib/knowledge-tags";
 import { normalizeMistakeStatusForSave } from "@/lib/mistake-status";
 
 const logger = createLogger('api:error-items:id');
@@ -125,25 +126,11 @@ export async function PUT(
                     : [];
 
             // 推断学科
-            const subjectKey = errorItem.subject?.name?.toLowerCase().includes('math') ||
-                errorItem.subject?.name?.includes('数学')
-                ? 'math'
-                : errorItem.subject?.name?.toLowerCase().includes('english') ||
-                    errorItem.subject?.name?.includes('英语')
-                    ? 'english'
-                    : 'other';
+            const subjectKey = inferSubjectFromName(errorItem.subject?.name ?? null) || 'other';
 
             const tagConnections: { id: string }[] = [];
             for (const tagName of tagNames) {
-                let tag = await prisma.knowledgeTag.findFirst({
-                    where: {
-                        name: tagName,
-                        OR: [
-                            { isSystem: true },
-                            { userId: user.id },
-                        ],
-                    },
-                });
+                let tag = await findVisibleTagByName(tagName, subjectKey, user.id);
 
                 if (!tag) {
                     // Determine grade context for the new tag
