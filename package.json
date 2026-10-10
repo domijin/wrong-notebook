@@ -38,7 +38,7 @@
     "dotenv": "^17.2.3",
     "global-agent": "^3.0.0",
     "jsonrepair": "^3.13.1",
-    "katex": "^0.16.25",
+    "katex": "^0.18.2",
     "next": "^16.4.0",
     "next-auth": "^4.24.15",
     "openai": "^6.9.1",
