@@ -1,6 +1,6 @@
 import type { Language } from '@/lib/translations';
 import { resolveAIRequest } from "@/lib/ai-request";
-import { acquireAIWork } from "@/lib/rate-limit";
+import { admitAIWork } from "@/lib/ai-budget";
 import { forbidden, badRequest } from "@/lib/api-errors";
 import { getCurrentSession } from "@/lib/current-session";
 import { NextRequest, NextResponse } from 'next/server';
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         try { body = resolveAIRequest(await request.json()); }
         catch { return badRequest("Invalid provider configuration or AI destination"); }
         const { provider, apiKey, baseUrl, model, endpoint, deploymentName, apiVersion, language = 'zh' } = body;
-        const work = acquireAIWork(session.user.id);
+        const work = await admitAIWork(session.user);
         if (work instanceof Response) return work;
         try {
             let textSupport = false;

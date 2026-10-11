@@ -66,6 +66,12 @@ vi.mock('@/lib/knowledge-tags', () => ({
 import { POST } from '@/app/api/analyze/route';
 import { getServerSession } from 'next-auth';
 
+// 每日额度和套餐余量保护在 ai-budget.test.ts 里单独测；这里只保留并发/突发限制
+vi.mock('@/lib/ai-budget', async () => {
+    const { acquireAIWork } = await import('@/lib/rate-limit');
+    return { admitAIWork: async (user: { id: string }) => acquireAIWork(user.id) };
+});
+
 describe('/api/analyze', () => {
     beforeEach(() => {
         vi.clearAllMocks();

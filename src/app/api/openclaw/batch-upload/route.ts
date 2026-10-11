@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "crypto";
-import { acquireAIWork, consumeRateLimit } from "@/lib/rate-limit";
+import { consumeRateLimit } from "@/lib/rate-limit";
+import { admitAIWork } from "@/lib/ai-budget";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -245,7 +246,7 @@ export async function POST(req: Request) {
         if (requestData.images.reduce((size, image) => size + image.base64.length * 3 / 4, 0) > 20 * 1024 * 1024) {
             return createErrorResponse('Batch exceeds 20MB', 400, ErrorCode.BAD_REQUEST);
         }
-        const acquired = acquireAIWork(dbUser.id);
+        const acquired = await admitAIWork(dbUser, Math.max(1, requestData.images.length));
         if (acquired instanceof Response) return acquired;
         work = acquired;
         // 获取图片数组

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Languages, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiClient } from '@/lib/api-client';
+import { aiBudgetMessage } from "@/lib/ai-budget-messages";
 
 export interface TranslateableFields {
     questionText: string;
@@ -66,9 +67,9 @@ export function TranslateButton({ item, onApply, className }: TranslateButtonPro
         } catch (e: any) {
             const code = String(e?.data?.message || e?.message || '');
             setError(
-                code.includes('AI_AUTH_ERROR') || code.includes('AI_RESPONSE_ERROR')
+                aiBudgetMessage(code, t.errors) ?? (code.includes('AI_AUTH_ERROR') || code.includes('AI_RESPONSE_ERROR')
                     ? t.errors?.AI_RESPONSE_ERROR || t.translate?.failed
-                    : t.translate?.failed
+                    : t.translate?.failed)
             );
         } finally {
             setPending(false);

@@ -14,6 +14,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { apiClient } from "@/lib/api-client";
 import { ClientSettings } from "@/types/api";
 import { frontendLogger } from "@/lib/frontend-logger";
+import { aiBudgetMessage } from "@/lib/ai-budget-messages";
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,10 @@ function PracticeContent() {
 
             let errorMessage = t.practice.errors?.default || "Failed to generate";
 
-            if (msg.includes('AI_CONNECTION_FAILED')) {
+            const budget = aiBudgetMessage(msg, t.errors);
+            if (budget) {
+                errorMessage = budget;
+            } else if (msg.includes('AI_CONNECTION_FAILED')) {
                 errorMessage = t.errors?.aiConnectionFailed || errorMessage;
             } else if (msg.includes('AI_RESPONSE_ERROR')) {
                 errorMessage = t.errors?.aiResponseError || errorMessage;

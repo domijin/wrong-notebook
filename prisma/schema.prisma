@@ -42,6 +42,15 @@ model AuthThrottle {
   @@index([lastFailureAt])
 }
 
+// 每日 AI 调用计数：key 形如 "user:<id>:2026-10-11" 或 "site:2026-10-11"
+model AiUsageCounter {
+  key       String   @id
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+}
+
 // No user foreign key: audit history survives account deletion and system reset.
 model AuditLog {
   id        String   @id @default(cuid())

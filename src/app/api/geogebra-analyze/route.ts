@@ -1,4 +1,4 @@
-import { acquireAIWork } from "@/lib/rate-limit";
+import { admitAIWork } from "@/lib/ai-budget";
 import { getCurrentSession } from "@/lib/current-session";
 import { NextResponse } from "next/server";
 import { unauthorized } from "@/lib/api-errors";
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const session = await getCurrentSession();
 
     if (!session?.user) return unauthorized("Authentication required");
-    const work = acquireAIWork(session.user.id);
+    const work = await admitAIWork(session.user);
     if (work instanceof Response) return work;
 
     try {
