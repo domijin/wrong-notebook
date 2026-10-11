@@ -22,6 +22,7 @@ import { normalizeMistakeStatusForSave, type MistakeStatus } from "@/lib/mistake
 import type { ReanswerQuestionResult } from "@/lib/ai/types";
 import { buildReanswerRequestBody } from "@/lib/reanswer-request";
 import { GeogebraDemo } from "@/components/geogebra-demo";
+import { aiBudgetMessage } from "@/lib/ai-budget-messages";
 
 interface ParsedQuestionWithSubject extends ParsedQuestion {
     subjectId?: string;
@@ -134,7 +135,10 @@ export function CorrectionEditor({ initialData, onSave, onCancel, imagePreview, 
             const reanswerErrors: ReanswerErrorMessages = t.errors?.reanswer || {};
             let errorText = reanswerErrors.default || 'Reanswer failed';
 
-            if (msg.includes('AI_AUTH_ERROR')) {
+            const budget = aiBudgetMessage(msg, t.errors);
+            if (budget) {
+                errorText = budget;
+            } else if (msg.includes('AI_AUTH_ERROR')) {
                 errorText = reanswerErrors.authError || t.errors?.AI_AUTH_ERROR || errorText;
             } else if (msg.includes('AI_CONNECTION_FAILED')) {
                 errorText = reanswerErrors.connectionFailed || t.errors?.AI_CONNECTION_FAILED || errorText;

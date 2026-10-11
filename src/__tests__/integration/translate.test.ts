@@ -25,6 +25,12 @@ vi.mock('@/lib/ai', () => ({
 
 import { POST } from '@/app/api/translate/route';
 
+// 每日额度和套餐余量保护在 ai-budget.test.ts 里单独测；这里只保留并发/突发限制
+vi.mock('@/lib/ai-budget', async () => {
+    const { acquireAIWork } = await import('@/lib/rate-limit');
+    return { admitAIWork: async (user: { id: string }) => acquireAIWork(user.id) };
+});
+
 function post(body: unknown, url = 'http://localhost/api/translate') {
     return POST(new Request(url, {
         method: 'POST',

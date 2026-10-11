@@ -23,6 +23,12 @@ services:
       - AI_ALLOWED_ORIGINS=${AI_ALLOWED_ORIGINS:-}
       # 可信反向代理写入客户端 IP 的请求头，启用按 IP 的登录限流（见 SECURITY.md）
       - AUTH_CLIENT_IP_HEADER=${AUTH_CLIENT_IP_HEADER:-}
+      # AI 每日上限与 MiniMax 套餐余量保护（见 SECURITY.md）
+      - AI_DAILY_LIMIT_PER_USER=${AI_DAILY_LIMIT_PER_USER:-200}
+      - AI_DAILY_LIMIT_SITE=${AI_DAILY_LIMIT_SITE:-1500}
+      - AI_QUOTA_MIN_WEEKLY_PERCENT=${AI_QUOTA_MIN_WEEKLY_PERCENT:-25}
+      - AI_QUOTA_MIN_INTERVAL_PERCENT=${AI_QUOTA_MIN_INTERVAL_PERCENT:-10}
+      - AI_QUOTA_TIMEZONE=${AI_QUOTA_TIMEZONE:-Asia/Shanghai}
       # NEXTAUTH_URL 根据实际情况设置你的信息
       - NEXTAUTH_URL=${NEXTAUTH_URL:?Set the Tailscale HTTPS URL}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:?Set a random secret of at least 32 characters}
