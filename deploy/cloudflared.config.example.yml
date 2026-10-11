@@ -1,0 +1,9 @@
+# Copy to $CLOUDFLARED_DIR/config.yml on the host (default ./cloudflared, git-ignored). Prefer a
+# directory outside the deploy folder, e.g. ~/.cloudflared-wrong-notebook, so a code sync cannot delete it.
+# <TUNNEL_ID> comes from `cloudflared tunnel create <name>`; its credentials JSON goes beside this file.
+tunnel: <TUNNEL_ID>
+credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
+ingress:
+  - hostname: notebook.example.com
+    service: http://wrong-notebook:3000
+  - service: http_status:404

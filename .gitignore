@@ -76,3 +76,6 @@ upload_test_output*.txt
 # 本机真实主机信息：HOSTS.md 与 hosts.env.example 是占位符版本
 /deploy/HOSTS.local.md
 /deploy/hosts.env
+
+# Cloudflare Tunnel credentials and config (deploy/cloudflared.config.example.yml)
+/cloudflared/

@@ -52,6 +52,34 @@ curl -fsS https://<host>.<tailnet>.ts.net/api/version
 docker logs --tail=200 wrong-notebook
 ```
 
+## Public access (Cloudflare Tunnel)
+
+The `cloudflared` service in `docker-compose.yml` publishes the app through a
+Cloudflare Tunnel: it dials out, so no inbound port is opened, and it reaches the
+app over the compose network.
+
+1. With a machine that holds the account's `cert.pem` (`cloudflared tunnel login`):
+   ```bash
+   cloudflared tunnel create wrong-notebook
+   # If ~/.cloudflared/config.yml names another tunnel, cloudflared uses that one;
+   # pass --config /dev/null and the tunnel ID to be sure:
+   cloudflared --config /dev/null tunnel route dns --overwrite-dns <TUNNEL_ID> notebook.example.com
+   ```
+2. On the app host, put `<TUNNEL_ID>.json` and a `config.yml`
+   (`deploy/cloudflared.config.example.yml`) in a directory **outside** the deploy
+   folder, mode 600, e.g. `~/.cloudflared-wrong-notebook`. A lost credentials file
+   can be rewritten with `cloudflared tunnel token --cred-file <path> <TUNNEL_ID>`.
+3. In the host's `.env`:
+   ```
+   NEXTAUTH_URL=https://notebook.example.com
+   AUTH_CLIENT_IP_HEADER=CF-Connecting-IP
+   COMPOSE_PROFILES=tunnel
+   CLOUDFLARED_DIR=/home/<user>/.cloudflared-wrong-notebook
+   CLOUDFLARED_UID=<uid that owns that directory>
+   ```
+4. `docker compose up -d`, then check `docker logs wrong-notebook-tunnel` for
+   `Registered tunnel connection` and `curl https://notebook.example.com/api/version`.
+
 ## Admin scripts
 
 Manual maintenance scripts live in `deploy/admin/`. `admin-run.sh` copies one
