@@ -9,6 +9,13 @@ import { ADMIN } from './helpers';
  * rendered UI at all. Override the host with LIVE_BASE_URL and supply
  * E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD.
  */
+
+// Opt-in only: this targets a live deployment and needs real credentials, so
+// it must never run as part of the normal suite (CI or local `npx playwright
+// test`). Run it explicitly:
+//   LIVE_BASE_URL=https://... E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... \
+//     npx playwright test e2e/live-i18n.spec.ts
+const liveOnly = Boolean(process.env.LIVE_BASE_URL || process.env.RUN_LIVE_E2E);
 const BASE = process.env.LIVE_BASE_URL || 'https://domis-pc-tools.taila7d2b1.ts.net';
 
 test.use({ baseURL: BASE });
@@ -35,6 +42,8 @@ const LABELS: Record<string, string[]> = {
 };
 
 test.describe('live i18n', () => {
+    test.skip(!liveOnly, 'set LIVE_BASE_URL / RUN_LIVE_E2E to target the live deployment');
+
     test('renders the home page in all three languages', async ({ page }) => {
         await login(page);
 
