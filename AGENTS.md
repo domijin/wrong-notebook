@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Git remotes
+
+- `origin` is the fork (domijin/wrong-notebook). Pull from and push to `origin` only; open PRs against `origin/main`.
+- `upstream` (wttwins/wrong-notebook) is read-only. Never `git pull upstream` or rebase onto it: that rewrites every fork commit.
+- Never deploy from this working folder. Deploy from a clean checkout of `origin/main` (see deploy/README.md).
