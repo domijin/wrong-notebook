@@ -4,13 +4,23 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
 import { createLogger } from "@/lib/logger"
-import { consumeRateLimit } from "@/lib/rate-limit"
+import { consumeRateLimit, hasRateLimitCapacity } from "@/lib/rate-limit"
 import { clearFailures, clientIpFromHeaders, getLockout, recordFailure, throttleKeys } from "@/lib/login-throttle"
 
 const logger = createLogger('auth');
 
 // 邮箱不存在时也做一次同等成本的 bcrypt 比对，避免通过响应时间探测哪些邮箱已注册
 const DUMMY_PASSWORD_HASH = '$2b$12$8glo.QvnPXMSb0nms0tbfex7LuLVp5HDRMnNOX7Nsu.wnCETikY4S';
+
+// 全站登录失败上限（15 分钟），只统计失败，成功登录不占额度。
+// 拿不到可信客户端 IP 时（没配 AUTH_CLIENT_IP_HEADER，或请求没经过代理），它是唯一的跨账号防线，所以收得紧；
+// 有可信 IP 时，按 IP 的锁定已经能挡住撞库，这里只是保护 CPU 的上限，放宽到不至于被单个攻击者打满而锁住所有人。
+const GLOBAL_FAILURE_WINDOW_MS = 15 * 60000;
+export function globalLoginFailureBucket(clientIp: string | null): { key: string; limit: number } {
+    return clientIp
+        ? { key: 'login:failures:proxied', limit: 2000 }
+        : { key: 'login:failures:direct', limit: 100 };
+}
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -51,10 +61,19 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
-                if (Buffer.byteLength(credentials.password) > 72 || credentials.email.length > 254
-                    || !consumeRateLimit('login:global', 100, 15 * 60000)) return null;
+                if (Buffer.byteLength(credentials.password) > 72 || credentials.email.length > 254) return null;
 
-                const keys = throttleKeys(credentials.email, clientIpFromHeaders(req?.headers));
+                const clientIp = clientIpFromHeaders(req?.headers);
+                const bucket = globalLoginFailureBucket(clientIp);
+                const keys = throttleKeys(credentials.email, clientIp);
+                const fail = async () => {
+                    consumeRateLimit(bucket.key, bucket.limit, GLOBAL_FAILURE_WINDOW_MS);
+                    await recordFailure(keys);
+                };
+                if (!hasRateLimitCapacity(bucket.key, bucket.limit)) {
+                    logger.warn({ bucket: bucket.key }, 'Global login failure limit reached');
+                    throw new Error("TooManyAttempts")
+                }
                 const lockedUntil = await getLockout(keys);
                 if (lockedUntil) {
                     logger.warn({ lockedUntil }, 'Login throttled');
@@ -70,7 +89,7 @@ export const authOptions: NextAuthOptions = {
                 if (!user) {
                     logger.debug('User not found');
                     await compare(credentials.password, DUMMY_PASSWORD_HASH)
-                    await recordFailure(keys)
+                    await fail()
                     return null
                 }
 
@@ -84,7 +103,7 @@ export const authOptions: NextAuthOptions = {
 
                 if (!isPasswordValid) {
                     logger.debug('Invalid password');
-                    await recordFailure(keys)
+                    await fail()
                     return null
                 }
 

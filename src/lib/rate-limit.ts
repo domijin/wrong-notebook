@@ -20,6 +20,12 @@ export function consumeRateLimit(key: string, limit: number, windowMs: number): 
     return true;
 }
 
+/** 只检查是否还有余量，不计数：用于「只有失败才计数」的场景 */
+export function hasRateLimitCapacity(key: string, limit: number): boolean {
+    const entry = windows.get(key);
+    return !entry || entry.expires <= Date.now() || entry.count < limit;
+}
+
 export function acquireAIWork(userId: string): { release: () => void } | NextResponse {
     if (!consumeRateLimit(`ai:${userId}`, 20, 10 * 60 * 1000)) {
         return NextResponse.json({ message: "Too many AI requests" }, { status: 429, headers: { 'Retry-After': '600' } });

@@ -106,3 +106,31 @@ describe('login throttling', () => {
         expect(await authorize({ email: 'fresh@example.com', password: 'guess' }, { headers: { 'x-forwarded-for': '203.0.113.8' } })).toBeNull();
     });
 });
+
+describe('global login failure limit', () => {
+    it('does not spend the limit on successful logins', async () => {
+        const authorize = await credentialsProvider();
+        for (let i = 0; i < 150; i++) expect(await authorize({ email: 'reader@example.com', password: 'password' }, {})).not.toBeNull();
+        mocks.compare.mockResolvedValue(false);
+        expect(await authorize({ email: 'reader@example.com', password: 'wrong' }, {})).toBeNull();
+    });
+    it('stops all logins after 100 failures when no trusted client IP is available', async () => {
+        const authorize = await credentialsProvider();
+        mocks.user.mockResolvedValue(null);
+        for (let i = 0; i < 100; i++) await authorize({ email: `user${i}@example.com`, password: 'guess' }, {});
+        mocks.user.mockResolvedValue({ id: 'reader', email: 'reader@example.com', name: 'Reader', password: 'hash', role: 'user', isActive: true, sessionVersion: 3 });
+        await expect(authorize({ email: 'reader@example.com', password: 'password' }, {})).rejects.toThrow('TooManyAttempts');
+    });
+    it('leaves other users able to sign in during a spread-out attack when client IPs are trusted', async () => {
+        vi.stubEnv('AUTH_CLIENT_IP_HEADER', 'CF-Connecting-IP');
+        const authorize = await credentialsProvider();
+        mocks.user.mockResolvedValue(null);
+        for (let ip = 0; ip < 30; ip++) {
+            for (let i = 0; i < 5; i++) {
+                await authorize({ email: `user${ip}-${i}@example.com`, password: 'guess' }, { headers: { 'cf-connecting-ip': `198.51.100.${ip}` } });
+            }
+        }
+        mocks.user.mockResolvedValue({ id: 'reader', email: 'reader@example.com', name: 'Reader', password: 'hash', role: 'user', isActive: true, sessionVersion: 3 });
+        expect(await authorize({ email: 'reader@example.com', password: 'password' }, { headers: { 'cf-connecting-ip': '203.0.113.50' } })).not.toBeNull();
+    });
+});
