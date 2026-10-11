@@ -5,6 +5,8 @@ import type { Prisma } from "@prisma/client";
 import { unauthorized, internalError } from "@/lib/api-errors";
 import { createLogger } from "@/lib/logger";
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, MIN_PAGE_SIZE } from "@/lib/constants/pagination";
+import { LANGUAGES, type Language } from "@/lib/translations";
+import { parseStoredFields } from "@/lib/item-translation";
 
 const logger = createLogger('api:error-items:list');
 
@@ -20,6 +22,8 @@ export async function GET(req: Request) {
 
     // 分页参数
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const langParam = searchParams.get("lang");
+    const lang = LANGUAGES.includes(langParam as Language) ? (langParam as Language) : null;
     const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(MIN_PAGE_SIZE, parseInt(searchParams.get("pageSize") || String(DEFAULT_PAGE_SIZE), 10)));
 
     try {
@@ -149,6 +153,8 @@ export async function GET(req: Request) {
             include: {
                 subject: true,
                 tags: true,
+                // 当前界面语言的机器译文，只取题干给卡片摘要用
+                ...(lang ? { translations: { where: { language: lang }, select: { fields: true } } } : {}),
             },
             skip: (page - 1) * pageSize,
             take: pageSize,
@@ -156,8 +162,13 @@ export async function GET(req: Request) {
 
         const totalPages = Math.ceil(total / pageSize);
 
+        const items = errorItems.map(({ translations, ...item }: typeof errorItems[number] & { translations?: { fields: string }[] }) => ({
+            ...item,
+            translatedQuestion: translations?.[0] ? parseStoredFields(translations[0].fields).questionText ?? null : null,
+        }));
+
         return NextResponse.json({
-            items: errorItems,
+            items,
             total,
             page,
             pageSize,

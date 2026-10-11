@@ -148,6 +148,22 @@ model ErrorItem {
   updatedAt        DateTime @updatedAt
 
   reviewSchedules ReviewSchedule[]
+  translations    ErrorItemTranslation[]
+}
+
+// 错题内容的机器翻译：作为原文之上的一层视图保存，从不覆盖原文。
+// sourceHash 记录翻译时原文的指纹，原文改动后可以提示「译文已过期」。
+model ErrorItemTranslation {
+  id          String    @id @default(cuid())
+  errorItemId String
+  errorItem   ErrorItem @relation(fields: [errorItemId], references: [id], onDelete: Cascade)
+  language    String
+  fields      String    // JSON: { questionText?, answerText?, analysis?, mistakeAnalysis?, userNotes? }
+  sourceHash  String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([errorItemId, language])
 }
 
 model ReviewSchedule {

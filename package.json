@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint src",
     "test": "vitest run",
+    "i18n:build": "node scripts/build-i18n.mjs",
+    "i18n:check": "node scripts/build-i18n.mjs --check",
     "test:unit": "vitest run src/__tests__/unit",
     "test:integration": "vitest run src/__tests__/integration",
     "test:watch": "vitest",

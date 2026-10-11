@@ -14,6 +14,7 @@ export interface TranslatableContent {
     questionText?: string | null;
     answerText?: string | null;
     analysis?: string | null;
+    wrongAnswerText?: string | null;
     mistakeAnalysis?: string | null;
     userNotes?: string | null;
 }

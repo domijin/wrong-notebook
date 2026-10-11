@@ -143,7 +143,8 @@
     "reanswering": "AI solving...",
     "reanswer": "🔄 Reanswer (based on corrected question)",
     "reanswerHint": "💡 If the question was misrecognized, correct it and click to regenerate answer",
-    "placeholder": "Supports Markdown and LaTeX..."
+    "placeholder": "Supports Markdown and LaTeX...",
+    "enterAnswerFirst": "Generate or enter an answer first"
   },
   "notebook": {
     "title": "My Notebook",
@@ -503,7 +504,8 @@
     "importAllData": "Import All",
     "importAllConfirm": "Import all users' data? This will restore data for all users from the export file.",
     "selectFile": "Select File",
-    "noFileSelected": "No file selected"
+    "noFileSelected": "No file selected",
+    "testMayBeInaccurate": "* Network problems can make this test result inaccurate"
   },
   "errors": {
     "AI_CONNECTION_FAILED": "Network error. Please check your connection.",
@@ -514,6 +516,9 @@
     "aiResponseError": "⚠️ AI returned invalid response\n\nPlease try again, contact support if issue persists",
     "AI_TIMEOUT_ERROR": "Request timeout. Please try again.",
     "AI_QUOTA_EXCEEDED": "API quota exceeded or insufficient balance. Please check your account.",
+    "AI_DAILY_LIMIT_USER": "You have reached today's AI limit. It resets at midnight (Beijing time).",
+    "AI_DAILY_LIMIT_SITE": "The site has reached today's AI limit. Please try again tomorrow.",
+    "AI_QUOTA_PAUSED": "AI features are paused for now to save the remaining quota. Please try again later.",
     "AI_PERMISSION_DENIED": "Permission denied (403). Please check your API key permissions.",
     "AI_NOT_FOUND": "Resource not found (404). Please check endpoint URL or model name.",
     "AI_SERVICE_UNAVAILABLE": "AI service unavailable (503). No available channel.",
@@ -676,26 +681,27 @@
   },
   "geogebra": {
     "regenerate": "Regenerate",
-    "reset": "Reset"
+    "reset": "Reset",
+    "loading": "Loading GeoGebra…",
+    "demoTitle": "GeoGebra interactive demo"
   },
   "translate": {
-    "title": "Translate",
-    "description": "Content is not in your interface language.",
-    "action": "Translate content",
-    "translating": "Translating {count}…",
-    "original": "Original",
-    "translated": "Translated",
+    "action": "Translate",
+    "translatingOne": "Translating…",
+    "machineTranslated": "Machine translation · {language}",
     "backToOriginal": "Show original",
-    "applyTranslation": "Use this translation",
-    "translationSaved": "Translation applied",
+    "showTranslation": "Show translation",
+    "stale": "The original was edited after this translation.",
+    "retranslate": "Translate again",
+    "removeTranslation": "Remove translation",
+    "noContent": "This item is already in {language}.",
     "failed": "Translation failed",
-    "unsupportedPair": "Translation is not available for this language pair yet. You can still edit the text manually.",
-    "targetLanguage": "Translate to",
-    "noContent": "This content is already in your interface language — nothing to translate.",
     "translateSelected": "Translate selected",
-    "translateDone": "Translated {count} item(s).",
     "translateNone": "Select items to translate.",
-    "translatingOne": "Translating…"
+    "translateProgress": "Translating {done} of {total}…",
+    "translateDone": "Translated {count} item(s). Your original text is unchanged.",
+    "translateFailedSome": "{count} item(s) could not be translated.",
+    "translatedBadge": "Translated"
   },
   "appTitle": "AI Notebook"
 }

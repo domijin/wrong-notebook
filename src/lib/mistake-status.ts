@@ -21,17 +21,11 @@ export function normalizeMistakeStatusForSave(
 export function getMistakeStatusLabel(status?: string | null, language: Language = 'zh') {
     const normalized = normalizeMistakeStatus(status);
 
-    const labels = language === 'en'
-        ? {
-            not_attempted: 'Not attempted',
-            wrong_attempt: 'Wrong attempt',
-            unknown: 'Unknown',
-        }
-        : {
-            not_attempted: '不会做',
-            wrong_attempt: '做错了',
-            unknown: '未判断',
-        };
+    const labels: Record<Language, Record<typeof normalized, string>> = {
+        en: { not_attempted: 'Not attempted', wrong_attempt: 'Wrong attempt', unknown: 'Unknown' },
+        es: { not_attempted: 'Sin intentar', wrong_attempt: 'Intento incorrecto', unknown: 'Sin determinar' },
+        zh: { not_attempted: '不会做', wrong_attempt: '做错了', unknown: '未判断' },
+    };
 
-    return labels[normalized];
+    return (labels[language] ?? labels.zh)[normalized];
 }

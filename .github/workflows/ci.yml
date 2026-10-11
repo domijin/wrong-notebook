@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check translations.ts matches the i18n catalogs
+        # translations.ts is generated from deploy/i18n/*.json; edit the JSON and run npm run i18n:build
+        run: npm run i18n:check
+
       - name: Run unit tests
         run: npm run test:unit
 

@@ -1272,7 +1272,7 @@ export function SettingsDialog() {
                                                             }</span>
                                                         )}
                                                     </div>
-                                                    <p className="text-muted-foreground/60 text-[10px] pl-1">* 由于网络问题，可能测试结果不准确</p>
+                                                    <p className="text-muted-foreground/60 text-[10px] pl-1">{t.settings?.testMayBeInaccurate || "* Network problems can make this test result inaccurate"}</p>
                                                 </div>
                                             )}
                                             {!testResult.success && testResult.textError && (

@@ -159,7 +159,7 @@ export function CorrectionEditor({ initialData, onSave, onCancel, imagePreview, 
             return;
         }
         if (!data.answerText.trim()) {
-            alert('请先生成或输入答案');
+            alert(t.editor?.enterAnswerFirst || 'Generate or enter an answer first');
             return;
         }
 
@@ -420,7 +420,7 @@ export function CorrectionEditor({ initialData, onSave, onCancel, imagePreview, 
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Box className="h-4 w-4" />
-                                    <span>GeoGebra 动态演示</span>
+                                    <span>{t.geogebra?.demoTitle || 'GeoGebra interactive demo'}</span>
                                 </div>
                                 <Button
                                     variant="outline"

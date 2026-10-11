@@ -12,7 +12,10 @@ export function cleanMarkdown(content: string): string {
         // 1. First, handle custom LaTeX-like escape sequences that remark might not catch or handle as we want
         // Specifically, handle escaped underscores manually before markdown stripping
         // because we want "\_" to become "_" (plain text underscore), not removed entirely
-        let text = content.replace(/\\_/g, '_');
+        let text = content.replace(/\\_/g, '_')
+            // LaTeX spacing commands (\, \; \! \quad) become a plain space. Do this before remark,
+            // which would otherwise read "\," as an escaped comma and leave a stray ",".
+            .replace(/\\(?:[,;:!]|quad|qquad)/g, ' ');
 
         // 2. Use remark to strip markdown formatting
         const file = remark().use(stripMarkdown as any).processSync(text);
@@ -26,8 +29,8 @@ export function cleanMarkdown(content: string): string {
             .replace(/\\right/g, '')
             .replace(/\\begin\{.*?\}/g, '')
             .replace(/\\end\{.*?\}/g, '')
-            .replace(/\\text\{.*?\}/g, '')
-            .replace(/\\mbox\{.*?\}/g, '')
+            // Keep the words inside \text{} / \mbox{} (units such as cm, N/kg); only drop the command
+            .replace(/\\(?:text|mbox|mathrm)\{([^{}]*)\}/g, '$1')
             // Math structures (Simple recursive patterns are not supported in JS regex, so we handle basic cases)
             .replace(/\\frac\s*\{([^{}]+)\}\s*\{([^{}]+)\}/g, '$1/$2')
             .replace(/\\sqrt\s*\{([^{}]+)\}/g, '√$1')

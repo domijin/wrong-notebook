@@ -20,7 +20,7 @@ import { inferSubjectFromName } from "@/lib/knowledge-tags";
 import { getMistakeStatusLabel, normalizeMistakeStatusForSave } from "@/lib/mistake-status";
 import { NotebookSelector } from "@/components/notebook-selector";
 import { GeogebraDemo } from "@/components/geogebra-demo";
-import { TranslateButton, type TranslateableFields } from "@/components/translate-button";
+import { TranslateButton, TranslationBanner, useItemTranslation } from "@/components/translate-button";
 
 interface KnowledgeTag {
     id: string;
@@ -73,7 +73,10 @@ export default function ErrorDetailPage() {
 
     const [isAnalyzingGeogebra, setIsAnalyzingGeogebra] = useState(false);
     const [geogebraError, setGeogebraError] = useState<string | null>(null);
-    const [translateStatus, setTranslateStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+    // 机器翻译只是原文之上的视图；编辑始终针对原文
+    const translation = useItemTranslation(item?.id, [item?.questionText, item?.answerText, item?.analysis, item?.wrongAnswerText, item?.mistakeAnalysis, item?.userNotes].join('\u0000'));
+    const translatedLang = (field: 'questionText' | 'answerText' | 'analysis' | 'wrongAnswerText' | 'mistakeAnalysis' | 'userNotes') =>
+        translation.fields[field] ? language : undefined;
     const [showQuestionImage, setShowQuestionImage] = useState(false);
     const [showReferenceImage, setShowReferenceImage] = useState(false);
     const [showOwnImage, setShowOwnImage] = useState(false);
@@ -181,6 +184,7 @@ export default function ErrorDetailPage() {
     };
 
     const startEditingNotes = () => {
+        translation.showOriginal();
         setNotesInput(item?.userNotes || "");
         setIsEditingNotes(true);
     };
@@ -280,6 +284,7 @@ export default function ErrorDetailPage() {
 
     // --- Question Handlers ---
     const startEditingQuestion = () => {
+        translation.showOriginal();
         if (item) {
             setQuestionInput(item.questionText);
             setIsEditingQuestion(true);
@@ -305,6 +310,7 @@ export default function ErrorDetailPage() {
 
     // --- Answer Handlers ---
     const startEditingAnswer = () => {
+        translation.showOriginal();
         if (item) {
             setAnswerInput(item.answerText);
             setIsEditingAnswer(true);
@@ -330,6 +336,7 @@ export default function ErrorDetailPage() {
 
     // --- Analysis Handlers ---
     const startEditingAnalysis = () => {
+        translation.showOriginal();
         if (item) {
             setAnalysisInput(item.analysis);
             setIsEditingAnalysis(true);
@@ -358,20 +365,9 @@ export default function ErrorDetailPage() {
      * Persist a machine translation of the item's prose. Only the fields the
      * translator actually returned are sent, so nothing else is overwritten.
      */
-    const applyTranslationHandler = async (fields: Partial<TranslateableFields>) => {
-        if (!item) return;
-        try {
-            await apiClient.put(`/api/error-items/${item.id}`, fields);
-            setItem({ ...item, ...fields });
-            setTranslateStatus('ok');
-        } catch (error) {
-            console.error(error);
-            setTranslateStatus('error');
-        }
-    };
-
     // --- Mistake Analysis Handlers ---
     const startEditingMistake = () => {
+        translation.showOriginal();
         if (item) {
             setWrongAnswerInput(item.wrongAnswerText || "");
             setMistakeAnalysisInput(item.mistakeAnalysis || "");
@@ -472,13 +468,8 @@ export default function ErrorDetailPage() {
                         <h1 className="text-2xl font-bold">{t.detail.title}</h1>
                     </div>
 
-                    <div className="flex gap-2">
-                        <TranslateButton item={item} onApply={applyTranslationHandler} />
-                        {translateStatus === 'ok' && (
-                            <span className="self-center text-xs text-muted-foreground">
-                                {t.translate?.translationSaved}
-                            </span>
-                        )}
+                    <div className="flex flex-wrap gap-2">
+                        <TranslateButton state={translation} />
                         <Link href={`/practice?id=${item.id}`}>
                             <Button variant="outline" size="sm">
                                 <RefreshCw className="mr-2 h-4 w-4" />
@@ -515,6 +506,8 @@ export default function ErrorDetailPage() {
                     </div>
                 </div>
 
+                <TranslationBanner state={translation} />
+
                 <Card>
                     <CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail.question}</CardTitle>{!isEditingQuestion && <Button variant="ghost" size="sm" onClick={startEditingQuestion}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div></CardHeader>
                     <CardContent className="space-y-4">
@@ -523,7 +516,7 @@ export default function ErrorDetailPage() {
                                 <Textarea value={questionInput} onChange={e => setQuestionInput(e.target.value)} placeholder="Enter question text..." rows={8} className="w-full font-mono text-sm" />
                                 <div className="flex gap-2"><Button size="sm" onClick={saveQuestionHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingQuestion}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div>
                             </div>
-                        ) : <MarkdownRenderer content={item.questionText} />}
+                        ) : <div lang={translatedLang('questionText')}><MarkdownRenderer content={translation.fields.questionText ?? item.questionText} /></div>}
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center"><h4 className="text-sm font-semibold">{t.editor?.tags || "Knowledge Tags"}</h4>{!isEditingTags && <Button variant="ghost" size="sm" onClick={startEditingTags}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div>
@@ -571,7 +564,7 @@ export default function ErrorDetailPage() {
                         <CardContent className="space-y-4">
                             {isEditingAnswer ? (
                                 <div className="space-y-3"><Textarea value={answerInput} onChange={e => setAnswerInput(e.target.value)} placeholder={t.editor?.answer || "Enter answer..."} rows={5} className="w-full font-mono text-sm" /><div className="flex gap-2"><Button size="sm" onClick={saveAnswerHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingAnswer}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div></div>
-                            ) : <MarkdownRenderer content={item.answerText} className="font-semibold" />}
+                            ) : <div lang={translatedLang('answerText')}><MarkdownRenderer content={translation.fields.answerText ?? item.answerText} className="font-semibold" /></div>}
                             {item.referenceImageUrl && <div className="pt-3"><Button variant="ghost" size="sm" onClick={() => setShowReferenceImage(!showReferenceImage)} className="flex items-center gap-2 text-muted-foreground">{showReferenceImage ? <><EyeOff className="h-4 w-4" />{t.detail?.hideImage}</> : <><ImageIcon className="h-4 w-4" />{t.detail?.viewImage}</>}</Button>{showReferenceImage && <div className="mt-4"><img src={item.referenceImageUrl} alt={t.detail?.referenceImageAlt} className="w-full rounded-lg border cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setIsImageViewerOpen(true)} /><p className="text-xs text-muted-foreground mt-1 text-center">{t.detail?.clickToEnlarge}</p></div>}</div>}
                         </CardContent>
                     </Card>
@@ -587,7 +580,7 @@ export default function ErrorDetailPage() {
                             ) : (
                                 <div className="space-y-4">
                                     <Badge variant={item.mistakeStatus === "wrong_attempt" ? "default" : "secondary"}>{getMistakeStatusLabel(item.mistakeStatus, language)}</Badge>
-                                    {item.wrongAnswerText ? <MarkdownRenderer content={item.wrongAnswerText} /> : <p className="text-sm text-muted-foreground italic">{t.detail?.noMistakeAnalysis}</p>}
+                                    {item.wrongAnswerText ? <div lang={translatedLang('wrongAnswerText')}><MarkdownRenderer content={translation.fields.wrongAnswerText ?? item.wrongAnswerText} /></div> : <p className="text-sm text-muted-foreground italic">{t.detail?.noMistakeAnalysis}</p>}
                                     {item.wrongAnswerImageUrl && <div className="pt-3"><Button variant="ghost" size="sm" onClick={() => setShowOwnImage(!showOwnImage)} className="flex items-center gap-2 text-muted-foreground">{showOwnImage ? <><EyeOff className="h-4 w-4" />{t.detail?.hideImage}</> : <><ImageIcon className="h-4 w-4" />{t.detail?.viewImage}</>}</Button>{showOwnImage && <div className="mt-4"><img src={item.wrongAnswerImageUrl} alt={t.detail?.ownImageAlt} className="w-full rounded-lg border cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setIsImageViewerOpen(true)} /><p className="text-xs text-muted-foreground mt-1 text-center">{t.detail?.clickToEnlarge}</p></div>}</div>}
                                 </div>
                             )}
@@ -596,8 +589,8 @@ export default function ErrorDetailPage() {
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
-                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail.analysis}</CardTitle>{!isEditingAnalysis && <Button variant="ghost" size="sm" onClick={startEditingAnalysis}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingAnalysis ? (<div className="space-y-3"><Textarea value={analysisInput} onChange={e => setAnalysisInput(e.target.value)} placeholder={t.editor?.analysis || "Enter analysis..."} rows={12} className="w-full font-mono text-sm" /><div className="flex gap-2"><Button size="sm" onClick={saveAnalysisHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingAnalysis}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div></div>) : <MarkdownRenderer content={item.analysis} />}</CardContent></Card>
-                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail?.mistakeAnalysis || "错因分析"}</CardTitle>{!isEditingMistake && <Button variant="ghost" size="sm" onClick={startEditingMistake}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingMistake ? (<div className="space-y-4"><div className="space-y-2"><label className="text-sm text-muted-foreground">{t.editor?.mistakeAnalysis || "错因分析"}</label><Textarea value={mistakeAnalysisInput} onChange={e => setMistakeAnalysisInput(e.target.value)} rows={8} className="w-full font-mono text-sm" /></div><div className="flex gap-2"><Button size="sm" onClick={saveMistakeHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingMistake}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div></div>) : item.mistakeAnalysis ? <MarkdownRenderer content={item.mistakeAnalysis} /> : <p className="text-sm text-muted-foreground italic">{t.detail?.noMistakeAnalysis || "暂无错因分析"}</p>}</CardContent></Card>
+                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail.analysis}</CardTitle>{!isEditingAnalysis && <Button variant="ghost" size="sm" onClick={startEditingAnalysis}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingAnalysis ? (<div className="space-y-3"><Textarea value={analysisInput} onChange={e => setAnalysisInput(e.target.value)} placeholder={t.editor?.analysis || "Enter analysis..."} rows={12} className="w-full font-mono text-sm" /><div className="flex gap-2"><Button size="sm" onClick={saveAnalysisHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingAnalysis}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div></div>) : <div lang={translatedLang('analysis')}><MarkdownRenderer content={translation.fields.analysis ?? item.analysis} /></div>}</CardContent></Card>
+                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail?.mistakeAnalysis || "错因分析"}</CardTitle>{!isEditingMistake && <Button variant="ghost" size="sm" onClick={startEditingMistake}><Edit className="h-4 w-4 mr-1" />{t.common?.edit || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingMistake ? (<div className="space-y-4"><div className="space-y-2"><label className="text-sm text-muted-foreground">{t.editor?.mistakeAnalysis || "错因分析"}</label><Textarea value={mistakeAnalysisInput} onChange={e => setMistakeAnalysisInput(e.target.value)} rows={8} className="w-full font-mono text-sm" /></div><div className="flex gap-2"><Button size="sm" onClick={saveMistakeHandler}><Save className="h-4 w-4 mr-1" />{t.common?.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingMistake}><X className="h-4 w-4 mr-1" />{t.common?.cancel || "Cancel"}</Button></div></div>) : item.mistakeAnalysis ? <div lang={translatedLang('mistakeAnalysis')}><MarkdownRenderer content={translation.fields.mistakeAnalysis ?? item.mistakeAnalysis} /></div> : <p className="text-sm text-muted-foreground italic">{t.detail?.noMistakeAnalysis || "暂无错因分析"}</p>}</CardContent></Card>
                 </div>
 
                 <div className="space-y-6">
@@ -607,7 +600,7 @@ export default function ErrorDetailPage() {
                         <div className="rounded-lg border border-dashed p-4"><div className="flex items-center justify-between"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Box className="h-4 w-4" /><span>{t.detail?.geogebraTitle}</span></div><Button variant="outline" size="sm" onClick={() => handleAnalyzeGeogebra()} disabled={isAnalyzingGeogebra}>{isAnalyzingGeogebra ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.detail?.geogebraAnalyzing}</> : <><Box className="mr-2 h-4 w-4" />{t.detail?.geogebraGenerate}</>}</Button></div>{geogebraError && <p className="text-xs text-muted-foreground mt-2">{geogebraError}</p>}<p className="text-xs text-muted-foreground mt-2">{t.detail?.geogebraHint}</p></div>
                     )}
 
-                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail.yourNotes}</CardTitle>{!isEditingNotes && <Button variant="ghost" size="sm" onClick={startEditingNotes}><Edit className="h-4 w-4 mr-1" />{t.detail.editNotes || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingNotes ? (<div className="space-y-3"><Textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} placeholder={t.detail.notesPlaceholder || "Enter your notes..."} rows={5} className="w-full" /><div className="flex gap-2"><Button size="sm" onClick={saveNotes}><Save className="h-4 w-4 mr-1" />{t.common.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingNotes}><X className="h-4 w-4 mr-1" />{t.common.cancel || "Cancel"}</Button></div></div>) : <div className="whitespace-pre-wrap">{item.userNotes ? <p className="text-foreground">{item.userNotes}</p> : <p className="text-muted-foreground italic">{t.detail.noNotes}</p>}</div>}</CardContent></Card>
+                    <Card><CardHeader><div className="flex justify-between items-center"><CardTitle>{t.detail.yourNotes}</CardTitle>{!isEditingNotes && <Button variant="ghost" size="sm" onClick={startEditingNotes}><Edit className="h-4 w-4 mr-1" />{t.detail.editNotes || "Edit"}</Button>}</div></CardHeader><CardContent>{isEditingNotes ? (<div className="space-y-3"><Textarea value={notesInput} onChange={e => setNotesInput(e.target.value)} placeholder={t.detail.notesPlaceholder || "Enter your notes..."} rows={5} className="w-full" /><div className="flex gap-2"><Button size="sm" onClick={saveNotes}><Save className="h-4 w-4 mr-1" />{t.common.save || "Save"}</Button><Button size="sm" variant="outline" onClick={cancelEditingNotes}><X className="h-4 w-4 mr-1" />{t.common.cancel || "Cancel"}</Button></div></div>) : <div className="whitespace-pre-wrap">{item.userNotes ? <p className="text-foreground" lang={translatedLang('userNotes')}>{translation.fields.userNotes ?? item.userNotes}</p> : <p className="text-muted-foreground italic">{t.detail.noNotes}</p>}</div>}</CardContent></Card>
                 </div>
             </div>
 
