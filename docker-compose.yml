@@ -36,3 +36,20 @@ services:
       # Persist the SQLite database
       - ./data:/app/data
       - ./config:/app/config
+  # Optional public access through a Cloudflare Tunnel (enable with COMPOSE_PROFILES=tunnel).
+  # The connector dials out to Cloudflare, so no inbound port is opened. It reaches the app
+  # over the compose network, and Cloudflare's CF-Connecting-IP header arrives unchanged:
+  # set AUTH_CLIENT_IP_HEADER=CF-Connecting-IP. Setup: deploy/README.md.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.9.3
+    container_name: wrong-notebook-tunnel
+    profiles: ["tunnel"]
+    restart: always
+    # Run as the host user that owns ./cloudflared so the credentials file can stay 0600.
+    user: "${CLOUDFLARED_UID:-65532}"
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    volumes:
+      # Keep the credentials outside the deploy folder so a code sync can never delete them.
+      - ${CLOUDFLARED_DIR:-./cloudflared}:/etc/cloudflared:ro
+    depends_on:
+      - wrong-notebook
