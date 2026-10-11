@@ -681,7 +681,10 @@ export function generateTranslatePrompt(
     for (const f of fields) payload[f] = (content[f] as string).trim();
 
     const prompt = [
-        `Translate the following study-note fields into ${targetName}.`,
+        `Translate the fields of this middle-school study note into ${targetName}.`,
+        ``,
+        `Input (JSON):`,
+        JSON.stringify(payload, null, 2),
         ``,
         `Rules:`,
         `1. Translate meaning, not word-for-word. Use natural, idiomatic ${targetName}.`,
@@ -689,8 +692,13 @@ export function generateTranslatePrompt(
         `   option letters, proper nouns, and any text that is already a quoted problem statement.`,
         `3. Keep the technical register of a middle-school study note. Do not add or remove content.`,
         `4. If a field is already in ${targetName}, return it unchanged.`,
-        `5. Reply with JSON only. Use exactly these keys and no others:`,
+        `5. Reply with JSON only, an object with EXACTLY these top-level keys and no others:`,
         `   ${JSON.stringify(fields)}`,
+        `   Each value is the ${targetName} translation of the field of the same name.`,
+        `   Example shape: ${JSON.stringify(
+            Object.fromEntries(fields.map((f) => [f, '<translated text>']))
+        )}`,
+        `6. Do not wrap the output in any other key such as "translation".`,
     ].join('\n');
 
     return { prompt, fields };

@@ -51,6 +51,20 @@ export async function runTranslate(
             out[field] = value;
         }
     }
+
+    // Some models wrap the result in a single key ("translation", "result").
+    // If that is all we got and exactly one field was requested, unwrap it
+    // rather than failing the whole request.
+    if (Object.keys(out).length === 0 && fields.length === 1) {
+        const single = fields[0];
+        for (const key of ['translation', 'result', 'text', 'output', 'value', single]) {
+            const value = parsed[key];
+            if (typeof value === 'string' && value.trim().length > 0) {
+                out[single] = value;
+                break;
+            }
+        }
+    }
     if (Object.keys(out).length === 0) {
         throw new Error('AI_RESPONSE_ERROR: translation returned no usable fields');
     }

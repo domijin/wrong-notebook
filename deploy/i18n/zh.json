@@ -691,10 +691,11 @@
     "failed": "翻译失败",
     "unsupportedPair": "暂不支持该语言对的翻译，你仍可手动编辑文本。",
     "targetLanguage": "翻译为",
-    "noContent": "暂无可翻译的内容。",
+    "noContent": "这段内容已经是当前界面语言，无需翻译。",
     "translateSelected": "翻译选中",
     "translateDone": "已翻译 {count} 道错题。",
-    "translateNone": "请先选择要翻译的错题。"
+    "translateNone": "请先选择要翻译的错题。",
+    "translatingOne": "正在翻译…"
   },
   "appTitle": "AI 错题本"
 }

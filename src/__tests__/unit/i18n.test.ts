@@ -276,3 +276,30 @@ describe('localizeSubjectName', () => {
         expect(localizeSubjectName(null, es)).toBe('');
     });
 });
+
+describe('runTranslate prompt and parsing', () => {
+    it('includes the actual field values in the prompt', async () => {
+        const { generateTranslatePrompt } = await import('@/lib/ai/prompts');
+        const { prompt, fields } = generateTranslatePrompt(
+            { questionText: '已知二次函数 f(x)=x^2-4x+3', analysis: '先配方。' },
+            'en'
+        );
+        expect(fields).toEqual(['questionText', 'analysis']);
+        // Regression: the prompt used to name the keys but never include the
+        // text, so the model replied {"translation": "..."} with no usable key.
+        expect(prompt).toContain('已知二次函数');
+        expect(prompt).toContain('先配方');
+        expect(prompt).toContain('"questionText"');
+        expect(prompt).toContain('"analysis"');
+    });
+
+    it('unwraps a single-field reply wrapped in another key', async () => {
+        const { runTranslate } = await import('@/lib/ai/translate');
+        const out = await runTranslate(
+            { questionText: '已知 f(x)' },
+            'en',
+            async () => '{"translation":"Given f(x)"}'
+        );
+        expect(out).toEqual({ questionText: 'Given f(x)' });
+    });
+});

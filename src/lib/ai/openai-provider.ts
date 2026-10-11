@@ -536,7 +536,14 @@ export class OpenAIProvider implements AIService {
             return await runTranslate(content, target, async (prompt) => {
                 const response = await this.openai.chat.completions.create({
                     model: this.model,
-                    messages: [{ role: 'system', content: prompt }],
+                    // A system message on its own is rejected by some
+                    // OpenAI-compatible providers ("chat content is empty"),
+                    // so mirror the other calls here and always pair it with a
+                    // user message.
+                    messages: [
+                        { role: 'system', content: prompt },
+                        { role: 'user', content: 'Translate the fields above. Reply with JSON only.' },
+                    ],
                     max_tokens: 8192,
                 });
                 return response.choices[0]?.message?.content || '';
