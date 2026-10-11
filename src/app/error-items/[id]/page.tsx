@@ -9,6 +9,7 @@ import { ArrowLeft, CheckCircle, XCircle, RefreshCw, Trash2, Edit, Save, X, Box,
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { TagInput } from "@/components/tag-input";
 import { Input } from "@/components/ui/input";
@@ -55,6 +56,7 @@ export default function ErrorDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { t, language } = useLanguage();
+    const { subjectName } = useSubjectNames();
     const [item, setItem] = useState<ErrorItemDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -545,7 +547,7 @@ export default function ErrorDetailPage() {
                                 </div>
                             ) : (
                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between"><span className="text-muted-foreground">{t.notebooks?.title || "Notebook"}:</span><span className="font-medium">{item.subject?.name || (t.common?.notSet || "Not set")}</span></div>
+                                    <div className="flex justify-between"><span className="text-muted-foreground">{t.notebooks?.title || "Notebook"}:</span><span className="font-medium">{subjectName(item.subject?.name) || (t.common?.notSet || "Not set")}</span></div>
                                     <div className="flex justify-between"><span className="text-muted-foreground">{t.filter.grade}:</span><span className="font-medium">{item.gradeSemester || (t.common?.notSet || "Not set")}</span></div>
                                     <div className="flex justify-between"><span className="text-muted-foreground">{t.filter.paperLevel}:</span><span className="font-medium">{item.paperLevel ? (t.editor.paperLevels?.[item.paperLevel as "a" | "b" | "other"] || item.paperLevel) : (t.common?.notSet || "Not set")}</span></div>
                                 </div>

@@ -12,6 +12,7 @@ import { BookOpen } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { Notebook } from "@/types/api";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 
 interface NotebookSelectorProps {
     value?: string;
@@ -23,6 +24,7 @@ export function NotebookSelector({ value, onChange, className }: NotebookSelecto
     const [notebooks, setNotebooks] = useState<Notebook[]>([]);
     const [loading, setLoading] = useState(true);
     const { t } = useLanguage();
+    const { subjectName } = useSubjectNames();
 
     useEffect(() => {
         const fetchNotebooks = async () => {
@@ -55,7 +57,7 @@ export function NotebookSelector({ value, onChange, className }: NotebookSelecto
                 ) : (
                     notebooks.map((notebook) => (
                         <SelectItem key={notebook.id} value={notebook.id}>
-                            {notebook.name}
+                            {subjectName(notebook.name)}
                         </SelectItem>
                     ))
                 )}

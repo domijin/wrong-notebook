@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,25 +25,17 @@ interface TagTreeNode {
     children: TagTreeNode[];
 }
 
-// 学科配置
-const SUBJECTS = [
-    { key: 'math', name: '数学' },
-    { key: 'science', name: '科学' },
-    { key: 'society', name: '社会' },
-    { key: 'english', name: '英语' },
-    { key: 'physics', name: '物理' },
-    { key: 'chemistry', name: '化学' },
-    { key: 'biology', name: '生物' },
-    { key: 'chinese', name: '语文' },
-    { key: 'history', name: '历史' },
-    { key: 'geography', name: '地理' },
-    { key: 'politics', name: '政治' },
+/** Subject keys, in the order they are presented. Names come from the catalog. */
+const SUBJECT_KEYS = [
+    'math', 'science', 'society', 'english', 'physics',
+    'chemistry', 'biology', 'chinese', 'history', 'geography', 'politics',
 ] as const;
 
-type SubjectKey = typeof SUBJECTS[number]['key'];
+type SubjectKey = typeof SUBJECT_KEYS[number];
 
 export default function TagsPage() {
     const { t } = useLanguage();
+    const { subjectName } = useSubjectNames();
     const [stats, setStats] = useState<TagStats[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -89,7 +82,7 @@ export default function TagsPage() {
         try {
             // 获取所有学科的扁平标签，过滤非系统标签
             const allCustom: Array<{ id: string; name: string; subject: string; parentName?: string }> = [];
-            for (const { key } of SUBJECTS) {
+            for (const key of SUBJECT_KEYS) {
                 const data = await apiClient.get<{ tags: Array<{ id: string; name: string; isSystem: boolean; parentName?: string }> }>(
                     `/api/tags?subject=${key}&flat=true`
                 );
@@ -277,8 +270,7 @@ export default function TagsPage() {
     const renderStandardTags = () => {
         return (
             <>
-                {SUBJECTS.map(({ key, name }) => {
-                    const subjectName = (t.tags?.subjects as any)?.[key] || name;
+                {SUBJECT_KEYS.map(key => {
                     const isExpanded = expandedNodes[`subject-${key}`];
                     const tags = tagsBySubject[key];
 
@@ -293,7 +285,7 @@ export default function TagsPage() {
                             >
                                 <CardTitle className="text-lg flex items-center gap-2">
                                     {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                                    {subjectName}
+                                    {subjectName(key)}
                                 </CardTitle>
                                 <span className="text-sm text-muted-foreground">
                                     {isExpanded ? (t.common?.collapse || "Collapse") : (t.common?.expand || "Expand")}
@@ -339,8 +331,8 @@ export default function TagsPage() {
                             <Select value={newTagSubject} onValueChange={(v) => setNewTagSubject(v as SubjectKey)}>
                                 <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    {SUBJECTS.map(({ key, name }) => (
-                                        <SelectItem key={key} value={key}>{(t.tags?.subjects as any)?.[key] || name}</SelectItem>
+                                    {SUBJECT_KEYS.map(key => (
+                                        <SelectItem key={key} value={key}>{subjectName(key)}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -380,7 +372,8 @@ export default function TagsPage() {
                         {t.tags?.custom?.empty || "No custom tags yet, click above to add!"}
                     </CardContent></Card>
                 ) : (
-                    SUBJECTS.map(({ key, name }) => {
+                    SUBJECT_KEYS.map(key => {
+                        const name = subjectName(key);
                         const tags = groupedBySubject[key];
                         if (!tags?.length) return null;
 

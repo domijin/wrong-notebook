@@ -123,8 +123,9 @@ describe('/api/translate', () => {
         ]);
     });
 
-    it('short-circuits when the content already matches the target language', async () => {
-        const res = await post({ target: 'zh', content: { analysis: '这是一个中文解析。' } });
+    it('short-circuits when substantial content already matches the target language', async () => {
+        const chinese = '本题考查二次函数的顶点坐标与对称轴。先配方得到顶点式，再由开口方向判断单调性，最后代入区间端点求最值。';
+        const res = await post({ target: 'zh', content: { analysis: chinese } });
         expect(res.status).toBe(200);
         const body = await res.json();
         expect(body.unchanged).toBe(true);
@@ -133,7 +134,21 @@ describe('/api/translate', () => {
     });
 
     it('still calls the model when Chinese content is requested in English', async () => {
-        const res = await post({ target: 'en', content: { analysis: '这是一个中文解析。' } });
+        const res = await post({
+            target: 'en',
+            content: { analysis: '本题考查二次函数的顶点坐标与对称轴，先配方得到顶点式，再由开口方向判断单调性。' },
+        });
+        expect(res.status).toBe(200);
+        expect(mocks.mockAIService.translateContent).toHaveBeenCalled();
+    });
+
+    it('does not treat math-only content as already English', async () => {
+        // Regression: the old heuristic returned true for any text without CJK,
+        // so a LaTeX-heavy question silently skipped translation.
+        const res = await post({
+            target: 'en',
+            content: { questionText: '已知 $f(x)=x^2-4x+3$，求最大值。' },
+        });
         expect(res.status).toBe(200);
         expect(mocks.mockAIService.translateContent).toHaveBeenCalled();
     });

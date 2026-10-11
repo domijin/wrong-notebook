@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, Filter, CheckCircle, Clock, ChevronDown, Printer, ListChecks, Trash2, X } from "lucide-react";
+import { Search, Filter, CheckCircle, Clock, ChevronDown, Printer, ListChecks, Trash2, X, Languages, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -58,6 +58,7 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
     const [isSelectMode, setIsSelectMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
     const { t, language } = useLanguage();
     const router = useRouter();
 
@@ -164,6 +165,58 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
             alert(t.common?.messages?.deleteFailed || "Delete failed");
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    /**
+     * Translate every selected mistake into the current UI language.
+     *
+     * Translating one card at a time is impractical — the whole point is to make
+     * an existing Chinese notebook readable in another language — so this walks
+     * the selection one item at a time, translating then persisting each.
+     */
+    const handleBatchTranslate = async () => {
+        if (selectedIds.size === 0) {
+            alert(t.translate?.translateNone || "Select items to translate.");
+            return;
+        }
+        const count = selectedIds.size;
+        if (!confirm(`\u7ffb\u8bd1 ${count} \u9053\u9519\u9898\uff1f\u8fd9\u4f1a\u6d88\u8017 AI \u989d\u5ea6\u3002`)) return;
+
+        setIsTranslating(true);
+        let done = 0;
+        try {
+            for (const id of Array.from(selectedIds)) {
+                try {
+                    const item = await apiClient.get<ErrorItem>(`/api/error-items/${id}`);
+                    const content = {
+                        questionText: item.questionText,
+                        answerText: item.answerText,
+                        analysis: item.analysis,
+                        mistakeAnalysis: item.mistakeAnalysis,
+                        userNotes: item.userNotes,
+                    };
+                    const res = await apiClient.post<{ translated: Record<string, string>; unchanged: boolean }>(
+                        '/api/translate',
+                        { target: language, content }
+                    );
+                    const translated = res.translated || {};
+                    if (!res.unchanged && Object.keys(translated).length > 0) {
+                        await apiClient.put(`/api/error-items/${id}`, translated);
+                    }
+                    done++;
+                } catch (itemError) {
+                    console.error('translate failed for', id, itemError);
+                }
+            }
+            const msg = (t.translate?.translateDone || "Translated {count} item(s).")
+                .replace("{count}", String(done));
+            alert(msg);
+            setIsSelectMode(false);
+            setSelectedIds(new Set());
+            fetchItems();
+        } finally {
+            setIsTranslating(false);
         }
     };
 
@@ -470,6 +523,21 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
                             >
                                 <X className="mr-2 h-4 w-4" />
                                 {t.notebook?.cancelSelect || "取消"}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={handleBatchTranslate}
+                                disabled={selectedIds.size === 0 || isTranslating}
+                            >
+                                {isTranslating ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Languages className="mr-2 h-4 w-4" />
+                                )}
+                                {isTranslating
+                                    ? (t.translate?.translating || "Translating {count}…")
+                                          .replace("{count}", String(selectedIds.size))
+                                    : t.translate?.translateSelected || "翻译选中"}
                             </Button>
                             <Button
                                 variant="destructive"

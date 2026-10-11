@@ -682,7 +682,7 @@
     "title": "Translate",
     "description": "Content is not in your interface language.",
     "action": "Translate content",
-    "translating": "Translating...",
+    "translating": "Translating {count}…",
     "original": "Original",
     "translated": "Translated",
     "backToOriginal": "Show original",
@@ -691,7 +691,10 @@
     "failed": "Translation failed",
     "unsupportedPair": "Translation is not available for this language pair yet. You can still edit the text manually.",
     "targetLanguage": "Translate to",
-    "noContent": "There is no content to translate yet."
+    "noContent": "There is no content to translate yet.",
+    "translateSelected": "Translate selected",
+    "translateDone": "Translated {count} item(s).",
+    "translateNone": "Select items to translate."
   },
   "appTitle": "AI Notebook"
 }

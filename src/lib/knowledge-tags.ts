@@ -77,3 +77,80 @@ export function inferSubjectFromName(subjectName: string | null): 'math' | 'phys
 
     return null;
 }
+
+/** Canonical subject keys used by the tag tree and the settings catalog. */
+export type SubjectKey =
+    | 'math' | 'science' | 'society' | 'english' | 'physics'
+    | 'chemistry' | 'biology' | 'chinese' | 'history' | 'geography' | 'politics';
+
+/** The Chinese names the database stores for each subject. */
+const SUBJECT_CANONICAL_ZH: Record<SubjectKey, string> = {
+    math: '数学',
+    science: '科学',
+    society: '社会',
+    english: '英语',
+    physics: '物理',
+    chemistry: '化学',
+    biology: '生物',
+    chinese: '语文',
+    history: '历史',
+    geography: '地理',
+    politics: '政治',
+};
+
+/**
+ * Extra stored names that mean the same subject. Zhejiang's combined
+ * 社会 paper is variously written 社会 / 历史与社会 / 道德与法治.
+ */
+const SUBJECT_ALIASES: Record<string, SubjectKey> = {
+    '社会': 'society',
+    '历史与社会': 'society',
+    '道德与法治': 'society',
+    '道法': 'society',
+    '科学': 'science',
+    '物理': 'physics',
+    '化学': 'chemistry',
+    '生物': 'biology',
+    '语文': 'chinese',
+    '数学': 'math',
+    '英语': 'english',
+    '历史': 'history',
+    '地理': 'geography',
+    '政治': 'politics',
+};
+
+/**
+ * Translate a stored subject name for display.
+ *
+ * Notebooks and tags keep Chinese names in the database on purpose: they are
+ * matched against the Chinese tag-tree roots and searched with Chinese input.
+ * Only the rendering is localized, so switching the UI language must never
+ * rewrite stored data.
+ *
+ * The name has to *be* the subject, not merely contain it: a custom notebook
+ * called 「我的数学本」 must not be displayed as 「Matemáticas」. Anything that
+ * is not an exact subject name is returned unchanged.
+ */
+export function localizeSubjectName(
+    name: string | null | undefined,
+    subjects: Partial<Record<SubjectKey, string>> | undefined
+): string {
+    if (!name) return '';
+    const trimmed = name.trim();
+    if (!trimmed) return '';
+
+    // Exact alias or key match only — never a substring.
+    const key =
+        SUBJECT_ALIASES[trimmed] ??
+        (/^[a-z]+$/.test(trimmed) && trimmed in SUBJECT_CANONICAL_ZH
+            ? (trimmed as SubjectKey)
+            : undefined);
+    if (!key) return name;
+
+    const localized = subjects?.[key];
+    if (!localized) return name;
+
+    // Already in the active language: leave it alone so switching back and
+    // forth is stable.
+    return trimmed === localized ? trimmed : localized;
+}

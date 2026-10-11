@@ -682,7 +682,7 @@
     "title": "Traducir",
     "description": "El contenido no está en el idioma de tu interfaz.",
     "action": "Traducir contenido",
-    "translating": "Traduciendo...",
+    "translating": "Traduciendo {count}…",
     "original": "Original",
     "translated": "Traducción",
     "backToOriginal": "Ver el original",
@@ -691,7 +691,10 @@
     "failed": "Error al traducir",
     "unsupportedPair": "La traducción no está disponible para este par de idiomas. Aun así, puedes editar el texto manualmente.",
     "targetLanguage": "Traducir a",
-    "noContent": "Todavía no hay contenido que traducir."
+    "noContent": "Todavía no hay contenido que traducir.",
+    "translateSelected": "Traducir seleccionados",
+    "translateDone": "Se tradujeron {count} ejercicio(s).",
+    "translateNone": "Selecciona elementos para traducir."
   },
   "appTitle": "AI Cuaderno"
 }

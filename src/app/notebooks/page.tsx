@@ -14,12 +14,14 @@ import { Notebook } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 
 // ... imports
 
 export default function NotebooksPage() {
     const router = useRouter();
     const { t } = useLanguage(); // Use hook
+    const { subjectName } = useSubjectNames();
     const [notebooks, setNotebooks] = useState<Notebook[]>([]);
     const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -130,7 +132,7 @@ export default function NotebooksPage() {
                             <NotebookCard
                                 key={notebook.id}
                                 id={notebook.id}
-                                name={notebook.name}
+                                name={subjectName(notebook.name)}
                                 errorCount={notebook._count?.errorItems || 0}
                                 onClick={() => handleNotebookClick(notebook.id)}
                                 onRename={() => setRenameTarget(notebook)}

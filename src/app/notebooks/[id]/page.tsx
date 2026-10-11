@@ -13,6 +13,7 @@ import { Notebook } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 
 // ... imports
 
@@ -20,6 +21,7 @@ export default function NotebookDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { t } = useLanguage();
+    const { subjectName } = useSubjectNames();
     const [notebook, setNotebook] = useState<Notebook | null>(null);
     const [loading, setLoading] = useState(true);
     const [renameDialogOpen, setRenameDialogOpen] = useState(false);
@@ -66,7 +68,7 @@ export default function NotebookDetailPage() {
                     <BackButton fallbackUrl="/notebooks" className="shrink-0" />
                     <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{notebook.name}</h1>
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">{subjectName(notebook.name)}</h1>
                             <Button
                                 variant="ghost"
                                 size="icon-sm"

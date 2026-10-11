@@ -8,6 +8,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { apiClient } from "@/lib/api-client";
 import { ErrorItem, PaginatedResponse } from "@/types/api";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSubjectNames } from "@/hooks/use-subject-names";
 import { PRINT_PREVIEW_PAGE_SIZE } from "@/lib/constants/pagination";
 import {
     getPrintPreviewCountLabel,
@@ -19,6 +20,7 @@ import {
 function PrintPreviewContent() {
     const searchParams = useSearchParams();
     const { t } = useLanguage();
+    const { subjectName } = useSubjectNames();
     const [items, setItems] = useState<ErrorItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAnswers, setShowAnswers] = useState(false);
@@ -222,7 +224,7 @@ function PrintPreviewContent() {
                                 </span>
                                 {item.subject && (
                                     <span className="text-sm text-muted-foreground">
-                                        {item.subject.name}
+                                        {subjectName(item.subject.name)}
                                     </span>
                                 )}
                                 {item.gradeSemester && (

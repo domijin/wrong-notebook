@@ -14,21 +14,50 @@ const MAX_FIELDS = 5;
 
 export const dynamic = 'force-dynamic';
 
-/** True when the text looks like it is already (mostly) in the target script. */
+/**
+ * Strip the parts of a study note that are language-neutral before deciding
+ * whether it is already in the target language: LaTeX, Markdown, numbers and
+ * option letters. Left in place they dominate short answers and make a
+ * Chinese question look "English" because it happens to contain no CJK in the
+ * first 1500 characters.
+ */
+function proseOnly(text: string): string {
+    return text
+        // $$...$$ and $...$ (LaTeX)
+        .replace(/\$\$[\s\S]*?\$\$/g, ' ')
+        .replace(/\$[^$\n]*\$/g, ' ')
+        // \command{...}
+        .replace(/\\[a-zA-Z]+/g, ' ')
+        // Markdown syntax, URLs, bare numbers, and A/B/C/D markers
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/[#>*_`|~[\]()]/g, ' ')
+        .replace(/https?:\/\/\S+/g, ' ')
+        .replace(/\b\d+(?:[.,]\d+)?\b/g, ' ')
+        .replace(/\b[ABCD]\b/g, ' ');
+}
+
+/**
+ * Heuristic: does this text already read as the target language?
+ *
+ * Returns false when there is too little prose to judge, so a short or
+ * math-only answer is still sent to the model rather than silently skipped.
+ */
 function looksLikeTargetLanguage(text: string, target: string): boolean {
-    const sample = text.slice(0, 1500);
-    if (target === 'es') {
-        // Spanish-specific characters that Chinese/English text lacks.
-        return /[ñáéíóúü¿¡]/i.test(sample);
-    }
-    if (target === 'zh') {
-        return /[一-鿿]/.test(sample);
-    }
-    if (target === 'en') {
-        // Strip CJK; if almost nothing is left the text is not really English.
-        return !/[一-鿿]/.test(sample);
-    }
-    return false;
+    const prose = proseOnly(text.slice(0, 4000));
+    // Need real prose before deciding; otherwise let the model try.
+    if (prose.replace(/\s+/g, '').length < 12) return false;
+
+    const cjk = (prose.match(/[一-鿿]/g) || []).length;
+    const latin = (prose.match(/[A-Za-zÀ-ÿ]/g) || []).length;
+    const total = cjk + latin;
+    if (total === 0) return false;
+
+    // CJK-dominant text counts as Chinese regardless of target; otherwise
+    // compare script ratios.
+    if (target === 'zh') return cjk / total > 0.3;
+    // English and Spanish share a script; treat as "already" only when the
+    // text has no CJK and enough Latin prose to be worth skipping.
+    return cjk === 0 && latin / total > 0.7 && prose.replace(/\s+/g, '').length > 40;
 }
 
 export async function POST(req: Request) {

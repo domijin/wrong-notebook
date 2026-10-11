@@ -250,3 +250,29 @@ describe('catalog coverage of strings that were once hardcoded', () => {
         expect(ratio).toBeLessThan(0.25);
     });
 });
+
+describe('localizeSubjectName', () => {
+    it('maps stored Chinese subject names to the active UI language', async () => {
+        const { localizeSubjectName, inferSubjectFromName } = await import(
+            '@/lib/knowledge-tags'
+        );
+        const es = resolveTranslations('es').tags.subjects as Record<string, string>;
+        const en = resolveTranslations('en').tags.subjects as Record<string, string>;
+
+        expect(localizeSubjectName('数学', es)).toBe('Matemáticas');
+        expect(localizeSubjectName('科学', es)).toBe('Ciencias');
+        expect(localizeSubjectName('社会', es)).toBe('Ciencias Sociales');
+        expect(localizeSubjectName('语文', es)).toBe('Lengua y Literatura');
+        expect(localizeSubjectName('英语', en)).toBe('English');
+        // Composite Zhejiang subject must win over the 历史 substring.
+        expect(inferSubjectFromName('历史与社会')).toBe('society');
+        expect(localizeSubjectName('历史与社会', en)).toBe('Society');
+    });
+
+    it('returns unmapped names unchanged so custom notebooks still show', async () => {
+        const { localizeSubjectName } = await import('@/lib/knowledge-tags');
+        const es = resolveTranslations('es').tags.subjects as Record<string, string>;
+        expect(localizeSubjectName('我的数学本', es)).toBe('我的数学本');
+        expect(localizeSubjectName(null, es)).toBe('');
+    });
+});
