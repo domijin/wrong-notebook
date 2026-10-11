@@ -560,7 +560,7 @@ function HomeContent() {
                                 onClick={() => setInputMode("direct")}
                             >
                                 <PenLine className="h-4 w-4" />
-                                直接录入
+                                {t.app?.directEntry}
                             </button>
                         </div>
 

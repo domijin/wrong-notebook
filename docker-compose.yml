@@ -2,7 +2,14 @@ version: '3'
 
 services:
   wrong-notebook:
-    image: ghcr.io/wttwins/wrong-notebook:latest
+    # Build from this checkout so local/self-hosted deployments run the code in
+    # this repository (including the i18n work) instead of whatever
+    # ghcr.io/wttwins/wrong-notebook:latest happens to publish. Swap the tag for
+    # a digest or the upstream image if you want to track upstream releases.
+    image: wrong-notebook:local
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: wrong-notebook
     restart: always
     ports:
@@ -23,4 +30,3 @@ services:
       # Persist the SQLite database
       - ./data:/app/data
       - ./config:/app/config
-

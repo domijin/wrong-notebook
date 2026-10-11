@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2, Maximize2, Minimize2, RotateCcw, RefreshCw } from "lucide-react";
 
 interface GeogebraDemoProps {
@@ -130,6 +131,7 @@ export function GeogebraDemo({
     className = "",
     onRegenerate,
 }: GeogebraDemoProps) {
+    const { t } = useLanguage();
     // This ref points to a div that React NEVER puts children into.
     // All GeoGebra DOM is injected via innerHTML in the effect, so
     // React's reconciler never touches the inside of this node.
@@ -268,15 +270,15 @@ export function GeogebraDemo({
                 <div className="flex items-center gap-1">
                     {onRegenerate && (
                         <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1"
-                            onClick={handleRegenerate} title="重新生成" disabled={regenerating || loading}>
+                            onClick={handleRegenerate} title={t.geogebra?.regenerate} disabled={regenerating || loading}>
                             {regenerating
                                 ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 : <RefreshCw className="h-3.5 w-3.5" />}
-                            <span>重新生成</span>
+                            <span>{t.geogebra?.regenerate}</span>
                         </Button>
                     )}
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
-                        onClick={handleReset} title="重置" disabled={loading}>
+                        onClick={handleReset} title={t.geogebra?.reset} disabled={loading}>
                         <RotateCcw className="h-3.5 w-3.5" />
                     </Button>
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0"

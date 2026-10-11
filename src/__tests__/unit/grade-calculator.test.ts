@@ -144,9 +144,17 @@ describe('calculateGrade', () => {
             expect(result).toContain('已毕业');
         });
 
-        it('默认使用英文语言', () => {
+        it('默认使用中文（存入数据库并与中文标签树匹配的形式）', () => {
+            // 默认值必须是 'zh'：返回值会作为 ErrorItem.gradeSemester 落库，
+            // 并与种子标签树的根节点（七年级上 / 初一上 …）匹配。
             const result = calculateGrade('junior_high', 2024, new Date('2024-10-15'));
-            expect(result).toBe('Junior High Grade 1, 1st Semester');
+            expect(result).toBe('初一上');
+        });
+
+        it('西班牙语也产出可入库的中文标签', () => {
+            // 界面语言不应影响落库值：es 与 zh 一样返回可匹配的中文标签。
+            const result = calculateGrade('junior_high', 2024, new Date('2024-10-15'), 'es');
+            expect(result).toBe('初一上');
         });
 
         it('默认使用当前日期', () => {

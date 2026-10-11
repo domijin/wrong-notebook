@@ -141,7 +141,7 @@ export function DirectTextEditor({ onSubmit, defaultNotebookId, defaultNotebookN
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <PenLine className="h-5 w-5" />
                         <span className="text-sm font-medium">
-                            直接录入错题内容（支持 Markdown + LaTeX）
+                            {t.app?.directEntryHint}
                         </span>
                     </div>
                     <Button

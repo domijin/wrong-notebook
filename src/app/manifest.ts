@@ -1,10 +1,19 @@
 import type { MetadataRoute } from 'next'
 
+import { translations } from '@/lib/translations'
+
+/**
+ * PWA manifest. The browser fetches this before any script runs, so it cannot
+ * react to a language chosen at runtime: it ships the Chinese names, and the
+ * client-side AppTitle keeps document.title in sync afterwards.
+ */
 export default function manifest(): MetadataRoute.Manifest {
+    const app = translations.zh.app
+    const title = translations.zh.appTitle
     return {
-        name: '智能错题本',
-        short_name: '错题本',
-        description: 'AI 驱动的智能错题管理系统，帮助学生高效整理、分析和复习错题',
+        name: title,
+        short_name: app.appNameShort,
+        description: app.appDescription,
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',

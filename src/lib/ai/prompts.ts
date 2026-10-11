@@ -1,7 +1,36 @@
+import type { Language } from '../translations';
 /**
  * Shared AI prompt templates
  * This module provides centralized prompt management
  */
+
+const LANGUAGE_NAMES: Record<Language, string> = {
+  zh: 'Simplified Chinese',
+  en: 'English',
+  es: 'Spanish (Español)',
+};
+
+/**
+ * Build the "which language should the AI answer in" instruction.
+ *
+ * `analysisLanguage` is the language the explanatory prose must use; the
+ * question/answer text follows the user's chosen language. Keeping this in one
+ * place means adding a locale only requires touching LANGUAGE_NAMES.
+ */
+function languageInstruction(
+  language: Language,
+  opts: { analysisFollowsSource?: boolean } = {}
+): string {
+  const name = LANGUAGE_NAMES[language] ?? LANGUAGE_NAMES.en;
+  if (opts.analysisFollowsSource) {
+    return `IMPORTANT: Provide the output based on the 'Original Question' language. ` +
+      `If the original question is not in ${name}, translate the new 'questionText' and ` +
+      `'answerText' into ${name}, and write the 'analysis' in ${name} as well so the student ` +
+      `can follow it.`;
+  }
+  return `IMPORTANT: Write 'questionText', 'answerText' and 'analysis' in ${name}. ` +
+    `Keep the mathematics and any quoted source text unchanged.`;
+}
 
 /**
  * 将 gradeSemester 字符串转换为年级数字（用于标签过滤）
@@ -316,15 +345,13 @@ export function getMathTagsForGrade(
  * @param options - Optional customizations
  */
 export function generateAnalyzePrompt(
-  language: 'zh' | 'en',
+  language: Language,
   grade?: 7 | 8 | 9 | 10 | 11 | 12 | null,
   subject?: string | null,
   options?: PromptOptions,
   gradeSemester?: string | null
 ): string {
-  const langInstruction = language === 'zh'
-    ? "IMPORTANT: For the 'analysis' field, use Simplified Chinese. For 'questionText' and 'answerText', YOU MUST USE THE SAME LANGUAGE AS THE ORIGINAL QUESTION. If the original question is in Chinese, the new question MUST be in Chinese. If the original is in English, keep it in English. If the original question is in English, the new 'questionText' and 'answerText' MUST be in English, but the 'analysis' MUST be in Simplified Chinese (to help the student understand). "
-    : "Please ensure all text fields are in English.";
+  const langInstruction = languageInstruction(language);
 
   // 各学科标签（必须由调用方从数据库预获取；数学按年级累进）
   const subjectTags: Array<{ subject: string; label: string; tags: string[] }> = [
@@ -375,16 +402,14 @@ ${formatTags(known.tags)}
  * @param options - Optional customizations
  */
 export function generateSimilarQuestionPrompt(
-  language: 'zh' | 'en',
+  language: Language,
   originalQuestion: string,
   knowledgePoints: string[],
   difficulty: 'easy' | 'medium' | 'hard' | 'harder' = 'medium',
   options?: PromptOptions,
   gradeSemester?: string | null
 ): string {
-  const langInstruction = language === 'zh'
-    ? "IMPORTANT: Provide the output based on the 'Original Question' language. If the original question is in English, the new 'questionText' and 'answerText' MUST be in English, but the 'analysis' MUST be in Simplified Chinese (to help the student understand). If the original is in Chinese, everything MUST be in Simplified Chinese."
-    : "Please ensure the generated question is in English.";
+  const langInstruction = languageInstruction(language, { analysisFollowsSource: true });
 
   const difficultyInstruction = {
     'easy': "Make the new question EASIER than the original. Use simpler numbers and more direct concepts.",
@@ -595,15 +620,13 @@ export function generateGeogebraPrompt(
  * @param options - 自定义选项
  */
 export function generateReanswerPrompt(
-  language: 'zh' | 'en',
+  language: Language,
   questionText: string,
   subject?: string | null,
   options?: PromptOptions,
   gradeSemester?: string | null
 ): string {
-  const langInstruction = language === 'zh'
-    ? "IMPORTANT: 解析必须使用简体中文。如果题目是英文，答案保持英文，但解析用中文。"
-    : "Please ensure all text fields are in English.";
+  const langInstruction = languageInstruction(language);
 
   const subjectHint = subject
     ? `本题学科：${subject}`
@@ -618,4 +641,57 @@ export function generateReanswerPrompt(
     grade_instruction: generateGradeInstruction(gradeSemester),
     provider_hints: options?.providerHints || ''
   }).trim();
+}
+
+/** Fields of an error item whose prose can be translated. */
+export interface TranslatableContent {
+    questionText?: string | null;
+    answerText?: string | null;
+    analysis?: string | null;
+    mistakeAnalysis?: string | null;
+    userNotes?: string | null;
+}
+
+const TRANSLATABLE_FIELD_ORDER = [
+    'questionText',
+    'answerText',
+    'analysis',
+    'mistakeAnalysis',
+    'userNotes',
+] as const satisfies readonly (keyof TranslatableContent)[];
+
+/**
+ * Prompt that converts an error item's prose into `target` while leaving
+ * mathematics, LaTeX and any quoted problem statement untouched.
+ *
+ * Empty fields are dropped from the payload so the model is never asked to
+ * "translate" nothing.
+ */
+export function generateTranslatePrompt(
+    content: TranslatableContent,
+    target: Language
+): { prompt: string; fields: (keyof TranslatableContent)[] } {
+    const targetName = LANGUAGE_NAMES[target] ?? LANGUAGE_NAMES.en;
+    const fields = TRANSLATABLE_FIELD_ORDER.filter((f) => {
+        const v = content[f];
+        return typeof v === 'string' && v.trim().length > 0;
+    });
+
+    const payload: Record<string, string> = {};
+    for (const f of fields) payload[f] = (content[f] as string).trim();
+
+    const prompt = [
+        `Translate the following study-note fields into ${targetName}.`,
+        ``,
+        `Rules:`,
+        `1. Translate meaning, not word-for-word. Use natural, idiomatic ${targetName}.`,
+        `2. PRESERVE exactly: LaTeX math ($...$, $$...$$), Markdown structure, numbers, units,`,
+        `   option letters, proper nouns, and any text that is already a quoted problem statement.`,
+        `3. Keep the technical register of a middle-school study note. Do not add or remove content.`,
+        `4. If a field is already in ${targetName}, return it unchanged.`,
+        `5. Reply with JSON only. Use exactly these keys and no others:`,
+        `   ${JSON.stringify(fields)}`,
+    ].join('\n');
+
+    return { prompt, fields };
 }

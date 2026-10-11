@@ -1,35 +1,83 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { translations, Language } from '@/lib/translations';
+import {
+    resolveTranslations,
+    normalizeLanguage,
+    LANGUAGES,
+    FALLBACK_LANGUAGE,
+    LANGUAGE_LABELS,
+    LANGUAGE_NATIVE_NAMES,
+    type Language,
+    type TranslationTree,
+} from '@/lib/translations';
 
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: typeof translations['en'];
+    /** Fully resolved catalog for `language` (never has holes: falls back to English). */
+    t: TranslationTree;
+    /** Native name of the active locale, e.g. "简体中文". */
+    languageName: string;
+    languages: Language[];
+    languageLabels: Record<Language, string>;
+}
+
+const STORAGE_KEY = 'app-language';
+
+/** BCP-47 tag for each locale, used for <html lang>. */
+const HTML_LANG: Record<Language, string> = {
+    zh: 'zh-CN',
+    en: 'en',
+    es: 'es',
+};
+
+/** Keep <html lang> in sync for screen readers and font shaping. */
+function applyDocumentLanguage(lang: Language) {
+    try {
+        document.documentElement.lang = HTML_LANG[lang];
+    } catch {
+        // Non-browser environment; nothing to sync.
+    }
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
+    // Default to Chinese; replaced on mount by the persisted preference.
+    const [language, setLanguageState] = useState<Language>('zh');
 
+    // Restore the saved locale, then sync <html lang> for it too — a page load
+    // with an already-stored preference must still update the attribute, not
+    // only an explicit setLanguage() call.
     useEffect(() => {
-        const savedLang = localStorage.getItem('app-language') as Language;
-        if (savedLang) {
-            setLanguage(savedLang);
+        try {
+            const saved = normalizeLanguage(localStorage.getItem(STORAGE_KEY));
+            setLanguageState(saved);
+            applyDocumentLanguage(saved);
+        } catch {
+            applyDocumentLanguage('zh');
         }
     }, []);
 
-    const handleSetLanguage = (lang: Language) => {
-        setLanguage(lang);
-        localStorage.setItem('app-language', lang);
+    const setLanguage = (lang: Language) => {
+        const next = normalizeLanguage(lang);
+        setLanguageState(next);
+        try {
+            localStorage.setItem(STORAGE_KEY, next);
+        } catch {
+            // Storage unavailable; the in-memory state still applies.
+        }
+        applyDocumentLanguage(next);
     };
 
-    const value = {
+    const value: LanguageContextType = {
         language,
-        setLanguage: handleSetLanguage,
-        t: translations[language],
+        setLanguage,
+        t: resolveTranslations(language),
+        languageName: LANGUAGE_NATIVE_NAMES[language],
+        languages: LANGUAGES,
+        languageLabels: LANGUAGE_LABELS,
     };
 
     return (
@@ -46,3 +94,5 @@ export function useLanguage() {
     }
     return context;
 }
+
+export { FALLBACK_LANGUAGE };

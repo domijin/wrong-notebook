@@ -1,12 +1,14 @@
+import type { Language } from '../translations';
 import { validateAIDestination, aiFetch } from "../ai-destination";
 import OpenAI from "openai";
-import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult } from "./types";
+import { AIService, ParsedQuestion, DifficultyLevel, AIConfig, ReanswerQuestionResult, GeogebraAnalysisResult, TranslatableContent, TranslatedContent} from "./types";
 import { generateAnalyzePrompt, generateSimilarQuestionPrompt, generateGeogebraPrompt } from './prompts';
 import { getAppConfig } from '../config';
 import { safeParseParsedQuestion, AI_SUBJECTS } from './schema';
 import { prefetchPromptTags } from './tag-service';
 import { createLogger } from '../logger';
 import { normalizeMistakeStatusForSave } from '../mistake-status';
+import { runTranslate } from './translate';
 
 const logger = createLogger('ai:openai');
 
@@ -163,7 +165,7 @@ export class OpenAIProvider implements AIService {
         }
     }
 
-    async analyzeImage(imageBase64: string, mimeType: string = "image/jpeg", language: 'zh' | 'en' = 'zh', grade?: 7 | 8 | 9 | 10 | 11 | 12 | null, subject?: string | null, gradeSemester?: string | null): Promise<ParsedQuestion> {
+    async analyzeImage(imageBase64: string, mimeType: string = "image/jpeg", language: Language = 'zh', grade?: 7 | 8 | 9 | 10 | 11 | 12 | null, subject?: string | null, gradeSemester?: string | null): Promise<ParsedQuestion> {
         const config = getAppConfig();
 
         const systemPrompt = generateAnalyzePrompt(language, grade, subject, {
@@ -301,7 +303,7 @@ export class OpenAIProvider implements AIService {
         }
     }
 
-    async generateSimilarQuestion(originalQuestion: string, knowledgePoints: string[], language: 'zh' | 'en' = 'zh', difficulty: DifficultyLevel = 'medium', gradeSemester?: string | null): Promise<ParsedQuestion> {
+    async generateSimilarQuestion(originalQuestion: string, knowledgePoints: string[], language: Language = 'zh', difficulty: DifficultyLevel = 'medium', gradeSemester?: string | null): Promise<ParsedQuestion> {
         const config = getAppConfig();
         const systemPrompt = generateSimilarQuestionPrompt(language, originalQuestion, knowledgePoints, difficulty, {
             customTemplate: config.prompts?.similar
@@ -352,7 +354,7 @@ export class OpenAIProvider implements AIService {
         }
     }
 
-    async reanswerQuestion(questionText: string, language: 'zh' | 'en' = 'zh', subject?: string | null, imageBase64?: string, gradeSemester?: string | null): Promise<ReanswerQuestionResult> {
+    async reanswerQuestion(questionText: string, language: Language = 'zh', subject?: string | null, imageBase64?: string, gradeSemester?: string | null): Promise<ReanswerQuestionResult> {
         const { generateReanswerPrompt } = await import('./prompts');
         const prompt = generateReanswerPrompt(language, questionText, subject, undefined, gradeSemester);
 
@@ -527,5 +529,24 @@ export class OpenAIProvider implements AIService {
         }
         throw new Error("AI_UNKNOWN_ERROR");
     }
+
+    async translateContent(content: TranslatableContent, target: Language): Promise<TranslatedContent> {
+        logger.info({ provider: 'OpenAI', model: this.model, target }, 'Translate request');
+        try {
+            return await runTranslate(content, target, async (prompt) => {
+                const response = await this.openai.chat.completions.create({
+                    model: this.model,
+                    messages: [{ role: 'system', content: prompt }],
+                    max_tokens: 8192,
+                });
+                return response.choices[0]?.message?.content || '';
+            });
+        } catch (error) {
+            logger.error({ error }, 'Translate failed');
+            this.handleError(error);
+            throw error;
+        }
+    }
+
 }
 

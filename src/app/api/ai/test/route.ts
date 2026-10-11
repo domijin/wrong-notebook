@@ -1,3 +1,4 @@
+import type { Language } from '@/lib/translations';
 import { resolveAIRequest } from "@/lib/ai-request";
 import { acquireAIWork } from "@/lib/rate-limit";
 import { forbidden, badRequest } from "@/lib/api-errors";
@@ -81,7 +82,7 @@ export interface AITestRequest {
     deploymentName?: string;
     apiVersion?: string;
     // 语言
-    language?: 'zh' | 'en';
+    language?: Language;
 }
 
 export interface AITestResponse {

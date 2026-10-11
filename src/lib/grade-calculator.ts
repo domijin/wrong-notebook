@@ -1,8 +1,19 @@
+import type { Language } from './translations';
+
+/**
+ * Build a grade/semester label.
+ *
+ * The value returned here is PERSISTED as `ErrorItem.gradeSemester` and matched
+ * against the Chinese root labels of the seeded tag tree (七年级上, 初一上 …),
+ * so the Chinese form is what the database must always receive regardless of
+ * the UI language. `language` only affects the human-readable variant used when
+ * a caller explicitly wants to display it instead of storing it.
+ */
 export function calculateGrade(
     educationStage: string,
     enrollmentYear: number,
     currentDate: Date = new Date(),
-    language: 'zh' | 'en' = 'en'
+    language: Language = 'zh'
 ): string {
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1; // 1-12
@@ -19,7 +30,10 @@ export function calculateGrade(
         semesterKey = "2nd";
     }
 
-    const isZh = language === 'zh';
+    // Only 'zh' produces the canonical, persistable label. Spanish reuses the
+    // English wording because the stored value is matched against the Chinese
+    // tag tree; callers that persist must pass 'zh'.
+    const isZh = language !== 'en';
 
     const semesterName = isZh
         ? (semesterKey === "1st" ? "上期" : "下期")
