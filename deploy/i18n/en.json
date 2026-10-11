@@ -70,10 +70,10 @@
     "textInputTip": "After entering the question, AI will automatically solve and generate analysis",
     "directEntry": "Direct Entry",
     "directEntryHint": "Type the question content directly (Markdown + LaTeX supported)",
-    "appName": "AI Study Notebook",
-    "appNameShort": "Notebook",
+    "appName": "AI Notebook",
+    "appNameShort": "AI Notebook",
     "appDescription": "An AI-powered system for organising, analysing and reviewing your mistakes",
-    "appleWebAppTitle": "Notebook"
+    "appleWebAppTitle": "AI Notebook"
   },
   "wrongAnswerStats": {
     "title": "Wrong Answer Statistics",
@@ -693,5 +693,5 @@
     "targetLanguage": "Translate to",
     "noContent": "There is no content to translate yet."
   },
-  "appTitle": "AI Study Notebook"
+  "appTitle": "AI Notebook"
 }

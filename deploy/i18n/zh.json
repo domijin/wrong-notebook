@@ -70,10 +70,10 @@
     "textInputTip": "输入题目后，AI 将自动解答并生成解析",
     "directEntry": "直接录入",
     "directEntryHint": "直接录入错题内容（支持 Markdown + LaTeX）",
-    "appName": "智能错题本",
-    "appNameShort": "错题本",
+    "appName": "AI 错题本",
+    "appNameShort": "AI 错题本",
     "appDescription": "基于AI的智能错题管理系统，帮助学生高效整理、分析和复习错题",
-    "appleWebAppTitle": "智能错题本"
+    "appleWebAppTitle": "AI 错题本"
   },
   "wrongAnswerStats": {
     "title": "错题统计",
@@ -693,5 +693,5 @@
     "targetLanguage": "翻译为",
     "noContent": "暂无可翻译的内容。"
   },
-  "appTitle": "智能错题本"
+  "appTitle": "AI 错题本"
 }

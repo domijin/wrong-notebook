@@ -70,10 +70,10 @@
     "textInputTip": "Tras introducir el enunciado, la IA lo resolverá y generará el análisis automáticamente",
     "directEntry": "Entrada directa",
     "directEntryHint": "Escribe directamente el contenido (compatible con Markdown + LaTeX)",
-    "appName": "Cuaderno de Fallos IA",
-    "appNameShort": "Cuaderno",
+    "appName": "AI Cuaderno",
+    "appNameShort": "AI Cuaderno",
     "appDescription": "Un sistema con IA para organizar, analizar y repasar tus errores",
-    "appleWebAppTitle": "Cuaderno"
+    "appleWebAppTitle": "AI Cuaderno"
   },
   "wrongAnswerStats": {
     "title": "Estadísticas de Errores",
@@ -693,5 +693,5 @@
     "targetLanguage": "Traducir a",
     "noContent": "Todavía no hay contenido que traducir."
   },
-  "appTitle": "Cuaderno de Fallos IA"
+  "appTitle": "AI Cuaderno"
 }
