@@ -24,7 +24,7 @@
 - 日志使用项目封装：后端 `@/lib/logger`，前端 `@/lib/frontend-logger`
 
 ## 国际化 (i18n)
-- 翻译定义在 `@/lib/translations.ts`
+- 翻译文案的源文件是 `deploy/i18n/{en,zh,es}.json`；`@/lib/translations.ts` 由 `npm run i18n:build` 生成，**不要直接编辑**（CI 会用 `npm run i18n:check` 检查）
 - UI 文本使用 `t.section.key`，Fallback 用英文
 
 ## 响应式设计
