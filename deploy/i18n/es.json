@@ -143,7 +143,8 @@
     "reanswering": "La IA está resolviendo...",
     "reanswer": "🔄 Volver a responder (según el enunciado corregido)",
     "reanswerHint": "💡 Si el enunciado se reconoció mal, corrígelo y haz clic para regenerar la respuesta",
-    "placeholder": "Compatible con Markdown y LaTeX..."
+    "placeholder": "Compatible con Markdown y LaTeX...",
+    "enterAnswerFirst": "Genera o escribe primero una respuesta"
   },
   "notebook": {
     "title": "Mi Cuaderno",
@@ -547,7 +548,8 @@
     "importAllData": "Importar todo",
     "importAllConfirm": "¿Importar los datos de todos los usuarios? Se restaurarán los datos de todos los usuarios desde el archivo exportado.",
     "selectFile": "Seleccionar archivo",
-    "noFileSelected": "Ningún archivo seleccionado"
+    "noFileSelected": "Ningún archivo seleccionado",
+    "testMayBeInaccurate": "* Los problemas de red pueden hacer que este resultado no sea exacto"
   },
   "errors": {
     "AI_CONNECTION_FAILED": "Error de red. Comprueba tu conexión.",
@@ -558,6 +560,9 @@
     "aiResponseError": "⚠️ La IA devolvió una respuesta no válida\n\nInténtalo de nuevo y contacta con soporte si el problema persiste",
     "AI_TIMEOUT_ERROR": "Tiempo de espera agotado. Inténtalo de nuevo.",
     "AI_QUOTA_EXCEEDED": "Se ha superado la cuota de la API o el saldo es insuficiente. Comprueba tu cuenta.",
+    "AI_DAILY_LIMIT_USER": "Has alcanzado el límite diario de IA. Se restablece a medianoche (hora de Pekín).",
+    "AI_DAILY_LIMIT_SITE": "El sitio ha alcanzado el límite diario de IA. Inténtalo de nuevo mañana.",
+    "AI_QUOTA_PAUSED": "Las funciones de IA están en pausa para conservar la cuota restante. Inténtalo más tarde.",
     "AI_PERMISSION_DENIED": "Permiso denegado (403). Comprueba los permisos de tu clave API.",
     "AI_NOT_FOUND": "Recurso no encontrado (404). Comprueba la URL del punto de conexión o el nombre del modelo.",
     "AI_SERVICE_UNAVAILABLE": "Servicio de IA no disponible (503). No hay ningún canal disponible.",
@@ -676,26 +681,27 @@
   },
   "geogebra": {
     "regenerate": "Regenerar",
-    "reset": "Restablecer"
+    "reset": "Restablecer",
+    "loading": "Cargando GeoGebra…",
+    "demoTitle": "Demostración interactiva de GeoGebra"
   },
   "translate": {
-    "title": "Traducir",
-    "description": "El contenido no está en el idioma de tu interfaz.",
-    "action": "Traducir contenido",
-    "translating": "Traduciendo {count}…",
-    "original": "Original",
-    "translated": "Traducción",
-    "backToOriginal": "Ver el original",
-    "applyTranslation": "Usar esta traducción",
-    "translationSaved": "Traducción aplicada",
+    "action": "Traducir",
+    "translatingOne": "Traduciendo…",
+    "machineTranslated": "Traducción automática · {language}",
+    "backToOriginal": "Mostrar original",
+    "showTranslation": "Mostrar traducción",
+    "stale": "El original se editó después de esta traducción.",
+    "retranslate": "Traducir de nuevo",
+    "removeTranslation": "Quitar traducción",
+    "noContent": "Este ejercicio ya está en {language}.",
     "failed": "Error al traducir",
-    "unsupportedPair": "La traducción no está disponible para este par de idiomas. Aun así, puedes editar el texto manualmente.",
-    "targetLanguage": "Traducir a",
-    "noContent": "Este contenido ya está en el idioma de tu interfaz; no hay nada que traducir.",
     "translateSelected": "Traducir seleccionados",
-    "translateDone": "Se tradujeron {count} ejercicio(s).",
     "translateNone": "Selecciona elementos para traducir.",
-    "translatingOne": "Traduciendo…"
+    "translateProgress": "Traduciendo {done} de {total}…",
+    "translateDone": "Se tradujeron {count} ejercicio(s). Tu texto original no cambia.",
+    "translateFailedSome": "No se pudieron traducir {count} ejercicio(s).",
+    "translatedBadge": "Traducido"
   },
   "appTitle": "AI Cuaderno"
 }

@@ -47,6 +47,8 @@ export interface Notebook {
 
 export interface ErrorItem {
     id: string;
+    /** 列表接口按 ?lang= 附带的译文题干（机器翻译，原文不变） */
+    translatedQuestion?: string | null;
     userId: string;
     subjectId?: string | null;
     subject?: Notebook | null;

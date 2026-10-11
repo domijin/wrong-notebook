@@ -643,19 +643,15 @@ export function generateReanswerPrompt(
   }).trim();
 }
 
-/** Fields of an error item whose prose can be translated. */
-export interface TranslatableContent {
-    questionText?: string | null;
-    answerText?: string | null;
-    analysis?: string | null;
-    mistakeAnalysis?: string | null;
-    userNotes?: string | null;
-}
+/** Fields of an error item whose prose can be translated (single definition in ./types). */
+export type { TranslatableContent } from './types';
+import type { TranslatableContent } from './types';
 
 const TRANSLATABLE_FIELD_ORDER = [
     'questionText',
     'answerText',
     'analysis',
+    'wrongAnswerText',
     'mistakeAnalysis',
     'userNotes',
 ] as const satisfies readonly (keyof TranslatableContent)[];

@@ -26,6 +26,7 @@ import { cleanMarkdown } from "@/lib/markdown-utils";
 import { Pagination } from "@/components/ui/pagination";
 import { DEFAULT_PAGE_SIZE } from "@/lib/constants/pagination";
 import { getMistakeStatusLabel } from "@/lib/mistake-status";
+import { aiBudgetMessage } from "@/lib/ai-budget-messages";
 
 interface ErrorListProps {
     subjectId?: string;
@@ -59,6 +60,7 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleting, setIsDeleting] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
+    const [translateStatus, setTranslateStatus] = useState<{ done: number; total: number; failed: number; finished: boolean; message?: string } | null>(null);
     const { t, language } = useLanguage();
     const router = useRouter();
 
@@ -126,6 +128,7 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
 
     // 多选模式相关函数
     const toggleSelectMode = () => {
+        setTranslateStatus(null);
         setIsSelectMode(!isSelectMode);
         setSelectedIds(new Set());
     };
@@ -169,57 +172,34 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
     };
 
     /**
-     * Translate every selected mistake into the current UI language.
-     *
-     * Translating one card at a time is impractical — the whole point is to make
-     * an existing Chinese notebook readable in another language — so this walks
-     * the selection one item at a time, translating then persisting each.
+     * 把选中的错题翻译成当前界面语言。译文单独保存为原文之上的视图，原文不会被改动，
+     * 所以不需要二次确认；进度和结果直接显示在底部操作栏里（不依赖可能被浏览器屏蔽的弹窗）。
      */
     const handleBatchTranslate = async () => {
-        if (selectedIds.size === 0) {
-            alert(t.translate?.translateNone || "Select items to translate.");
-            return;
-        }
-        const count = selectedIds.size;
-        if (!confirm(`\u7ffb\u8bd1 ${count} \u9053\u9519\u9898\uff1f\u8fd9\u4f1a\u6d88\u8017 AI \u989d\u5ea6\u3002`)) return;
-
+        if (selectedIds.size === 0) return;
+        const ids = Array.from(selectedIds);
         setIsTranslating(true);
+        setTranslateStatus({ done: 0, total: ids.length, failed: 0, finished: false });
         let done = 0;
-        try {
-            for (const id of Array.from(selectedIds)) {
-                try {
-                    const item = await apiClient.get<ErrorItem>(`/api/error-items/${id}`);
-                    const content = {
-                        questionText: item.questionText,
-                        answerText: item.answerText,
-                        analysis: item.analysis,
-                        mistakeAnalysis: item.mistakeAnalysis,
-                        userNotes: item.userNotes,
-                    };
-                    const res = await apiClient.post<{ translated: Record<string, string>; unchanged: boolean }>(
-                        '/api/translate',
-                        // Same reasoning as TranslateButton: a full question plus
-                        // analysis exceeds apiClient's 60s default.
-                        { target: language, content, timeout: 180000 }
-                    );
-                    const translated = res.translated || {};
-                    if (!res.unchanged && Object.keys(translated).length > 0) {
-                        await apiClient.put(`/api/error-items/${id}`, translated);
-                    }
-                    done++;
-                } catch (itemError) {
-                    console.error('translate failed for', id, itemError);
-                }
+        let failed = 0;
+        let budgetError: string | undefined;
+        for (const id of ids) {
+            try {
+                // 翻译一整道题加解析常常超过 apiClient 默认的 60 秒
+                await apiClient.post(`/api/error-items/${id}/translation`, { target: language }, { timeout: 180000 });
+                done++;
+            } catch (error: unknown) {
+                failed++;
+                const code = (error as { data?: { message?: string } })?.data?.message;
+                budgetError = aiBudgetMessage(code, t.errors as Record<string, unknown> | undefined);
+                // 每日额度用完或额度保护暂停时，后面的也不会成功，直接停下
+                if (budgetError) break;
             }
-            const msg = (t.translate?.translateDone || "Translated {count} item(s).")
-                .replace("{count}", String(done));
-            alert(msg);
-            setIsSelectMode(false);
-            setSelectedIds(new Set());
-            fetchItems();
-        } finally {
-            setIsTranslating(false);
+            setTranslateStatus({ done: done + failed, total: ids.length, failed, finished: false });
         }
+        setTranslateStatus({ done, total: ids.length, failed: ids.length - done, finished: true, message: budgetError });
+        setIsTranslating(false);
+        fetchItems();
     };
 
     // 追踪筛选条件是否变化（用于判断是否需要重置页码）
@@ -248,7 +228,7 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
 
         // 正常请求数据
         fetchItems();
-    }, [page, search, masteryFilter, timeFilter, selectedTag, subjectId, gradeFilter, chapterFilter, paperLevelFilter]);
+    }, [page, search, masteryFilter, timeFilter, selectedTag, subjectId, gradeFilter, chapterFilter, paperLevelFilter, language]);
 
     const fetchItems = async () => {
         setLoading(true);
@@ -271,6 +251,8 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
             // 分页参数
             params.append("page", page.toString());
             params.append("pageSize", pageSize.toString());
+            // 当前界面语言的译文（如果有）会随列表一起返回，卡片上显示译文摘要
+            params.append("lang", language);
 
             const response = await apiClient.get<PaginatedResponse<ErrorItem>>(`/api/error-items/list?${params.toString()}`);
             setItems(response.items);
@@ -447,10 +429,10 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-sm line-clamp-3">
+                                        <div className="text-sm line-clamp-3" lang={item.translatedQuestion ? language : undefined}>
                                             {(() => {
                                                 // 提取文本并清理 LaTeX/Markdown 格式
-                                                const rawText = (item.questionText || "").split('\n\n')[0]; // 取第一段
+                                                const rawText = (item.translatedQuestion || item.questionText || "").split('\n\n')[0]; // 取第一段（有译文时用译文）
                                                 const cleanText = cleanMarkdown(rawText);
 
                                                 return cleanText.length > 80
@@ -459,6 +441,12 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
                                             })()}
                                         </div>
                                         <div className="flex flex-wrap gap-2 mt-3">
+                                            {item.translatedQuestion && (
+                                                <Badge variant="outline" className="text-xs gap-1 border-sky-300 text-sky-800 dark:border-sky-800 dark:text-sky-200">
+                                                    <Languages className="h-3 w-3" aria-hidden />
+                                                    {t.translate?.translatedBadge || "Translated"}
+                                                </Badge>
+                                            )}
                                             <Badge variant={item.mistakeStatus === "wrong_attempt" ? "default" : "secondary"} className="text-xs">
                                                 {getMistakeStatusLabel(item.mistakeStatus, language)}
                                             </Badge>
@@ -515,8 +503,14 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
             {isSelectMode && (
                 <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg p-4 z-50">
                     <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-                        <span className="text-sm text-muted-foreground">
-                            {(t.notebook?.selectedCount || "{count} selected").replace("{count}", selectedIds.size.toString())}
+                        <span className="text-sm text-muted-foreground" role="status">
+                            {translateStatus?.finished
+                                ? [
+                                    (t.translate?.translateDone || "Translated {count} item(s).").replace("{count}", String(translateStatus.done)),
+                                    translateStatus.failed > 0 ? (t.translate?.translateFailedSome || "{count} item(s) could not be translated.").replace("{count}", String(translateStatus.failed)) : '',
+                                    translateStatus.message || '',
+                                ].filter(Boolean).join(' ')
+                                : (t.notebook?.selectedCount || "{count} selected").replace("{count}", selectedIds.size.toString())}
                         </span>
                         <div className="flex gap-2">
                             <Button
@@ -536,9 +530,10 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
                                 ) : (
                                     <Languages className="mr-2 h-4 w-4" />
                                 )}
-                                {isTranslating
-                                    ? (t.translate?.translating || "Translating {count}…")
-                                          .replace("{count}", String(selectedIds.size))
+                                {isTranslating && translateStatus
+                                    ? (t.translate?.translateProgress || "Translating {done} of {total}…")
+                                          .replace("{done}", String(translateStatus.done))
+                                          .replace("{total}", String(translateStatus.total))
                                     : t.translate?.translateSelected || "翻译选中"}
                             </Button>
                             <Button

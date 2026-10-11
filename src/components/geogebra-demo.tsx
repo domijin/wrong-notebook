@@ -306,7 +306,7 @@ export function GeogebraDemo({
                 >
                     <div className="flex flex-col items-center gap-2">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                        <span className="text-sm text-muted-foreground">加载 GeoGebra...</span>
+                        <span className="text-sm text-muted-foreground">{t.geogebra?.loading || "Loading GeoGebra…"}</span>
                     </div>
                 </div>
             )}

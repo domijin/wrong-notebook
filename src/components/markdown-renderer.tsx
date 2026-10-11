@@ -43,9 +43,9 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
                     h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-3" {...props} />,
                     h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2" {...props} />,
                     p: ({ node, ...props }) => <p className="mb-3 leading-relaxed" {...props} />,
-                    ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
-                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
-                    li: ({ node, ...props }) => <li className="ml-4" {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc list-outside pl-6 mb-3 space-y-1" {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal list-outside pl-6 mb-3 space-y-1" {...props} />,
+                    li: ({ node, ...props }) => <li className="pl-1 [&>p]:my-0" {...props} />,
                     blockquote: ({ node, ...props }) => (
                         <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground" {...props} />
                     ),

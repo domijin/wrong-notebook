@@ -160,7 +160,7 @@ export function UploadZone({ onImageSelect, isAnalyzing }: UploadZoneProps) {
                     onImageSelect(file);
                     console.log('✅ 截图完成，当前页面未跳转');
                 } else {
-                    alert('截图转换失败');
+                    alert(t.upload?.screenshotFailed || 'Screenshot conversion failed');
                 }
             }, 'image/png', 1.0);
 
