@@ -21,6 +21,20 @@ const nextConfig: NextConfig = {
   // waiting to leave /login, which looks like an auth bug but is not one.
   allowedDevOrigins: ['127.0.0.1', 'localhost'],
   poweredByHeader: false,
+  // Behind Cloudflare (or any TLS-terminating proxy) a visitor who typed http:// reaches the app with
+  // X-Forwarded-Proto: http. Send them to the same URL over HTTPS before a login form is ever served
+  // in clear text. Requests without the header (local dev, tests) are untouched.
+  async redirects() {
+    return [{
+      source: "/:path*",
+      has: [
+        { type: "header", key: "x-forwarded-proto", value: "http" },
+        { type: "host", value: "(?<host>.+)" },
+      ],
+      destination: "https://:host/:path*",
+      permanent: true,
+    }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
