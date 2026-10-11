@@ -691,10 +691,11 @@
     "failed": "Translation failed",
     "unsupportedPair": "Translation is not available for this language pair yet. You can still edit the text manually.",
     "targetLanguage": "Translate to",
-    "noContent": "There is no content to translate yet.",
+    "noContent": "This content is already in your interface language — nothing to translate.",
     "translateSelected": "Translate selected",
     "translateDone": "Translated {count} item(s).",
-    "translateNone": "Select items to translate."
+    "translateNone": "Select items to translate.",
+    "translatingOne": "Translating…"
   },
   "appTitle": "AI Notebook"
 }

@@ -198,7 +198,9 @@ export function ErrorList({ subjectId, subjectName }: ErrorListProps = {}) {
                     };
                     const res = await apiClient.post<{ translated: Record<string, string>; unchanged: boolean }>(
                         '/api/translate',
-                        { target: language, content }
+                        // Same reasoning as TranslateButton: a full question plus
+                        // analysis exceeds apiClient's 60s default.
+                        { target: language, content, timeout: 180000 }
                     );
                     const translated = res.translated || {};
                     if (!res.unchanged && Object.keys(translated).length > 0) {

@@ -54,6 +54,10 @@ export function TranslateButton({ item, onApply, className }: TranslateButtonPro
                 '/api/translate',
                 {
                     target: language,
+                    // Translating a full question plus its analysis takes longer
+                    // than apiClient's 60s default, so raise it. The server
+                    // allows 180s for the provider call itself.
+                    timeout: 180000,
                     content: {
                         questionText: item.questionText,
                         answerText: item.answerText,
@@ -102,7 +106,7 @@ export function TranslateButton({ item, onApply, className }: TranslateButtonPro
                 {pending ? (
                     <>
                         <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        {t.translate?.translating}
+                        {t.translate?.translatingOne}
                     </>
                 ) : (
                     <>
@@ -127,7 +131,7 @@ export function TranslateButton({ item, onApply, className }: TranslateButtonPro
 
                         {Object.keys(preview).length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                {t.translate?.description}
+                                {t.translate?.noContent}
                             </p>
                         ) : (
                             <div className="space-y-4">
