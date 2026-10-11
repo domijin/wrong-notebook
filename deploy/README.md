@@ -105,6 +105,37 @@ runs it there, and removes it again. It reads `REMOTE` from `deploy/hosts.env`.
   running instance (`WN_BASE_URL`, `WN_EMAIL`, `WN_PASSWORD`) and saves
   full-page screenshots for visual review.
 
+## Off-machine backups
+
+A second machine pulls a nightly snapshot over SSH (`deploy/backup/`). The
+backup machine pulls rather than the app host pushing, so a compromised app
+host cannot reach or delete the backups. Each snapshot is a `.tar.gz` holding
+`dev.db` (taken with SQLite's online backup API, integrity-checked) and
+`app-config.json` (AI provider settings, including the API key). The newest 30
+are kept.
+
+1. On the backup machine, create a key:
+   `ssh-keygen -t ed25519 -N "" -f ~/.ssh/wrong-notebook-backup`
+2. On the app host, install the snapshot script outside the deploy folder and
+   allow the key to run only that script:
+   ```bash
+   install -m 755 deploy/backup/snapshot.sh ~/bin/wrong-notebook-snapshot.sh
+   echo 'command="/home/<user>/bin/wrong-notebook-snapshot.sh",restrict <contents of wrong-notebook-backup.pub>' >> ~/.ssh/authorized_keys
+   ```
+   With `restrict`, the key cannot open a shell or forward ports, and any
+   command it asks for runs the snapshot instead.
+3. On the backup Mac, copy `deploy/backup/pull-backup.sh` to
+   `~/services/wrong-notebook-backup/`, record the host key
+   (`ssh-keyscan <app-host> >> ~/.ssh/known_hosts`), run it once with
+   `BACKUP_SOURCE=<user>@<app-host>`, then install the launchd job from
+   `deploy/backup/com.example.wrong-notebook-backup.plist` (03:30 daily; log in
+   `~/Library/Logs/wrong-notebook-backup.log`).
+
+Restore: stop the app, unpack the newest snapshot, and put the files back
+(`docker compose stop wrong-notebook`, copy `dev.db` to `data/` and
+`app-config.json` to `config/`, keep their owner uid 1001, then
+`docker compose up -d`). Keep the current `dev.db` aside first.
+
 ## Notes on WSL
 
 If the host is a Windows machine running WSL:

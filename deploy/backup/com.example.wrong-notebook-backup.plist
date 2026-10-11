@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- launchd job for the backup Mac: pulls a snapshot every night at 03:30.
+     Replace YOU and BACKUP_SOURCE, copy to ~/Library/LaunchAgents/, then
+     launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/<this file> -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.example.wrong-notebook-backup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/YOU/services/wrong-notebook-backup/pull-backup.sh</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>BACKUP_SOURCE</key><string>user@app-host</string>
+    <key>PATH</key><string>/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict><key>Hour</key><integer>3</integer><key>Minute</key><integer>30</integer></dict>
+  <key>StandardOutPath</key><string>/Users/YOU/Library/Logs/wrong-notebook-backup.log</string>
+  <key>StandardErrorPath</key><string>/Users/YOU/Library/Logs/wrong-notebook-backup.log</string>
+</dict>
+</plist>
