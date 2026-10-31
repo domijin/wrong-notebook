@@ -56,7 +56,7 @@
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "strip-markdown": "^6.0.0",
-    "undici": "^7.30.0",
+    "undici": "^7.30.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {
