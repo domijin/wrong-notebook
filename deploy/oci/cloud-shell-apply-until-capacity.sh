@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
-# 等到接近本地午夜再 Apply Resource Manager stack（非高峰容量更好）。
+# 等到本地晚间窗口再 Apply Resource Manager stack（非高峰容量更好）。
 # 用法:
 #   ./cloud-shell-apply-until-capacity.sh
 # 环境变量:
-#   LOCAL_TZ=America/Los_Angeles   # 午夜按此时区算
-#   TARGET_HOUR=0 TARGET_MINUTE=5  # 目标时刻（默认 00:05）
-#   JITTER_SEC=600                 # 目标前后随机抖动（默认 ±10 分钟）
-#   WINDOW_RETRIES=6               # 午夜窗口内连续尝试次数
-#   WINDOW_INTERVAL_SEC=300        # 窗口内间隔（默认 5 分钟）
-#   MAX_NIGHTS=14                  # 最多跨多少个午夜
-# 只对 Out of capacity 重试；其它错误直接退出。
+#   LOCAL_TZ=America/Los_Angeles     # 按此时区算目标时刻
+#   TARGET_HOUR=22 TARGET_MINUTE=30  # 默认 22:30（午夜前）
+#   JITTER_SEC=600                   # 目标前后随机抖动（默认 ±10 分钟）
+#   WINDOW_RETRIES=8                 # 窗口内连续尝试次数
+#   WINDOW_INTERVAL_SEC=300          # 窗口内间隔（默认 5 分钟）
+#   MAX_NIGHTS=14                    # 最多跨多少个晚上
+# 只对 Out of capacity / 429 TooManyRequests 重试；其它错误直接退出。
 
 set -euo pipefail
 
 STACK_ID="${STACK_ID:-ocid1.ormstack.oc1.us-sanjose-1.amaaaaaas7aq4diax3z2x64jn3tjgy66ci5yirqu2rurqezl4dx5udibsdaq}"
 REGION="${REGION:-us-sanjose-1}"
 LOCAL_TZ="${LOCAL_TZ:-America/Los_Angeles}"
-TARGET_HOUR="${TARGET_HOUR:-0}"
-TARGET_MINUTE="${TARGET_MINUTE:-5}"
+TARGET_HOUR="${TARGET_HOUR:-22}"
+TARGET_MINUTE="${TARGET_MINUTE:-30}"
 JITTER_SEC="${JITTER_SEC:-600}"
-WINDOW_RETRIES="${WINDOW_RETRIES:-6}"
+WINDOW_RETRIES="${WINDOW_RETRIES:-8}"
 WINDOW_INTERVAL_SEC="${WINDOW_INTERVAL_SEC:-300}"
 MAX_NIGHTS="${MAX_NIGHTS:-14}"
 DISPLAY_NAME_PREFIX="${DISPLAY_NAME_PREFIX:-wrong-notebook-a1-apply}"
@@ -87,9 +87,9 @@ job_error_text() {
     --query 'data[*].message' --raw-output 2>/dev/null | tail -n 40 || true
 }
 
-is_capacity_error() {
+is_retryable_error() {
   local text="$1"
-  grep -qiE 'out of (host )?capacity|InternalError.*capacity' <<<"$text"
+  grep -qiE 'out of (host )?capacity|InternalError.*capacity|TooManyRequests|Too many requests|429' <<<"$text"
 }
 
 run_one_apply() {
@@ -111,12 +111,22 @@ run_one_apply() {
   job_id="$(grep -oE 'ocid1.ormjob[.a-z0-9-]+' <<<"$job_json" | head -n1 || true)"
 
   if [[ -z "$job_id" ]]; then
+    if is_retryable_error "$job_json"; then
+      log "no job id (rate limit / transient) — treat as retryable"
+      printf '%s\n' "$job_json" | tail -n 15
+      return 1
+    fi
     job_id="$(oci resource-manager job create-apply-job \
       --stack-id "$STACK_ID" \
       --execution-plan-strategy AUTO_APPROVED \
       --display-name "$name" \
       --region "$REGION" \
-      --query 'data.id' --raw-output)"
+      --query 'data.id' --raw-output 2>&1)" || true
+    if ! grep -qE '^ocid1\.ormjob' <<<"$job_id"; then
+      log "fallback create failed — treat as retryable"
+      printf '%s\n' "$job_id" | tail -n 15
+      return 1
+    fi
     log "job=$job_id waiting..."
     if wait_job "$job_id"; then
       log "SUCCESS: apply job succeeded ($job_id)"
@@ -135,11 +145,11 @@ run_one_apply() {
   log "job=$job_id failed; last logs:"
   printf '%s\n' "$err_text" | tail -n 20
 
-  if is_capacity_error "$err_text $job_json"; then
+  if is_retryable_error "$err_text $job_json"; then
     return 1
   fi
 
-  log "ERROR: non-capacity failure — stop"
+  log "ERROR: non-retryable failure — stop"
   exit 2
 }
 
@@ -160,7 +170,7 @@ while (( night <= MAX_NIGHTS )); do
     if run_one_apply; then
       exit 0
     fi
-    log "capacity miss in midnight window"
+    log "retryable miss in midnight window (capacity/429)"
     if (( attempt < WINDOW_RETRIES )); then
       log "sleep ${WINDOW_INTERVAL_SEC}s then retry in-window"
       sleep "$WINDOW_INTERVAL_SEC"
